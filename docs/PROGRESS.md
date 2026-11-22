@@ -63,9 +63,8 @@ that needs testing on real hardware.
   fallback to the full manifest.
 - ~~Which repo is canonical?~~ **Answered:** `xnmrph/corne` (ZMK `main`). Owner doesn't know
   which firmware is currently flashed.
-- Host setup: **mainly Linux**, macOS reached through a KVM. Open: hardware KVM (USB
-  switch / HID-emulating KVM) or software KVM (Deskflow/Input Leap/Barrier)? Affects
-  which keys reach macOS, and whether ZMK's own Bluetooth profiles could replace the KVM.
+- Host setup: **mainly Linux**; macOS reached via a **software KVM** (Deskflow-style) or
+  by switching to **another Bluetooth profile** on the keyboard. No hardware KVM.
 
 ### Notes from the owner's answers
 - "Which firmware am I on?" can't be fully answered from the device: ZMK doesn't report
@@ -81,6 +80,16 @@ that needs testing on real hardware.
 - The keymap has both Windows- and macOS-style æ/ø/å macros; on a Norwegian Linux
   layout the native `keys_nb.h` keys are what's needed. A future "which computer do you
   type on" setting could pick the right variant (Phase 7 idea).
+
+- Owner's keymap already has `&bt BT_SEL 0/1/2`, `BT_CLR`, `BT_CLR_ALL` on the *System*
+  layer, but **no `&out` key**. ZMK sends over USB while USB is connected, so with the
+  keyboard cabled to Linux, picking the Mac's Bluetooth profile won't reach the Mac until
+  output is switched (`&out OUT_BLE` / `OUT_TOG`). Suggest adding an output toggle next to
+  the BT keys (owner's decision; first real edit candidate once Phase 5 lands).
+- Implications for the app: a "computers" concept (profile 1 = Linux, 2 = Mac) in the UI
+  to label BT keys; Studio over BLE (Phase 10, `zmk-studio-api` `ble` feature) becomes
+  more useful; settings reset clears pairings — the flash flow must warn and walk through
+  re-pairing both computers.
 
 ### Needs manual testing (no hardware / display in the cloud environment)
 - `npm run tauri dev` on NixOS (try `nix-shell` with the provided `shell.nix`, untested).
