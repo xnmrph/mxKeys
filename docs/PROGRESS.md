@@ -61,7 +61,26 @@ that needs testing on real hardware.
   Current prototype writes immediately.
 - Toolchain module strategy (ARCHITECTURE §6): recommend allow-list with automatic
   fallback to the full manifest.
-- Which repo is canonical going forward: `corne` (ZMK main) or `corne-macOS-Optimised` (v0.3)? Assumed `corne`.
+- ~~Which repo is canonical?~~ **Answered:** `xnmrph/corne` (ZMK `main`). Owner doesn't know
+  which firmware is currently flashed.
+- Host setup: **mainly Linux**, macOS reached through a KVM. Open: hardware KVM (USB
+  switch / HID-emulating KVM) or software KVM (Deskflow/Input Leap/Barrier)? Affects
+  which keys reach macOS, and whether ZMK's own Bluetooth profiles could replace the KVM.
+
+### Notes from the owner's answers
+- "Which firmware am I on?" can't be fully answered from the device: ZMK doesn't report
+  its version over USB or Studio RPC (device info = name + serial only). What detection
+  *can* tell: bootloader/controller (`INFO_UF2.TXT`), whether firmware is ZMK (USB
+  `1D50:615E`, product = keyboard name), whether Studio is enabled (CDC serial port,
+  RPC answers). Plan for Phase 2/4: say this plainly, and offer "flash from your repo
+  (+ settings reset)" so the firmware is known from then on; record the flashed repo
+  commit per half in app data.
+- Linux-first: Linux is the primary dev *and* user platform; UF2 drive detection on
+  Linux (udisks automount, NixOS) gets tested first. Studio-over-serial only works on
+  the machine the keyboard is plugged into, which may not be the macOS side of a KVM.
+- The keymap has both Windows- and macOS-style æ/ø/å macros; on a Norwegian Linux
+  layout the native `keys_nb.h` keys are what's needed. A future "which computer do you
+  type on" setting could pick the right variant (Phase 7 idea).
 
 ### Needs manual testing (no hardware / display in the cloud environment)
 - `npm run tauri dev` on NixOS (try `nix-shell` with the provided `shell.nix`, untested).
