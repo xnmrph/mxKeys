@@ -90,6 +90,8 @@ that needs testing on real hardware.
   to label BT keys; Studio over BLE (Phase 10, `zmk-studio-api` `ble` feature) becomes
   more useful; settings reset clears pairings — the flash flow must warn and walk through
   re-pairing both computers.
+- Owner chose to **wait for the app** to add the output toggle (Phase 5 acceptance test in
+  ROADMAP) — don't edit `xnmrph/corne` by hand.
 
 ### Needs manual testing (no hardware / display in the cloud environment)
 - `npm run tauri dev` on NixOS (try `nix-shell` with the provided `shell.nix`, untested).

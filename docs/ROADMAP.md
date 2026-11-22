@@ -74,6 +74,7 @@ Phases are done in order, one at a time. Tick boxes as work lands (keep this fil
 - [ ] Key binding editor with behavior picker + keycode search (plain names)
 - [ ] Undo/redo, file watcher reload
 - [ ] Read-only display for opaque/macro-generated bindings
+- [ ] Acceptance test: owner adds `&out OUT_TOG` next to the BT keys on the *System* layer of `xnmrph/corne` using only the app (deliberately not done by hand)
 
 ## Phase 6 — Settings page
 - [ ] Lossless `.conf` editor model
