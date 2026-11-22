@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/zmk-config"]
+members = ["crates/zmk-config", "src-tauri"]
 
 [workspace.package]
 edition = "2021"

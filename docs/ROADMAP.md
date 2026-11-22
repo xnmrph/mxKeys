@@ -23,8 +23,9 @@ Phases are done in order, one at a time. Tick boxes as work lands (keep this fil
 - [x] Span-patch edit engine (`set_binding`, `set_layer_display_name`) with re-parse
 - [x] Round-trip tests on real-world-style keymaps (comments, preprocessor, CRLF, unicode)
 - [x] `build.yaml` parser (include list + board/shield matrix form), target model, user's build.yaml fixture
-- [x] Tauri command: open a config folder → summary (layers, targets)
-- [x] CI workflow: fmt, clippy, tests (Linux/macOS/Windows), frontend typecheck/build
+- [x] Tauri command: open a config folder → summary (layers, targets); `set_binding` writes the file
+- [x] Minimal UI: layer tabs on a visual Corne layout, edit one key's binding, build targets list
+- [x] CI workflow: fmt, clippy, tests (Linux/macOS/Windows), frontend typecheck/build (first run on GitHub pending)
 - [ ] Parse `config/west.yml` (ZMK revision, extra modules)
 - [ ] Parse `.conf` (Kconfig lines, lossless)
 - [ ] Clone a config repo from a URL (git2) in the first-run flow

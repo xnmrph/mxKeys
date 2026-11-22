@@ -1,0 +1,6 @@
+* text=auto eol=lf
+# Parser fixtures must keep their exact bytes on every platform (round-trip tests).
+crates/zmk-config/tests/fixtures/** -text
+*.png binary
+*.ico binary
+*.icns binary

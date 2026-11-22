@@ -3,3 +3,5 @@ node_modules/
 dist/
 .DS_Store
 *.log
+tsconfig.tsbuildinfo
+src-tauri/gen/
