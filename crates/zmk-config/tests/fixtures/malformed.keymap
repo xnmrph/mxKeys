@@ -1,0 +1,14 @@
+/ {
+    keymap {
+        compatible = "zmk,keymap";
+        broken {
+            bindings = <&kp A &kp B>
+            oops = ;
+        };
+        fine {
+            display-name = "Fine";
+            bindings = <&kp C>;
+        };
+    };
+};
+}; // stray closer

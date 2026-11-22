@@ -1,0 +1,16 @@
+[package]
+name = "zmk-config"
+version = "0.1.0"
+description = "Lossless parsing and editing of ZMK config repositories (keymaps, build.yaml)"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_yaml.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true

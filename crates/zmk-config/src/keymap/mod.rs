@@ -1,0 +1,456 @@
+//! Typed ZMK keymap model on top of the lossless devicetree CST.
+//!
+//! The model is a *view*: it records spans into the [`Document`] and never owns text that
+//! would need regenerating. Edits produce [`Patch`]es which are applied to the document
+//! source, then the document is re-parsed and the model rebuilt.
+
+use std::collections::HashMap;
+
+use serde::Serialize;
+
+use crate::dts::{escape_string, CellKind, Document, Item, Node, Patch, Property, Span, Value};
+
+#[derive(Debug, thiserror::Error, PartialEq, Eq)]
+pub enum KeymapError {
+    #[error("no node with `compatible = \"zmk,keymap\"` was found")]
+    NoKeymapNode,
+    #[error("layer {0} does not exist")]
+    NoSuchLayer(usize),
+    #[error("key position {pos} does not exist on layer {layer}")]
+    NoSuchKey { layer: usize, pos: usize },
+    #[error("layer {layer} cannot be edited automatically: {reason}")]
+    Opaque { layer: usize, reason: String },
+    #[error("layer {0} has no `bindings` property")]
+    NoBindings(usize),
+    #[error("binding text must start with `&`: {0:?}")]
+    InvalidBinding(String),
+    #[error(transparent)]
+    Patch(#[from] crate::dts::PatchError),
+}
+
+/// One key's binding, e.g. `&kp LCTRL` or `&mt LSHIFT A`.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct Binding {
+    /// Covers the behavior reference and all its parameters.
+    pub span: Span,
+    /// Behavior reference including `&`, e.g. `&kp`. For a `#define`d binding (`XXX`),
+    /// this is the reference from the define body.
+    pub behavior: String,
+    /// Raw parameter texts, e.g. `["LSHIFT", "A"]`.
+    pub params: Vec<String>,
+    /// The exact source text (with original spacing).
+    pub raw: String,
+    /// Set when the binding came from an object-like `#define` (e.g. `XXX` → `&none`).
+    pub via_define: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct BindingList {
+    /// Span of the whole property (`bindings = < … >;`).
+    pub property_span: Span,
+    pub bindings: Vec<Binding>,
+    /// If set, the bindings could not be split into keys reliably (macro-generated), so
+    /// the list is shown read-only.
+    pub opaque_reason: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct Layer {
+    pub index: usize,
+    /// Devicetree node name, e.g. `default_layer`.
+    pub node_name: String,
+    pub labels: Vec<String>,
+    /// Value of `display-name` (or legacy `label`) if present.
+    pub display_name: Option<String>,
+    pub display_name_span: Option<Span>,
+    pub bindings: Option<BindingList>,
+    pub sensor_bindings: Option<BindingList>,
+    pub node_span: Span,
+    pub open_brace: Span,
+}
+
+impl Layer {
+    /// Human-friendly name: display-name, else the node name prettified.
+    pub fn title(&self) -> String {
+        if let Some(n) = &self.display_name {
+            return n.clone();
+        }
+        let base = self.node_name.trim_end_matches("_layer");
+        let mut s: String = base.replace(['_', '-'], " ");
+        if let Some(first) = s.get_mut(0..1) {
+            first.make_ascii_uppercase();
+        }
+        s
+    }
+}
+
+/// A behavior/combo/macro/conditional-layer node, listed generically for now
+/// (typed editing arrives in Phase 7).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct DefinitionNode {
+    pub kind: DefinitionKind,
+    pub node_name: String,
+    pub labels: Vec<String>,
+    pub compatible: Option<String>,
+    pub span: Span,
+    /// `(property name, raw value text)` pairs.
+    pub properties: Vec<(String, String)>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DefinitionKind {
+    Behavior,
+    Macro,
+    Combo,
+    ConditionalLayer,
+    /// `&label { … }` amending an existing behavior (e.g. tuning `&mt`).
+    BehaviorOverride,
+    /// Opaque helper-macro invocation, e.g. `ZMK_HOLD_TAP(...)`.
+    HelperMacro,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct Keymap {
+    pub keymap_node_span: Span,
+    pub layers: Vec<Layer>,
+    pub definitions: Vec<DefinitionNode>,
+    pub includes: Vec<String>,
+}
+
+impl Keymap {
+    pub fn from_document(doc: &Document) -> Result<Keymap, KeymapError> {
+        let defines = DefineTable::from_document(doc);
+        let keymap_node = doc
+            .walk()
+            .find_map(|i| match i {
+                Item::Node(n) if n.compatible() == Some("zmk,keymap") => Some(n),
+                _ => None,
+            })
+            .ok_or(KeymapError::NoKeymapNode)?;
+
+        let layers = keymap_node
+            .child_nodes()
+            .enumerate()
+            .map(|(index, n)| layer_from_node(doc, &defines, index, n))
+            .collect();
+
+        let mut definitions = Vec::new();
+        for item in doc.walk() {
+            match item {
+                Item::Node(n) => {
+                    if let Some(def) = definition_from_node(doc, n) {
+                        definitions.push(def);
+                    }
+                }
+                Item::RefNode(r) => definitions.push(DefinitionNode {
+                    kind: DefinitionKind::BehaviorOverride,
+                    node_name: r.target.clone(),
+                    labels: r.labels.iter().map(|l| l.name.clone()).collect(),
+                    compatible: None,
+                    span: r.span,
+                    properties: r
+                        .children
+                        .iter()
+                        .filter_map(|c| match c {
+                            Item::Property(p) => Some(prop_pair(doc, p)),
+                            _ => None,
+                        })
+                        .collect(),
+                }),
+                Item::MacroCall(m) if m.name.starts_with("ZMK_") => definitions.push(DefinitionNode {
+                    kind: DefinitionKind::HelperMacro,
+                    node_name: m.args.first().cloned().unwrap_or_default(),
+                    labels: Vec::new(),
+                    compatible: Some(m.name.clone()),
+                    span: m.span,
+                    properties: Vec::new(),
+                }),
+                _ => {}
+            }
+        }
+
+        let includes = doc
+            .walk()
+            .filter_map(|i| match i {
+                Item::Directive(crate::dts::Directive {
+                    kind: crate::dts::DirectiveKind::Include { path },
+                    ..
+                }) => Some(path.clone()),
+                _ => None,
+            })
+            .collect();
+
+        Ok(Keymap {
+            keymap_node_span: keymap_node.span,
+            layers,
+            definitions,
+            includes,
+        })
+    }
+
+    pub fn layer(&self, index: usize) -> Result<&Layer, KeymapError> {
+        self.layers.get(index).ok_or(KeymapError::NoSuchLayer(index))
+    }
+
+    /// Patch replacing the binding at `pos` on `layer` with `text` (e.g. `"&kp ESC"`).
+    pub fn set_binding(&self, layer: usize, pos: usize, text: &str) -> Result<Patch, KeymapError> {
+        let text = text.trim();
+        if !text.starts_with('&') {
+            return Err(KeymapError::InvalidBinding(text.to_string()));
+        }
+        let l = self.layer(layer)?;
+        let list = l.bindings.as_ref().ok_or(KeymapError::NoBindings(layer))?;
+        if let Some(reason) = &list.opaque_reason {
+            return Err(KeymapError::Opaque {
+                layer,
+                reason: reason.clone(),
+            });
+        }
+        let b = list
+            .bindings
+            .get(pos)
+            .ok_or(KeymapError::NoSuchKey { layer, pos })?;
+        Ok(Patch::replace(b.span, text))
+    }
+
+    /// Patch setting the layer's `display-name` (replacing it, or inserting it as the
+    /// first property of the layer node, matching the node's indentation).
+    pub fn set_layer_display_name(
+        &self,
+        doc: &Document,
+        layer: usize,
+        name: &str,
+    ) -> Result<Patch, KeymapError> {
+        let l = self.layer(layer)?;
+        let quoted = format!("\"{}\"", escape_string(name));
+        if let Some(span) = l.display_name_span {
+            return Ok(Patch::replace(span, quoted));
+        }
+        let nl = doc.newline();
+        let node_indent = doc.indent_at(l.node_span.start).to_string();
+        let unit = if node_indent.contains('\t') {
+            "\t".to_string()
+        } else {
+            "    ".to_string()
+        };
+        let child_indent = format!("{node_indent}{unit}");
+        Ok(Patch::insert(
+            l.open_brace.end,
+            format!("{nl}{child_indent}display-name = {quoted};"),
+        ))
+    }
+}
+
+/// Edit helper: apply `patch` to `doc` and rebuild both document and keymap.
+pub fn apply(doc: &Document, patch: &Patch) -> Result<(Document, Keymap), KeymapError> {
+    let new_doc = doc.apply(std::slice::from_ref(patch))?;
+    let km = Keymap::from_document(&new_doc)?;
+    Ok((new_doc, km))
+}
+
+fn prop_pair(doc: &Document, p: &Property) -> (String, String) {
+    (
+        p.name.clone(),
+        p.values_span.map(|s| doc.text(s).to_string()).unwrap_or_default(),
+    )
+}
+
+fn definition_from_node(doc: &Document, n: &Node) -> Option<DefinitionNode> {
+    let compatible = n.compatible().map(str::to_string);
+    let kind = match compatible.as_deref() {
+        Some(c) if c.starts_with("zmk,behavior-macro") => DefinitionKind::Macro,
+        Some(c) if c.starts_with("zmk,behavior-") => DefinitionKind::Behavior,
+        Some("zmk,combos") => {
+            // The container; its children are the combos — handled via the parent below.
+            return None;
+        }
+        Some("zmk,conditional-layers") => return None,
+        _ => {
+            // Children of combos / conditional_layers containers have no compatible.
+            return None;
+        }
+    };
+    Some(DefinitionNode {
+        kind,
+        node_name: n.name.clone(),
+        labels: n.labels.iter().map(|l| l.name.clone()).collect(),
+        compatible,
+        span: n.span,
+        properties: props(doc, n),
+    })
+}
+
+fn props(doc: &Document, n: &Node) -> Vec<(String, String)> {
+    n.children
+        .iter()
+        .filter_map(|c| match c {
+            Item::Property(p) => Some(prop_pair(doc, p)),
+            _ => None,
+        })
+        .collect()
+}
+
+fn layer_from_node(doc: &Document, defines: &DefineTable, index: usize, n: &Node) -> Layer {
+    let display = n.property("display-name").or_else(|| n.property("label"));
+    let display_name_span = display.and_then(|p| {
+        p.values.iter().find_map(|v| match v {
+            Value::Str { span, .. } => Some(*span),
+            _ => None,
+        })
+    });
+    Layer {
+        index,
+        node_name: n.name.clone(),
+        labels: n.labels.iter().map(|l| l.name.clone()).collect(),
+        display_name: display.and_then(|p| p.first_string()).map(str::to_string),
+        display_name_span,
+        bindings: n.property("bindings").map(|p| binding_list(doc, defines, p)),
+        sensor_bindings: n
+            .property("sensor-bindings")
+            .map(|p| binding_list(doc, defines, p)),
+        node_span: n.span,
+        open_brace: n.open_brace,
+    }
+}
+
+/// Object-like and function-like `#define`s whose body starts with `&` (i.e. expand to
+/// bindings). Value = number of `&` references in the body.
+struct DefineTable {
+    binding_defines: HashMap<String, (String, usize)>,
+    other_defines: HashMap<String, String>,
+}
+
+impl DefineTable {
+    fn from_document(doc: &Document) -> Self {
+        let mut binding_defines = HashMap::new();
+        let mut other_defines = HashMap::new();
+        for (name, _params, body) in doc.defines() {
+            let body = body.trim();
+            if body.starts_with('&') {
+                let refs = body.matches('&').count();
+                binding_defines.insert(name.to_string(), (body.to_string(), refs));
+            } else {
+                other_defines.insert(name.to_string(), body.to_string());
+            }
+        }
+        DefineTable {
+            binding_defines,
+            other_defines,
+        }
+    }
+}
+
+fn binding_list(doc: &Document, defines: &DefineTable, p: &Property) -> BindingList {
+    let mut bindings: Vec<Binding> = Vec::new();
+    let mut opaque_reason = None;
+
+    if p.values.iter().any(|v| !matches!(v, Value::Cells { .. })) {
+        opaque_reason = Some("bindings are produced by a macro".to_string());
+    }
+
+    // Collect (span, kind) and group.
+    struct Cur {
+        start: Span,
+        end: Span,
+        behavior: String,
+        params: Vec<String>,
+        via_define: Option<String>,
+    }
+    let mut cur: Option<Cur> = None;
+    let finish = |c: Cur, out: &mut Vec<Binding>| {
+        let span = c.start.to(c.end);
+        out.push(Binding {
+            span,
+            behavior: c.behavior,
+            params: c.params,
+            raw: doc.text(span).to_string(),
+            via_define: c.via_define,
+        });
+    };
+
+    for cell in p.cells() {
+        let text = doc.text(cell.span).to_string();
+        let starts_binding: Option<(String, Option<String>)> = match &cell.kind {
+            CellKind::Ref(label) => Some((format!("&{label}"), None)),
+            CellKind::Ident(name) | CellKind::Call { name, .. } => match defines.binding_defines.get(name) {
+                Some((body, 1)) => {
+                    let behavior = body.split_whitespace().next().unwrap_or("&?").to_string();
+                    Some((behavior, Some(name.clone())))
+                }
+                Some((_, n)) => {
+                    opaque_reason.get_or_insert_with(|| format!("`{name}` expands to {n} bindings"));
+                    None
+                }
+                None => None,
+            },
+            _ => None,
+        };
+        match starts_binding {
+            Some((behavior, via_define)) => {
+                if let Some(c) = cur.take() {
+                    finish(c, &mut bindings);
+                }
+                cur = Some(Cur {
+                    start: cell.span,
+                    end: cell.span,
+                    behavior,
+                    params: Vec::new(),
+                    via_define,
+                });
+            }
+            None => match cur.as_mut() {
+                Some(c) => {
+                    c.end = cell.span;
+                    c.params.push(text);
+                }
+                None => {
+                    let hint = match &cell.kind {
+                        CellKind::Ident(n) if defines.other_defines.contains_key(n) => {
+                            format!("`{n}` is a macro that isn't a binding")
+                        }
+                        _ => format!("unexpected `{text}` before the first binding"),
+                    };
+                    opaque_reason.get_or_insert(hint);
+                }
+            },
+        }
+    }
+    if let Some(c) = cur.take() {
+        finish(c, &mut bindings);
+    }
+
+    BindingList {
+        property_span: p.span,
+        bindings,
+        opaque_reason,
+    }
+}
+
+/// Collect every combo (children of a `zmk,combos` node) — helper for the UI summary.
+pub fn combos(doc: &Document) -> Vec<DefinitionNode> {
+    children_of_compatible(doc, "zmk,combos", DefinitionKind::Combo)
+}
+
+/// Collect every conditional layer (children of a `zmk,conditional-layers` node).
+pub fn conditional_layers(doc: &Document) -> Vec<DefinitionNode> {
+    children_of_compatible(doc, "zmk,conditional-layers", DefinitionKind::ConditionalLayer)
+}
+
+fn children_of_compatible(doc: &Document, compatible: &str, kind: DefinitionKind) -> Vec<DefinitionNode> {
+    doc.walk()
+        .filter_map(|i| match i {
+            Item::Node(n) if n.compatible() == Some(compatible) => Some(n),
+            _ => None,
+        })
+        .flat_map(|n| n.child_nodes())
+        .map(|c| DefinitionNode {
+            kind,
+            node_name: c.name.clone(),
+            labels: c.labels.iter().map(|l| l.name.clone()).collect(),
+            compatible: None,
+            span: c.span,
+            properties: props(doc, c),
+        })
+        .collect()
+}

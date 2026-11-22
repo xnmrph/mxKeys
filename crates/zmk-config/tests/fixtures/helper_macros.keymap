@@ -1,0 +1,35 @@
+// Fixture: keymap written with helper macros (zmk-helpers style). The parser must keep
+// every byte; the typed model can't see layers here and must say so instead of failing
+// silently.
+#include <behaviors.dtsi>
+#include <dt-bindings/zmk/keys.h>
+#include "zmk-helpers/helper.h"
+
+#define KEYS_L 0 1 2 3 4 5
+#define MULTI &kp A &kp B
+
+ZMK_HOLD_TAP(hml,
+    flavor = "balanced";
+    tapping-term-ms = <280>;
+    bindings = <&kp>, <&kp>;
+)
+
+ZMK_COMBO(esc, &kp ESC, 0 1, 0)
+ZMK_COMBO(tab, &kp TAB, 12 13, 0);
+
+ZMK_LAYER(base,
+    &kp Q &kp W &kp E
+    &kp A MULTI
+)
+
+/ {
+    keymap {
+        compatible = "zmk,keymap";
+        opaque_layer {
+            bindings = <MULTI &kp C>;
+        };
+        macro_valued {
+            bindings = ROW_BINDINGS;
+        };
+    };
+};
