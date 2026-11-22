@@ -17,6 +17,8 @@ const ALL: &[&str] = &[
     "advanced.keymap",
     "helper_macros.keymap",
     "malformed.keymap",
+    "xnmrph_corne.keymap",
+    "xnmrph_corne_macos.keymap",
 ];
 
 /// Every byte must belong to exactly one token, and rebuilding from tokens is identical.
@@ -51,7 +53,13 @@ fn all_fixtures_round_trip() {
 
 #[test]
 fn well_formed_fixtures_have_no_diagnostics() {
-    for name in ["corne_stock.keymap", "advanced.keymap", "helper_macros.keymap"] {
+    for name in [
+        "corne_stock.keymap",
+        "advanced.keymap",
+        "helper_macros.keymap",
+        "xnmrph_corne.keymap",
+        "xnmrph_corne_macos.keymap",
+    ] {
         let doc = Document::parse(fixture(name));
         assert!(doc.diagnostics.is_empty(), "{name}: {:?}", doc.diagnostics);
         assert!(!doc.walk().any(|i| matches!(i, Item::Unknown(_))), "{name}");
@@ -330,4 +338,58 @@ fn trivia_kinds_cover_comments_and_directives() {
     assert_eq!(count(TokenKind::LineComment), 1);
     // 4 includes, 7 defines, `#ifdef` + 2 defines + `#else` + `#endif`.
     assert_eq!(count(TokenKind::Directive), 4 + 7 + 5);
+}
+
+/// The project owner's real keymaps (`xnmrph/corne`, `xnmrph/corne-macOS-Optimised`).
+#[test]
+fn owners_real_keymaps() {
+    for (name, titles, macros) in [
+        (
+            "xnmrph_corne.keymap",
+            &["Base", "NavNum", "Symbols", "System", "Extra", "NOR"][..],
+            13,
+        ),
+        (
+            "xnmrph_corne_macos.keymap",
+            &["Base", "NavNum", "Symbols", "System", "Extra"][..],
+            7,
+        ),
+    ] {
+        let src = fixture(name);
+        let doc = Document::parse(src.clone());
+        let km = Keymap::from_document(&doc).unwrap();
+        assert_eq!(
+            km.layers.iter().map(|l| l.title()).collect::<Vec<_>>(),
+            titles,
+            "{name}"
+        );
+        for l in &km.layers {
+            let b = l.bindings.as_ref().unwrap();
+            assert_eq!(b.opaque_reason, None, "{name} {}", l.node_name);
+            assert_eq!(b.bindings.len(), 42, "{name} {}", l.node_name);
+        }
+        let count = |k: DefinitionKind| km.definitions.iter().filter(|d| d.kind == k).count();
+        assert_eq!(count(DefinitionKind::Behavior), 5, "{name}");
+        assert_eq!(count(DefinitionKind::Macro), macros, "{name}");
+        assert_eq!(keymap::combos(&doc).len(), 19, "{name}");
+
+        // Layer nodes are named after `#define`d layer numbers (`DEF`, `NAV`, …).
+        assert_eq!(km.layers[0].node_name, "DEF");
+        let base = &km.layers[0].bindings.as_ref().unwrap().bindings;
+        assert!(base[0].raw.starts_with("&mt TAB ESC"), "{name}");
+
+        // A one-key edit changes exactly those bytes.
+        let patch = km.set_binding(0, 1, "&kp ESC").unwrap();
+        let (doc2, km2) = keymap::apply(&doc, &patch).unwrap();
+        assert_eq!(
+            doc2.source().len(),
+            src.len() + "&kp ESC".len() - base[1].raw.len()
+        );
+        assert_eq!(&doc2.source()[..base[1].span.start], &src[..base[1].span.start]);
+        assert_eq!(&doc2.source()[base[1].span.start + 7..], &src[base[1].span.end..]);
+        assert_eq!(
+            km2.layers[0].bindings.as_ref().unwrap().bindings[1].raw,
+            "&kp ESC"
+        );
+    }
 }

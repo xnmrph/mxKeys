@@ -29,7 +29,8 @@ Phases are done in order, one at a time. Tick boxes as work lands (keep this fil
 - [ ] Parse `config/west.yml` (ZMK revision, extra modules)
 - [ ] Parse `.conf` (Kconfig lines, lossless)
 - [ ] Clone a config repo from a URL (git2) in the first-run flow
-- [ ] More real-world keymap fixtures (miryoku-style, urob-style helper macros) — ask user for their keymap
+- [x] Owner's real keymaps as fixtures (`xnmrph/corne`, `xnmrph/corne-macOS-Optimised`)
+- [ ] More real-world keymap fixtures (miryoku-style, heavy zmk-helpers `ZMK_LAYER` usage)
 - [ ] Binding-grid re-alignment formatter (optional op)
 
 ## Phase 2 — Hardware detection + first-run setup

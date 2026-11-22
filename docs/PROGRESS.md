@@ -35,10 +35,24 @@ that needs testing on real hardware.
     Verified in Chromium with a mocked Tauri bridge fed by the real Rust summary JSON.
   - CI: frontend build; fmt + clippy + tests on Ubuntu, macOS, Windows.
 
+### Owner's real config repos (found after GitHub access was granted)
+- `xnmrph/corne` — **the active config** (matches the brief's build.yaml): ZMK `main`
+  (unpinned branch), extra west modules `urob/zmk-helpers` and `urob/zmk-unicode`,
+  Norwegian keys via `config/keys_nb.h`, 6 layers, 5 custom behaviors, 13 macros,
+  19 combos. Layer nodes are named after `#define`d layer numbers (`DEF`, `NAV`, …).
+- `xnmrph/corne-macOS-Optimised` — older variant on ZMK `v0.3`, legacy board id
+  `nice_nano_v2`, already builds only the needed variants.
+- Both keymaps parse losslessly with zero diagnostics, all layers editable; added as
+  fixtures (`keys_nb.h` not copied — Unicode license) with model + minimal-edit tests.
+- Implications: the toolchain must fetch extra modules from the user's `west.yml`
+  (affects the allow-list idea in ARCHITECTURE §6); `revision: main` needs the app-side
+  lockfile (§7); the two repos span two Zephyr/SDK generations, a good upgrade-assistant
+  test case.
+
 ### Next (in order)
 1. Check the first CI run on GitHub (macOS/Windows never built locally).
 2. Finish Phase 1: `west.yml` parser, lossless `.conf` model, clone-from-URL.
-3. Ask the user for their real `.keymap` as an extra round-trip fixture.
+3. Parse `west.yml` using the owner's two repos as fixtures (modules, `defaults.revision`).
 4. Phase 2: `crates/hardware` profile + detection, `crates/probe` traits + mocks.
 
 ### Open questions for the user
@@ -47,7 +61,7 @@ that needs testing on real hardware.
   Current prototype writes immediately.
 - Toolchain module strategy (ARCHITECTURE §6): recommend allow-list with automatic
   fallback to the full manifest.
-- Can you share your actual `config/corne.keymap` and `corne.conf`?
+- Which repo is canonical going forward: `corne` (ZMK main) or `corne-macOS-Optimised` (v0.3)? Assumed `corne`.
 
 ### Needs manual testing (no hardware / display in the cloud environment)
 - `npm run tauri dev` on NixOS (try `nix-shell` with the provided `shell.nix`, untested).

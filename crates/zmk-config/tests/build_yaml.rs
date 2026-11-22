@@ -74,3 +74,18 @@ fn discover_and_load_a_repo() {
     assert!(RepoFiles::discover(&empty).is_err());
     std::fs::remove_dir_all(&dir).unwrap();
 }
+
+/// `xnmrph/corne-macOS-Optimised`: ZMK v0.3 with legacy board naming, only needed variants.
+#[test]
+fn legacy_board_naming() {
+    let m = BuildMatrix::parse(
+        &std::fs::read_to_string(fixtures().join("xnmrph_corne_macos_build.yaml")).unwrap(),
+    )
+    .unwrap();
+    assert_eq!(m.targets.len(), 3);
+    let b = &m.targets[0].board;
+    assert_eq!((b.name.as_str(), b.revision.as_deref()), ("nice_nano_v2", None));
+    assert!(m.targets[0].has_studio() && m.targets[0].has_nice_view());
+    assert!(m.targets[1].has_nice_view() && !m.targets[1].has_studio());
+    assert!(m.targets[2].is_settings_reset());
+}
