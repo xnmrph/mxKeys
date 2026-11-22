@@ -50,7 +50,7 @@ that needs testing on real hardware.
   test case.
 
 ### Next (in order)
-1. Check the first CI run on GitHub (macOS/Windows never built locally).
+1. ~~Check the first CI run~~ — green on all three OSes (run 5).
 2. Finish Phase 1: `west.yml` parser, lossless `.conf` model, clone-from-URL.
 3. Parse `west.yml` using the owner's two repos as fixtures (modules, `defaults.revision`).
 4. Phase 2: `crates/hardware` profile + detection, `crates/probe` traits + mocks.

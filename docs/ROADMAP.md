@@ -25,7 +25,7 @@ Phases are done in order, one at a time. Tick boxes as work lands (keep this fil
 - [x] `build.yaml` parser (include list + board/shield matrix form), target model, user's build.yaml fixture
 - [x] Tauri command: open a config folder → summary (layers, targets); `set_binding` writes the file
 - [x] Minimal UI: layer tabs on a visual Corne layout, edit one key's binding, build targets list
-- [x] CI workflow: fmt, clippy, tests (Linux/macOS/Windows), frontend typecheck/build (first run on GitHub pending)
+- [x] CI workflow: fmt, clippy, tests (Linux/macOS/Windows), frontend typecheck/build — green on Linux, macOS, Windows (run 5, 2026-11-22)
 - [ ] Parse `config/west.yml` (ZMK revision, extra modules)
 - [ ] Parse `.conf` (Kconfig lines, lossless)
 - [ ] Clone a config repo from a URL (git2) in the first-run flow
