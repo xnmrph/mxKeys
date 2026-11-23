@@ -171,3 +171,34 @@ button.link { border: none; background: none; padding: 0; cursor: pointer; }
 .behaviors button.link { color: var(--accent); padding: 2px 4px; font-size: 13px; }
 .behaviors button.link:disabled { color: var(--muted); }
 .def-prop .badge { margin-left: auto; }
+.history-panel { border: 1px solid var(--border); border-radius: 10px; padding: 8px 18px 14px; background: var(--card); margin: 12px 0 20px; }
+.history-panel .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 6px 0; }
+.history-panel .ok { color: #15803d; }
+@media (prefers-color-scheme: dark) { .history-panel .ok { color: #86efac; } }
+.changed-files { list-style: none; padding: 0; margin: 0 0 10px; }
+.changed-file { border-top: 1px solid var(--border); padding: 4px 0; }
+.changed-file .row { margin: 2px 0; }
+.changed-file .spacer { flex: 1; }
+.change-summary { margin: 2px 0 4px 34px; padding-left: 16px; font-size: 14px; }
+.badge.kind-added { background: #dcfce7; color: #166534; }
+.badge.kind-deleted, .badge.kind-conflicted { background: #fee2e2; color: #991b1b; }
+.history-panel button.link { color: var(--accent); padding: 2px 4px; font-size: 13px; }
+.history-panel button.link.danger { color: var(--err); }
+.commit-box textarea { width: 100%; box-sizing: border-box; font: inherit; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); }
+.commit-box .field { display: flex; flex-direction: column; gap: 4px; }
+.identity { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.identity p { flex-basis: 100%; margin: 4px 0; }
+.identity input { font: inherit; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--card); color: var(--fg); }
+.diff { margin: 4px 0 8px 34px; overflow-x: auto; }
+.diff-hunk { border-collapse: collapse; font-family: ui-monospace, monospace; font-size: 12px; width: 100%; margin: 0 0 6px; }
+.diff-hunk td { border: none; padding: 0 6px; white-space: pre; }
+.diff-hunk .ln { color: var(--muted); text-align: right; width: 1%; user-select: none; }
+.diff-hunk .hunk-head td { color: var(--muted); background: var(--key-muted); }
+.diff-hunk tr.added { background: #dcfce7; }
+.diff-hunk tr.removed { background: #fee2e2; }
+@media (prefers-color-scheme: dark) { .diff-hunk tr.added { background: #14532d; } .diff-hunk tr.removed { background: #7f1d1d; } }
+.diff-hunk .sign { display: inline-block; width: 1.2em; color: var(--muted); }
+.recent { margin: 20px 0; }
+.recent ul { list-style: none; padding: 0; }
+.recent li { margin: 4px 0; }
+.recent button.link { color: var(--accent); font-weight: 600; padding: 0 6px 0 0; }

@@ -274,3 +274,27 @@ export type SettingsOp =
   | { op: "set_raw"; name: string; value: string }
   | { op: "remove_raw"; name: string };
 export type FirmwareState = "not_built" | "up_to_date" | "outdated";
+
+// ---- Changes & upload (Phase 8) ----
+export type ChangeKind = "added" | "modified" | "deleted" | "renamed" | "conflicted" | "type_change";
+export interface CommitInfo { id: string; short_id: string; summary: string; author: string; time: number }
+export interface RepoStatus {
+  root: string; branch: string | null; upstream: string | null; remote_name: string | null; remote_url: string | null;
+  ahead: number; behind: number; unborn: boolean; operation: string | null;
+  identity: [string, string] | null; last_commit: CommitInfo | null;
+}
+export interface ChangedFile { path: string; old_path: string | null; kind: ChangeKind; untracked: boolean; summary: string[] }
+export interface History {
+  isRepo: boolean; status: RepoStatus | null; files: ChangedFile[]; suggestedMessage: string;
+  backend: { kind: "system_git"; path: string; version: string } | { kind: "libgit2" }; recent: CommitInfo[];
+}
+export interface DiffLine { kind: "context" | "added" | "removed"; old_line: number | null; new_line: number | null; text: string }
+export interface FileDiff { path: string; old_path: string | null; kind: ChangeKind; binary: boolean; added: number; removed: number; hunks: { header: string; lines: DiffLine[] }[] }
+export type GitOp =
+  | { op: "commit"; message: string; files: string[] | null }
+  | { op: "push" } | { op: "pull" } | { op: "fetch" } | { op: "init" }
+  | { op: "discard"; files: string[] }
+  | { op: "set_identity"; name: string; email: string };
+export type GitOpResult =
+  | { result: "committed"; commit: CommitInfo } | { result: "pushed" } | { result: "fetched" } | { result: "done" }
+  | { result: "pulled"; outcome: { result: "up_to_date" } | { result: "updated"; commits: number } | { result: "rebased"; commits: number } };

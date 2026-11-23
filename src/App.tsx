@@ -8,6 +8,7 @@ import { BuildPanel } from "./BuildPanel";
 import type { HardwareProfile } from "./types";
 import { KeymapEditor } from "./KeymapEditor";
 import { SettingsPanel } from "./SettingsPanel";
+import { HistoryPanel } from "./HistoryPanel";
 
 export default function App() {
   const [repo, setRepo] = useState<RepoSummary | null>(null);
@@ -48,7 +49,7 @@ export default function App() {
         </button>
       </header>
       {error && <p className="error" role="alert">{error}</p>}
-      {!repo ? <Welcome onCloned={setRepo} /> : (
+      {!repo ? <Welcome onCloned={setRepo} onOpen={loadFolder} /> : (
         <RepoView
           repo={repo}
           onKeymapChanged={(k) => setRepo((r) => (r ? replaceKeymap(r, k) : r))}
@@ -65,7 +66,9 @@ function replaceKeymap(repo: RepoSummary, k: KeymapSummary): RepoSummary {
   return { ...repo, keymaps: repo.keymaps.map((old) => (old.path === k.path ? k : old)) };
 }
 
-function Welcome({ onCloned }: { onCloned: (r: RepoSummary) => void }) {
+function Welcome({ onCloned, onOpen }: { onCloned: (r: RepoSummary) => void; onOpen: (dir: string) => void }) {
+  const [recent, setRecent] = useState<string[]>([]);
+  useEffect(() => { invoke<string[]>("recent_folders").then(setRecent).catch(() => {}); }, []);
   return (
     <section className="welcome">
       <h2>Let's set up your keyboard</h2>
@@ -75,6 +78,16 @@ function Welcome({ onCloned }: { onCloned: (r: RepoSummary) => void }) {
         <strong> Open config folder…</strong> above if it's already on this computer. Nothing is
         changed until you edit something.
       </p>
+      {recent.length > 0 && (
+        <div className="recent">
+          <h3>Open again</h3>
+          <ul>
+            {recent.map((r) => (
+              <li key={r}><button className="link" onClick={() => onOpen(r)}>{r.split(/[\\/]/).filter(Boolean).pop()}</button> <span className="muted small">{r}</span></li>
+            ))}
+          </ul>
+        </div>
+      )}
       <CloneForm onCloned={onCloned} />
     </section>
   );
@@ -96,6 +109,7 @@ function RepoView({ repo, onKeymapChanged, onReload }: {
       <p className="muted path">{repo.root}</p>
       <HardwareSetup repoRoot={repo.root} onProfile={onProfile} />
       {profile && <BuildPanel repoRoot={repo.root} autoSetup changes={changes} />}
+      <HistoryPanel repoRoot={repo.root} changes={changes} onFilesChanged={() => { void onReload(); bump(); }} />
       {repo.warnings.map((w) => (
         <p key={w} className="warning">{w}</p>
       ))}
