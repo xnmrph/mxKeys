@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { confirmAction } from "./dialogs";
 import { invoke } from "@tauri-apps/api/core";
 import type { ChangedFile, FileDiff, GitOp, GitOpResult, History } from "./types";
 
@@ -21,6 +22,8 @@ function plural(n: number, one: string, many: string) {
 /** Where the upload goes, in plain words (“GitHub (xnmrph/corne)”). */
 function serverName(url: string | null): string {
   if (!url) return "the server";
+  // A folder on this computer or a network share.
+  if (/^(\/|[A-Za-z]:[\\/]|file:)/.test(url)) return `the folder “${url.replace(/[\\/]+$/, "").split(/[\\/]/).pop()}”`;
   const m = url.match(/^(?:https?:\/\/|ssh:\/\/)?(?:[^@/]+@)?([^/:]+)[/:](.+?)(?:\.git)?\/?$/);
   if (!m) return url;
   const host = m[1].replace(/^www\./, "");
@@ -47,6 +50,7 @@ export function HistoryPanel({ repoRoot, changes, onFilesChanged }: {
   const [diffs, setDiffs] = useState<Record<string, FileDiff[]>>({});
   const [identity, setIdentity] = useState({ name: "", email: "" });
   const loading = useRef(false);
+  const filesKey = useRef("");
 
   const refresh = useCallback(async () => {
     if (loading.current) return;
@@ -54,7 +58,12 @@ export function HistoryPanel({ repoRoot, changes, onFilesChanged }: {
     try {
       const next = await invoke<History>("git_history", { repoPath: repoRoot });
       setH(next);
-      setDiffs({});
+      // Line views stay open unless the changes themselves changed.
+      const key = JSON.stringify(next.files);
+      if (key !== filesKey.current) {
+        filesKey.current = key;
+        setDiffs({});
+      }
     } catch (e) {
       setError(String(e));
     } finally {
@@ -68,12 +77,30 @@ export function HistoryPanel({ repoRoot, changes, onFilesChanged }: {
     const t = setInterval(() => { if (!busy) void refresh(); }, 5000);
     return () => clearInterval(t);
   }, [refresh, busy]);
-  // Check the server once in the background (silently: offline is fine).
+  // Check the server in the background (silently: offline is fine): now, every few
+  // minutes, and when the window comes back into focus.
   useEffect(() => {
-    invoke<GitOpResult>("git_run", { repoPath: repoRoot, op: { op: "fetch" } })
-      .then(() => { setFetchProblem(null); void refresh(); })
-      .catch((e) => setFetchProblem(String(e)));
+    let last = 0;
+    const check = () => {
+      if (Date.now() - last < 60_000) return;
+      last = Date.now();
+      invoke<GitOpResult>("git_run", { repoPath: repoRoot, op: { op: "fetch" } })
+        .then(() => { setFetchProblem(null); void refresh(); })
+        .catch((e) => setFetchProblem(String(e)));
+    };
+    check();
+    const t = setInterval(check, 180_000);
+    window.addEventListener("focus", check);
+    return () => { clearInterval(t); window.removeEventListener("focus", check); };
   }, [repoRoot, refresh]);
+  // Re-load an open line view after it was cleared by a change.
+  useEffect(() => {
+    if (open && !diffs[open]) {
+      invoke<FileDiff[]>("git_diff", { repoPath: repoRoot, file: open })
+        .then((d) => setDiffs((x) => ({ ...x, [open]: d })))
+        .catch((e) => setError(String(e)));
+    }
+  }, [open, diffs, repoRoot]);
   // Keep the suggestion current until the user types their own message.
   useEffect(() => { if (h && !messageEdited) setMessage(h.suggestedMessage); }, [h, messageEdited]);
 
@@ -122,17 +149,8 @@ export function HistoryPanel({ repoRoot, changes, onFilesChanged }: {
     }
   }
 
-  async function toggleDiff(path: string) {
-    if (open === path) return setOpen(null);
-    setOpen(path);
-    if (!diffs[path]) {
-      try {
-        const d = await invoke<FileDiff[]>("git_diff", { repoPath: repoRoot, file: path });
-        setDiffs((x) => ({ ...x, [path]: d }));
-      } catch (e) {
-        setError(String(e));
-      }
-    }
+  function toggleDiff(path: string) {
+    setOpen(open === path ? null : path);
   }
 
   if (!h) return error ? <section className="history-panel"><p className="error">{error}</p></section> : null;
@@ -192,7 +210,7 @@ export function HistoryPanel({ repoRoot, changes, onFilesChanged }: {
                 onInclude={(on) => setExcluded((x) => { const n = new Set(x); if (on) n.delete(f.path); else n.add(f.path); return n; })}
                 onToggle={() => toggleDiff(f.path)}
                 onDiscard={async () => {
-                  if (window.confirm(`Throw away all unsaved changes to ${f.path}? This can't be undone.`)) {
+                  if (await confirmAction(`Throw away all unsaved changes to ${f.path}? This can't be undone.`, "Throw away")) {
                     if (await run("Undoing…", { op: "discard", files: [f.path] })) onFilesChanged();
                   }
                 }}
