@@ -179,8 +179,14 @@ fn file_name(url: &str) -> String {
     url.rsplit('/').next().unwrap_or("download").replace("%2B", "+")
 }
 
+/// `MXKEYS_FORCE_BUNDLED_GIT=1` (tests/CI) pretends there is no system git. Only "1"
+/// counts — CI matrices often set such variables to an empty string.
+fn force_bundled_git(value: Option<&str>) -> bool {
+    value.is_some_and(|v| v.trim() == "1")
+}
+
 fn has_system_git() -> bool {
-    if std::env::var_os("MXKEYS_FORCE_BUNDLED_GIT").is_some() {
+    if force_bundled_git(std::env::var("MXKEYS_FORCE_BUNDLED_GIT").ok().as_deref()) {
         return false;
     }
     Command::new("git")
@@ -415,6 +421,14 @@ mod tests {
         assert!(!s.ready);
         assert_eq!(s.missing.len(), 6);
         assert_eq!(s.size, 0);
+    }
+
+    #[test]
+    fn bundled_git_flag_only_when_set_to_1() {
+        assert!(force_bundled_git(Some("1")));
+        assert!(!force_bundled_git(Some("")));
+        assert!(!force_bundled_git(Some("0")));
+        assert!(!force_bundled_git(None));
     }
 
     #[test]
