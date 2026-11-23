@@ -398,35 +398,54 @@ license (**MIT**, recommended) so code could flow back to ZMK if ever wanted.
     `set_active_physical_layout`, `move/add/remove/restore_layer`, `set_layer_props`;
     notification `unsaved_changes_status_changed`.
 
-### 9.2 Client crate
+### 9.2 Client crate (built: own client)
 
-`zmk-studio-api` (crates.io 0.6.1, Apache-2.0, by srwi; features `serial` (default) and
-`ble` via `bluest`) provides a blocking `StudioClient` with typed behaviors/keycodes.
-Evaluation: license compatible; serial support matches our first transport; it's young
-(10 releases in 2026) with a single maintainer. **Recommendation:** depend on it behind
-our own `StudioSession` trait, so we can swap to a thin in-house client generated from
-`zmk-studio-messages` with `prost` if it stalls. Verify against real hardware in Phase 10.
+Decision B: our own small client in `crates/studio` instead of `zmk-studio-api`.
 
-### 9.3 Sync-back design (write-up before implementing)
+```
+framing.rs   SOF/ESC/EOF encode + streaming decoder
+proto.rs     hand-written prost structs (field numbers tested against proto/*.proto,
+             vendored from zmk-studio-messages, MIT) — no protoc at build time
+client.rs    Transport trait (send, recv with timeout) → Client: requests by id,
+             notifications queued, Locked / NotSupported / Refused errors
+serial.rs    USB CDC-ACM via serialport (VID/PID 0x1D50:0x615E)
+ble.rs       btleplug on a tokio thread; 20-byte writes, indications
+sim.rs       simulated keyboard with ZMK's rules (CI + MXKEYS_SIM_KEYBOARD=1)
+mapping.rs   source text ⇄ {behavior_id, param1, param2}
+sync.rs      expected keymap from the files, comparison, decoding device bindings
+live.rs      Live<T>: connect, poll lock state, set/restore key, rename layer,
+             save, discard, clear saved
+```
+
+The app side (`src-tauri/src/live.rs`) holds one connection, runs each live edit as
+“keyboard first, then the file through the normal editor (undo history); roll the
+keyboard back if the file edit fails”, and remembers per keyboard serial when changes
+were last saved and per repo when firmware was last installed (app data `live.json`)
+to decide whether to offer clearing saved changes.
+
+### 9.3 Sync-back design (as implemented; details in `docs/live-sync.md`)
 
 The hard part: the device speaks *runtime* ids (`behavior_id`, HID usage numbers, layer
 ids), the repo speaks *source* (`&kp LCTRL`, `&mo 1`, `#define`s).
 
-1. **Behavior mapping.** At connect, list behaviors (`display_name`). Build a map
-   `behavior_id → source label` from (a) a table of ZMK built-in behaviors for the pinned
-   revision (display name → `&kp`, `&mo`, `&lt`, …, generated from ZMK's
-   `app/dts/behaviors/*.dtsi`) and (b) custom behaviors in the user's keymap (their node
-   `display-name` / node name). Unmappable ids ⇒ that binding is read-only.
-2. **Parameter mapping.** HID usages → keycode names via a table generated from
-   `dt-bindings/zmk/keys.h`. To keep diffs small, when a value equals the value of the
-   *existing* source token (e.g. `LCTRL` vs `LEFT_CONTROL`), the existing spelling is kept.
-   Layer params → layer index → `#define` name if the source used one.
-3. **Layer identity.** Device layer `id` is stable across reorders; we record the
-   id ↔ source layer node mapping when the device keymap equals the repo keymap.
-4. **Transaction per edit.** Live edit = `set_layer_binding` on the device **and** a span
-   patch on the `.keymap` in the same operation; if either fails, both roll back
-   (`discard_changes` / undo patch). "Save to keyboard" = `save_changes`; the files are
-   already written. Nothing is ever only on the device.
+1. **Behavior mapping.** At unlock, list behaviors and their display names. A behavior's
+   name on the keyboard is `display-name` ?? `label` ?? node name, read from ZMK's
+   `app/dts/behaviors/*.dtsi` in the build workspace and from the user's keymap; ids are
+   per keyboard, so they are always looked up by name. Names reported twice ⇒ keys using
+   them are read-only live.
+2. **Parameter mapping.** No generated tables: a small C preprocessor
+   (`zmk_config::cpp`) evaluates the binding's cells with ZMK's headers and the user's
+   own includes from the workspace — exactly what the build does (checked against
+   `zephyr.dts`). Decoding back (for “Keep keyboard's”) prefers the spelling already in
+   the file, then the catalog's keycode names with modifier wrappers like `LS(…)`.
+3. **Layer identity.** Studio layer ids are the devicetree layer indices; layers are
+   matched by index, and a structure difference (layer count, keys per layer) turns
+   live editing off until the firmware is rebuilt.
+4. **Transaction per edit.** Live edit = `set_layer_binding` on the device, then the
+   span patch on the `.keymap` through the editor; if the file edit fails, the old
+   binding is put back on the keyboard. "Save on keyboard" = `save_changes`; the files
+   are already written. Discard = `discard_changes` + the file as it was at the last
+   save (an undo step). Nothing is ever only on the device.
 5. **Conflict avoidance.** On connect, the app computes `normalize(device keymap)` and
    `normalize(compile(repo keymap))` and compares:
    - equal → in sync;

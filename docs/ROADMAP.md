@@ -145,9 +145,15 @@ Phases are done in order, one at a time. Tick boxes as work lands (keep this fil
 - [ ] Pictures for other displays (128×32 OLED)
 
 ## Phase 10 — Live editing (Studio RPC)
-- [x] Write `docs/live-sync.md` (detailed design, review before coding) — draft done; waiting for the owner's decisions A–E
-- [ ] `StudioSession` trait; adapter over `zmk-studio-api` (serial first, BLE later)
-- [ ] Behavior/keycode mapping tables generated from pinned ZMK revision
-- [ ] Transactional live edits (device + file patch)
-- [ ] On-connect diff device ↔ repo, conflict UI
-- [ ] RPC-based hardware detection (device info + physical layouts)
+- [x] Write `docs/live-sync.md` (detailed design, reviewed) — owner chose: Save button, own client, offer to clear saved changes, layers stay file edits, USB **and** Bluetooth
+- [x] Own client `crates/studio`: framing, hand-written prost messages checked against the vendored `.proto` files, request/response client with notifications
+- [x] Simulator (`sim.rs`) with ZMK's rules (lock, per-keyboard behavior ids, RAM vs saved, reset) — sync engine tested against it on all three OSes
+- [x] Transports: USB serial (found by VID/PID, permission hint) with a pty test; Bluetooth via btleplug (needs pairing)
+- [x] Mapping source ⇄ device: mini C preprocessor over ZMK's headers and the user's includes, behavior display names; verified on the owner's keymap against a real `zephyr.dts` (252/252 bindings)
+- [x] Transactional live edits: keyboard first, then the file patch; rollback of the keyboard if the file edit fails
+- [x] Compare keyboard ↔ files on connect and on every file reload; per-key “Keep keyboard's” / “Send files'”, layer-name differences, unchecked keys explained
+- [x] Save on keyboard / Discard (keyboard and file together, undoable); offer to clear saved live changes after a firmware install
+- [x] App: connect panel (USB, Bluetooth scan, simulated keyboard in developer mode), unlock hint with the layer/key of `&studio_unlock`, live mode in the key editor
+- [ ] Real-hardware checks (checklist in PROGRESS.md)
+- [ ] RPC-based hardware detection (device info + physical layouts → Phase 2 evidence); the client already reads both
+- [ ] Live layer add/remove/move (decision D: not in v1)

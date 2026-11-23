@@ -3,6 +3,71 @@
 Newest first. Each session: what was done, what's next, open questions, and anything
 that needs testing on real hardware.
 
+## Session 3 (cont.) — 2026-11-23 — Phase 10 (live editing)
+
+### Done
+- `crates/studio`: own ZMK Studio client — framing, protobuf messages (hand-written prost
+  structs, a test checks field numbers against the vendored `zmk-studio-messages`
+  `.proto` files, MIT), client with lock state, behaviors, keymap, set binding, layer
+  name, save/discard, reset, notifications.
+- Transports: USB serial (`0x1D50:0x615E`, DTR, “add yourself to `dialout`” hint on
+  Linux) and Bluetooth (btleplug; Studio service `00000000-0196-6107-c967-c5cfb1c2482a`,
+  needs pairing). A pty test runs the serial transport against the simulator.
+- Simulator with ZMK's rules: only device info, lock state and the behavior list work
+  while locked; behavior ids come from a per-keyboard settings table; changes live in
+  RAM until saved; saved changes survive “flashing”; reset clears only keymap changes.
+- Mapping: a small C preprocessor (object/function macros, `##`, includes, integer
+  expressions) over ZMK's headers and the user's own includes (`keys_nb.h`, zmk-helpers,
+  zmk-unicode). Checked against a real build of the owner's config: all 252 bindings
+  give exactly the numbers in `zephyr.dts`, 46 behavior display names match, and all 252
+  decode and re-encode identically. Found and fixed on the way: numeric layer node names
+  after preprocessing (`DEF` → `0`), `&` inside macro expansions.
+- Sync: compare files ↔ keyboard (structure, per-key, layer names, keys that can't be
+  checked with the reason); decode keyboard bindings back to source text (modifier
+  wrappers, layer names) for “Keep keyboard's”.
+- App: live panel above the layers. Connect by USB, Bluetooth scan, or a simulated
+  keyboard (`MXKEYS_SIM_KEYBOARD=1`). Locked → “press the Studio unlock key (layer …,
+  key N)”. Live mode: key changes and layer renames go to the keyboard and the file in
+  one step (keyboard first; rolled back if the file edit fails); other edits say they
+  need a build. Save on keyboard, Discard (keyboard and file, undoable), offer to clear
+  saved live changes after installing firmware (Bluetooth pairings stay).
+- **Tested in the real app** (Xvfb) on a copy of `xnmrph/corne` with the simulated
+  keyboard: connect → unlock → Q → Shift+Q went to the keyboard and to the file
+  (`&kp LS(Q)`), unsaved notice shown; Discard restored both; an outside edit
+  (`&kp LS(W)`) showed up as one difference, “Send files'” brought the keyboard in line;
+  Save on keyboard cleared the unsaved state.
+- 184 tests.
+
+### Notes
+- Connecting needs the ZMK sources from a first build (headers and behavior names);
+  without them the panel says “Build the firmware once first”.
+- Behaviors that share a display name on the keyboard are read-only live (the panel
+  names them; a `display-name` fixes it).
+- `lock` has no handler in ZMK 4de3133; the keyboard locks itself on idle, which the
+  panel notices.
+
+### Manual hardware test checklist — live editing (needs the real keyboard)
+1. Build and install firmware with the `studio-rpc-usb-uart` snippet on the left half.
+2. Linux: user in the `dialout` group (or `uucp` on Arch); macOS/Windows: nothing.
+3. Plug in the left half by USB → it appears in the live panel; Connect.
+4. The panel asks for the unlock key; press `&studio_unlock` → green “Live”.
+5. Change a key → it works immediately without flashing; the `.keymap` shows the
+   same change in History.
+6. Restart the keyboard without saving → the old key is back; reconnect shows one
+   difference → “Send files'” → works again.
+7. Save on keyboard → restart → the change stays.
+8. Install new firmware → reconnect → the panel offers to clear saved live changes;
+   clearing keeps Bluetooth pairings (check both hosts still connect).
+9. Bluetooth: pair the keyboard, “Look over Bluetooth” → Connect → repeat 4–5.
+10. Use ZMK Studio (web) to change a key, then connect mxKeys → the difference shows;
+    “Keep keyboard's” writes it into the file.
+
+### Next
+1. Real-hardware run of the checklist above (owner).
+2. Feed Studio device info / physical layouts into hardware detection.
+3. Still open with the owner: apply the OUT_TOG and screen edits to `xnmrph/corne`
+   through the app, and fix `build.yaml`'s board id.
+
 ## Session 3 (cont.) — 2026-11-23 — Phase 10 (design)
 
 ### Done
@@ -17,8 +82,9 @@ that needs testing on real hardware.
   - The build's `zephyr.dts` contains the fully resolved keymap (numbers, defines and
     helper macros expanded) → exact expected device keymap.
 
-### Waiting for
-- The owner's answers to decisions A–E at the end of `docs/live-sync.md` before coding.
+### Decisions
+- Owner's answers: Save button, own client, offer to clear saved changes, layers stay
+  file edits, Bluetooth in v1 too. Implementation in the next entry.
 
 ## Session 3 (cont.) — 2026-11-23 — Phase 9
 
