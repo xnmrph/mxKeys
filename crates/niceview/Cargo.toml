@@ -1,0 +1,14 @@
+[package]
+name = "mxkeys-niceview"
+version = "0.1.0"
+description = "Pictures and animations for the nice!view: fit, dither, 1-bit LVGL images and the generated ZMK module"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+image = { version = "0.25", default-features = false, features = ["png", "gif", "jpeg", "bmp", "webp"] }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
