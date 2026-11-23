@@ -33,6 +33,8 @@ pub struct KeymapSummary {
     pub macros: usize,
     pub combos: usize,
     pub conditional_layers: usize,
+    /// Typed hold-taps, macros, combos, … (Phase 7).
+    pub definitions: Vec<zmk_config::behaviors::Definition>,
     pub parse_problems: Vec<String>,
 }
 
@@ -207,6 +209,7 @@ pub fn keymap_summary(file: &KeymapFile) -> KeymapSummary {
         macros: count(DefinitionKind::Macro),
         combos: keymap::combos(doc).len(),
         conditional_layers: keymap::conditional_layers(doc).len(),
+        definitions: zmk_config::behaviors::list(doc, Some(km)),
         parse_problems: doc
             .diagnostics
             .iter()

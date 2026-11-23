@@ -9,6 +9,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
 use serde::{Deserialize, Serialize};
+use zmk_config::behaviors::{self, Schema};
 use zmk_config::catalog::{self, Behavior, Keycode, LayerRef};
 use zmk_config::dts::{Document, Patch};
 use zmk_config::keymap::Keymap;
@@ -40,6 +41,26 @@ pub enum EditOp {
         from: usize,
         to: usize,
     },
+    /// Set (or remove) one property of a hold-tap, macro, combo, … (by definition id).
+    SetDefProp {
+        id: String,
+        prop: String,
+        value: behaviors::NewProp,
+    },
+    /// Add a new definition.
+    AddDef {
+        def_type: behaviors::DefType,
+        name: String,
+        #[serde(default)]
+        props: Vec<(String, behaviors::NewProp)>,
+    },
+    RemoveDef {
+        id: String,
+    },
+    /// Add `&mt { };` (etc.) to tune a built-in behavior.
+    TuneBuiltin {
+        target: String,
+    },
 }
 
 #[derive(Debug, Serialize)]
@@ -57,7 +78,11 @@ pub struct EditorCatalog {
     pub keycodes: &'static [Keycode],
     pub keycodes_source: &'static str,
     pub behaviors: Vec<Behavior>,
+    /// Steps only offered when editing a macro.
+    pub macro_controls: Vec<Behavior>,
     pub layers: Vec<LayerRef>,
+    /// Form descriptions for hold-taps, macros, combos, …
+    pub schemas: Vec<Schema>,
 }
 
 #[derive(Default)]
@@ -92,7 +117,21 @@ pub fn catalog_for(path: &Path) -> Result<EditorCatalog, String> {
         keycodes: catalog::keycodes(),
         keycodes_source: catalog::keycodes_source(),
         behaviors,
+        macro_controls: catalog::macro_controls(),
         layers: catalog::layer_refs(&file.document, &file.keymap),
+        schemas: [
+            behaviors::DefType::HoldTap,
+            behaviors::DefType::ModMorph,
+            behaviors::DefType::TapDance,
+            behaviors::DefType::StickyKey,
+            behaviors::DefType::CapsWord,
+            behaviors::DefType::Macro,
+            behaviors::DefType::Combo,
+            behaviors::DefType::ConditionalLayer,
+            behaviors::DefType::Other,
+        ]
+        .map(behaviors::schema)
+        .to_vec(),
     })
 }
 
@@ -119,6 +158,20 @@ fn patches_for(doc: &Document, km: &Keymap, op: &EditOp) -> Result<Vec<Patch>, S
         EditOp::AddLayer { name } => vec![km.add_layer(doc, name).map_err(|e| s(&e))?],
         EditOp::RemoveLayer { layer } => km.remove_layer(doc, *layer).map_err(|e| s(&e))?,
         EditOp::MoveLayer { from, to } => km.move_layer(doc, *from, *to).map_err(|e| s(&e))?,
+        EditOp::SetDefProp { id, prop, value } => {
+            behaviors::set_prop(doc, Some(km), id, prop, value).map_err(|e| s(&e))?
+        }
+        EditOp::AddDef {
+            def_type,
+            name,
+            props,
+        } => vec![behaviors::add(doc, Some(km), *def_type, name.trim(), props).map_err(|e| s(&e))?],
+        EditOp::RemoveDef { id } => vec![behaviors::remove(doc, id).map_err(|e| s(&e))?],
+        EditOp::TuneBuiltin { target } => behaviors::tune_builtin(doc, target.trim_start_matches('&'))
+            .map_err(|e| s(&e))?
+            .1
+            .into_iter()
+            .collect(),
     })
 }
 
@@ -274,6 +327,49 @@ mod tests {
         let cat = catalog_for(&path).unwrap();
         assert!(cat.behaviors.iter().any(|b| b.reference == "&out"));
         assert_eq!(cat.layers[3].title, "System");
+        std::fs::remove_file(&path).unwrap();
+    }
+
+    #[test]
+    fn definition_ops_from_ui_json() {
+        let fixtures = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../crates/zmk-config/tests/fixtures");
+        let path = std::env::temp_dir().join(format!("mxkeys-defs-{}.keymap", std::process::id()));
+        std::fs::copy(fixtures.join("xnmrph_corne.keymap"), &path).unwrap();
+        let original = std::fs::read_to_string(&path).unwrap();
+        let ed = Editor::default();
+        let op = |j: &str| serde_json::from_str::<EditOp>(j).unwrap();
+        let r = ed
+            .edit(
+                &path,
+                &op(r#"{"op":"add_def","def_type":"combo","name":"undo_c","props":[["key-positions",{"type":"numbers","value":[25,26]}],["bindings",{"type":"bindings","value":["&kp LC(Z)"]}]]}"#),
+            )
+            .unwrap();
+        assert!(r.keymap.definitions.iter().any(|d| d.id == "combos/undo_c"));
+        ed.edit(
+            &path,
+            &op(r#"{"op":"set_def_prop","id":"combos/undo_c","prop":"timeout-ms","value":{"type":"int","value":40}}"#),
+        )
+        .unwrap();
+        ed.edit(&path, &op(r#"{"op":"tune_builtin","target":"&mt"}"#))
+            .unwrap();
+        let r = ed
+            .edit(
+                &path,
+                &op(r#"{"op":"set_def_prop","id":"&mt","prop":"quick-tap-ms","value":{"type":"int","value":150}}"#),
+            )
+            .unwrap();
+        assert!(r.keymap.definitions.iter().any(|d| d.id == "&mt"));
+        let err = ed
+            .edit(&path, &op(r#"{"op":"remove_def","id":"macros/browsertab"}"#))
+            .unwrap_err();
+        assert!(err.contains("used"), "{err}");
+        for _ in 0..4 {
+            ed.undo(&path).unwrap();
+        }
+        assert_eq!(std::fs::read_to_string(&path).unwrap(), original);
+        let cat = catalog_for(&path).unwrap();
+        assert!(cat.macro_controls.iter().any(|b| b.reference == "&macro_press"));
+        assert_eq!(cat.schemas.len(), 9);
         std::fs::remove_file(&path).unwrap();
     }
 }
