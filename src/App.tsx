@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import type { ConfSummary, FirmwareSummary, KeymapSummary, RepoSummary, TargetSummary } from "./types";
 import { CloneForm } from "./CloneForm";
 import { HardwareSetup } from "./HardwareSetup";
-import type { KeyGeom } from "./types";
+import { BuildPanel } from "./BuildPanel";
+import type { HardwareProfile, KeyGeom } from "./types";
 import { bindingLabel } from "./bindingLabel";
 
 const UNIT = 54; // px per key unit
@@ -74,10 +75,13 @@ function Welcome({ onCloned }: { onCloned: (r: RepoSummary) => void }) {
 
 function RepoView({ repo, onKeymapChanged }: { repo: RepoSummary; onKeymapChanged: (k: KeymapSummary) => void }) {
   const keymap = repo.keymaps[0];
+  const [profile, setProfile] = useState<HardwareProfile | null>(null);
+  const onProfile = useCallback((p: HardwareProfile | null) => setProfile(p), []);
   return (
     <>
       <p className="muted path">{repo.root}</p>
-      <HardwareSetup repoRoot={repo.root} />
+      <HardwareSetup repoRoot={repo.root} onProfile={onProfile} />
+      {profile && <BuildPanel repoRoot={repo.root} autoSetup />}
       {repo.warnings.map((w) => (
         <p key={w} className="warning">{w}</p>
       ))}

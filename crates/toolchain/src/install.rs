@@ -99,8 +99,10 @@ impl Layout {
     pub fn venv_python(&self) -> PathBuf {
         self.venv_bin().join(self.host.exe("python"))
     }
-    pub fn west(&self) -> PathBuf {
-        self.venv_bin().join(self.host.exe("west"))
+    /// `python -m west …` — independent of the `west` launcher script, whose absolute
+    /// shebang/launcher breaks if the data directory moves.
+    pub fn west(&self) -> Cmd {
+        Cmd::new(self.venv_python()).args(["-m", "west"])
     }
     pub fn cmake_bin(&self) -> PathBuf {
         self.root.join("cmake").join("bin")
@@ -153,6 +155,23 @@ impl Installed {
         env.insert("PYTHONUTF8".into(), "1".into());
         env.insert("PYTHONNOUSERSITE".into(), "1".into());
         env
+    }
+}
+
+fn venv_healthy(l: &Layout) -> bool {
+    Command::new(l.venv_python())
+        .args(["-c", "import west"])
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .is_ok_and(|s| s.success())
+}
+
+impl Layout {
+    /// Identifies the current venv (changes whenever it's recreated).
+    pub fn venv_token(&self) -> String {
+        fs::read_to_string(self.marker("venv")).unwrap_or_default()
     }
 }
 
@@ -274,6 +293,10 @@ pub fn install(
         git_dir,
     };
 
+    // A venv breaks if the data folder moved or the base Python changed: rebuild it then.
+    if l.is_done("venv") && !venv_healthy(&l) {
+        let _ = fs::remove_file(l.marker("venv"));
+    }
     if !l.is_done("venv") {
         progress(Progress::Step {
             component: "Python packages".into(),
@@ -296,7 +319,9 @@ pub fn install(
                 .envs(&env),
             &mut line,
         )?;
-        fs::write(l.marker("venv"), "").map_err(io(&l.root))?;
+        // A fresh token: workspaces reinstall their Python requirements into a new venv.
+        let token = format!("{:?}", std::time::SystemTime::now());
+        fs::write(l.marker("venv"), token).map_err(io(&l.root))?;
         progress(Progress::Done {
             component: "Python packages".into(),
             freed: 0,
@@ -368,7 +393,7 @@ mod tests {
         assert!(lw.venv_python().ends_with("venv/Scripts/python.exe"));
         assert!(lw.python().ends_with("python/python.exe"));
         let ll = Layout::new(Path::new("/data"), &m, Host::LinuxX86_64);
-        assert!(ll.west().ends_with("venv/bin/west"));
+        assert!(ll.west().display().ends_with("venv/bin/python -m west"));
         assert_eq!(ll.root, Path::new("/data/toolchain").join(&m.id));
     }
 

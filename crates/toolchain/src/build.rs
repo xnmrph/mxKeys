@@ -6,7 +6,7 @@ use mxkeys_hardware::profile::{BuildTarget, TargetId};
 use serde::Serialize;
 
 use crate::install::Installed;
-use crate::runner::{Cmd, CommandRunner, RunError};
+use crate::runner::{CommandRunner, RunError};
 use crate::workspace::Workspace;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -101,7 +101,9 @@ pub fn build(
     runner: &dyn CommandRunner,
     on_line: &mut dyn FnMut(&str),
 ) -> Result<PathBuf, BuildError> {
-    let cmd = Cmd::new(tools.layout.west())
+    let cmd = tools
+        .layout
+        .west()
         .args(west_build_args(plan, ws))
         .cwd(&ws.dir)
         .envs(&tools.env());

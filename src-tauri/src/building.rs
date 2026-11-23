@@ -38,14 +38,14 @@ pub fn info(data: &std::path::Path, jobs: &Jobs) -> ToolchainInfo {
 
 /// Messages for the frontend. `Finished` closes a run.
 #[derive(Debug, Clone, Serialize)]
-#[serde(tag = "kind", rename_all = "snake_case")]
+#[serde(tag = "type", content = "data", rename_all = "snake_case")]
 pub enum ToolchainEvent {
     Progress(Progress),
     Finished { ok: bool, error: Option<String> },
 }
 
 #[derive(Debug, Clone, Serialize)]
-#[serde(tag = "kind", rename_all = "snake_case")]
+#[serde(tag = "type", content = "data", rename_all = "snake_case")]
 pub enum BuildEvent {
     Event(Event),
     Finished {
@@ -140,6 +140,27 @@ mod tests {
         assert!(claim(&jobs.build).is_none());
         drop(a);
         assert!(claim(&jobs.build).is_some());
+    }
+
+    #[test]
+    fn event_json_has_no_duplicate_tags() {
+        let e = BuildEvent::Event(Event::Install(Progress::Bytes {
+            component: "Python".into(),
+            done: 5,
+            total: Some(10),
+        }));
+        assert_eq!(
+            serde_json::to_value(&e).unwrap(),
+            serde_json::json!({"type": "event", "data": {"event": "install", "kind": "bytes", "component": "Python", "done": 5, "total": 10}})
+        );
+        let t = ToolchainEvent::Progress(Progress::Done {
+            component: "CMake".into(),
+            freed: 1,
+        });
+        assert_eq!(
+            serde_json::to_value(&t).unwrap(),
+            serde_json::json!({"type": "progress", "data": {"kind": "done", "component": "CMake", "freed": 1}})
+        );
     }
 
     #[test]

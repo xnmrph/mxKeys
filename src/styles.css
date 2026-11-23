@@ -69,3 +69,19 @@ button.primary { background: var(--accent); color: #fff; border-color: var(--acc
 .option-label { font-weight: 600; }
 .option-desc { font-size: 13px; }
 .hw-chip { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid var(--border); border-radius: 10px; padding: 8px 14px; background: var(--card); margin: 12px 0; }
+.build-panel { border: 1px solid var(--border); border-radius: 10px; padding: 12px 18px 16px; background: var(--card); margin: 12px 0 20px; }
+.build-panel h2 { margin-top: 4px; }
+.build-panel .row { display: flex; gap: 8px; margin: 10px 0; }
+.targets-status { list-style: none; padding: 0; }
+.targets-status li { padding: 6px 0; border-bottom: 1px solid var(--border); }
+.targets-status .icon { display: inline-block; width: 1.4em; text-align: center; }
+.targets-status .done .icon { color: #16a34a; }
+.targets-status .failed .icon { color: var(--err); }
+.problem { margin: 6px 0 6px 1.6em; padding: 6px 10px; border-left: 3px solid var(--err); background: var(--key-muted); border-radius: 4px; }
+.problem .raw, .log { font-family: ui-monospace, monospace; font-size: 12px; white-space: pre-wrap; word-break: break-all; }
+.log { max-height: 320px; overflow: auto; background: var(--key-muted); padding: 8px; border-radius: 6px; }
+.targets-status .skipped { color: var(--muted); }
+.targets-status .building .icon { color: var(--accent); }
+.targets-status li .icon { color: var(--muted); }
+.targets-status li.done .icon { color: #16a34a; }
+.targets-status li.failed .icon { color: var(--err); }

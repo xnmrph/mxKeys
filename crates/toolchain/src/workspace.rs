@@ -161,11 +161,20 @@ pub fn prepare(
     force_update: bool,
     progress: &mut dyn FnMut(Progress),
 ) -> Result<(), WorkspaceError> {
+    let env = tools.env();
+    let reqs_stamp = ws.dir.join(".mxkeys-python-reqs");
+    let token = tools.layout.venv_token();
+    let reqs_current = fs::read_to_string(&reqs_stamp).is_ok_and(|t| t == token);
     if ws.is_ready() && !force_update {
+        if !reqs_current {
+            // The venv was rebuilt since this workspace was prepared.
+            install_requirements(ws, tools, manifest, runner, &mut |t: &str| {
+                progress(Progress::Line { text: t.to_string() })
+            })?;
+            fs::write(&reqs_stamp, &token).map_err(io(&ws.dir))?;
+        }
         return Ok(());
     }
-    let env = tools.env();
-    let west = tools.layout.west();
     let config = ws.dir.join("config");
     fs::create_dir_all(&config).map_err(io(&config))?;
     fs::write(config.join("west.yml"), &ws.manifest_text).map_err(io(&config))?;
@@ -173,7 +182,9 @@ pub fn prepare(
 
     if !ws.dir.join(".west").is_dir() {
         runner.run(
-            &Cmd::new(&west)
+            &tools
+                .layout
+                .west()
                 .args(["init", "-l", "config"])
                 .cwd(&ws.dir)
                 .envs(&env),
@@ -181,7 +192,9 @@ pub fn prepare(
         )?;
     }
     runner.run(
-        &Cmd::new(&west)
+        &tools
+            .layout
+            .west()
             .args([
                 "update",
                 "--narrow",
@@ -211,7 +224,9 @@ pub fn prepare(
     // Resolved commits for every project except the (non-git) manifest folder itself.
     let mut names: Vec<String> = Vec::new();
     runner.run(
-        &Cmd::new(&west)
+        &tools
+            .layout
+            .west()
             .args(["list", "-f", "{name}"])
             .cwd(&ws.dir)
             .envs(&env),
@@ -224,7 +239,9 @@ pub fn prepare(
     )?;
     let mut lock = String::new();
     runner.run(
-        &Cmd::new(&west)
+        &tools
+            .layout
+            .west()
             .args(["list", "-f", "{name} {sha}"])
             .args(names)
             .cwd(&ws.dir)
@@ -236,6 +253,34 @@ pub fn prepare(
     )?;
     fs::write(ws.lock_file(), lock).map_err(io(&ws.dir))?;
     fs::write(ws.ready_marker(), "").map_err(io(&ws.dir))?;
+    Ok(())
+}
+
+/// Install the Python requirements the workspace's Zephyr and modules declare.
+fn install_requirements(
+    ws: &Workspace,
+    tools: &Installed,
+    manifest: &Manifest,
+    runner: &dyn CommandRunner,
+    line: &mut dyn FnMut(&str),
+) -> Result<(), WorkspaceError> {
+    let reqs: Vec<String> = manifest
+        .python
+        .workspace_requirements
+        .iter()
+        .map(|r| ws.dir.join(r))
+        .filter(|p| p.is_file())
+        .flat_map(|p| ["-r".to_string(), p.display().to_string()])
+        .collect();
+    if !reqs.is_empty() {
+        runner.run(
+            &Cmd::new(tools.layout.venv_python())
+                .args(["-m", "pip", "install", "--quiet"])
+                .args(reqs)
+                .envs(&tools.env()),
+            line,
+        )?;
+    }
     Ok(())
 }
 

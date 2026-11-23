@@ -137,3 +137,36 @@ export interface QuizQuestion { id: "controller" | "display"; prompt: string; op
 export interface QuizAnswers { keyboard?: KeyboardId | null; controller?: ControllerId | null; display?: DisplayKind | null }
 
 export interface KeyGeom { w: number; h: number; x: number; y: number; r: number; rx: number; ry: number }
+
+// ----- toolchain + builds (src-tauri building.rs, crates/toolchain) -----
+export interface ToolchainStatus { host: string | null; root: string; done: string[]; missing: string[]; ready: boolean; size: number }
+export interface ToolchainInfo { status: ToolchainStatus; sdkVersion: string; running: boolean }
+
+export type InstallProgress =
+  | { kind: "step"; component: string; step: "download" | "unpack" | "trim" | "setup" }
+  | { kind: "bytes"; component: string; done: number; total: number | null }
+  | { kind: "done"; component: string; freed: number }
+  | { kind: "line"; text: string };
+
+export type ToolchainEvent =
+  | { type: "progress"; data: InstallProgress }
+  | { type: "finished"; data: { ok: boolean; error: string | null } };
+
+export type TargetId = "left" | "right" | "settings_reset";
+
+export interface ProblemLocation { file: string; line: number; layer: string | null; key: number | null; binding: string | null }
+export interface Problem { title: string; hint: string | null; location: ProblemLocation | null; raw: string }
+
+export type PipelineEvent =
+  | { event: "stage"; text: string }
+  | ({ event: "install" } & InstallProgress)
+  | { event: "line"; target: TargetId | null; text: string }
+  | { event: "target_started"; target: TargetId }
+  | { event: "target_finished"; target: TargetId; ok: boolean; uf2: string | null; problems: Problem[] };
+
+export interface TargetResult { target: TargetId; uf2: string | null; problems: Problem[] }
+export interface BuildOutcome { profile: HardwareProfile; results: TargetResult[]; firmware_dir: string; lock: string }
+
+export type BuildEvent =
+  | { type: "event"; data: PipelineEvent }
+  | { type: "finished"; data: { outcome: BuildOutcome | null; error: string | null } };

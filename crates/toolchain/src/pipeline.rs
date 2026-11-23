@@ -39,7 +39,7 @@ pub struct Options {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
-#[serde(tag = "kind", rename_all = "snake_case")]
+#[serde(tag = "event", rename_all = "snake_case")]
 pub enum Event {
     /// A high-level stage in plain language ("Downloading build tools", …).
     Stage {
