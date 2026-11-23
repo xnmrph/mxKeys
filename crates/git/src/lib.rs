@@ -7,6 +7,7 @@
 //!
 //! The app never stores tokens.
 
+pub mod repo;
 mod url;
 
 use std::io::{BufReader, Read};
@@ -50,6 +51,26 @@ pub enum GitError {
     Network,
     #[error("SSH addresses (git@…) need git installed on this computer. Install git or use the https:// address instead.")]
     SshNeedsSystemGit,
+    #[error("{0} isn't a git repository (no change history).")]
+    NotARepository(PathBuf),
+    #[error("The server has changes you don't have yet (for example edits made on GitHub). Get them first with “Get latest”, then upload again.")]
+    Rejected,
+    #[error("Your saved versions and the server's have both moved on. Install git so mxKeys can combine them, or combine them in a git tool.")]
+    Diverged,
+    #[error("Your changes and the server's changes touch the same lines, so they can't be combined automatically. Nothing was changed; combine them in a git tool (or undo your local version).")]
+    Conflict,
+    #[error("There's nothing new to save — no files changed since the last saved version.")]
+    NothingToCommit,
+    #[error("There's nothing to upload yet — save a version first.")]
+    NothingToPush,
+    #[error("Git needs your name and email for the version history. Enter them once and mxKeys will remember them for this folder.")]
+    NoIdentity,
+    #[error("You have unsaved changes. Save a version (or undo the changes) before getting the latest from the server.")]
+    LocalChangesInTheWay,
+    #[error("Your account isn't allowed to upload to this repository. If it belongs to someone else, fork it and use your copy.")]
+    NoPushPermission,
+    #[error("This folder isn't linked to a server (no git remote), so there's nowhere to upload to.")]
+    NoRemote,
     #[error("git failed: {0}")]
     Other(String),
 }
