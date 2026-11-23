@@ -938,6 +938,10 @@ mod tests {
             .unwrap()
             .set_bool("core.autocrlf", false)
             .unwrap();
+        // The clone already checked files out with the machine's setting: write them
+        // again with LF so the working copy matches the commits.
+        repo.checkout_head(Some(git2::build::CheckoutBuilder::new().force()))
+            .unwrap();
         Fixture { base, server, work }
     }
 
