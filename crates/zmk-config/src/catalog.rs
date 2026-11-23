@@ -137,6 +137,74 @@ fn b(reference: &str, name: &str, description: &str, category: &str, params: Vec
 }
 
 /// ZMK's built-in behaviors that make sense on a key.
+/// Steps that only make sense inside a macro (`app/dts/behaviors/macros.dtsi`).
+pub fn macro_controls() -> Vec<Behavior> {
+    use ParamKind::*;
+    let m = |r: &str, n: &str, d: &str, params| b(r, n, d, "macro", params);
+    vec![
+        m(
+            "&macro_tap",
+            "Tap mode",
+            "Keys after this are tapped (pressed and released). This is the default.",
+            vec![],
+        ),
+        m(
+            "&macro_press",
+            "Press mode",
+            "Keys after this are pressed and held…",
+            vec![],
+        ),
+        m(
+            "&macro_release",
+            "Release mode",
+            "…and keys after this are released.",
+            vec![],
+        ),
+        m(
+            "&macro_pause_for_release",
+            "Wait for key release",
+            "Pauses until you let go of the macro key (hold-to-keep-pressed macros).",
+            vec![],
+        ),
+        m(
+            "&macro_wait_time",
+            "Change pause",
+            "Pause between the following steps, in ms.",
+            vec![p("milliseconds", Free)],
+        ),
+        m(
+            "&macro_tap_time",
+            "Change tap length",
+            "How long following taps are held down, in ms.",
+            vec![p("milliseconds", Free)],
+        ),
+        m(
+            "&macro_param_1to1",
+            "Use parameter 1",
+            "The next step gets the macro's first parameter as its first parameter.",
+            vec![],
+        ),
+        m(
+            "&macro_param_1to2",
+            "Parameter 1 → second",
+            "The next step gets the macro's first parameter as its second parameter.",
+            vec![],
+        ),
+        m(
+            "&macro_param_2to1",
+            "Parameter 2 → first",
+            "The next step gets the macro's second parameter as its first parameter.",
+            vec![],
+        ),
+        m(
+            "&macro_param_2to2",
+            "Use parameter 2",
+            "The next step gets the macro's second parameter as its second parameter.",
+            vec![],
+        ),
+    ]
+}
+
 pub fn builtin_behaviors() -> Vec<Behavior> {
     use ParamKind::*;
     vec![
@@ -404,7 +472,7 @@ fn binding_cells(props: &[(String, String)]) -> usize {
         .unwrap_or(0)
 }
 
-fn prettify(name: &str) -> String {
+pub(crate) fn prettify(name: &str) -> String {
     let s = name.replace(['_', '-'], " ");
     let mut c = s.chars();
     match c.next() {
