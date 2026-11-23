@@ -7,6 +7,7 @@ pub mod detection;
 pub mod editor;
 pub mod flashing;
 pub mod history;
+pub mod pictures;
 pub mod profiles;
 pub mod summary;
 
@@ -325,6 +326,50 @@ fn redo_settings(
     conf_settings::step(&PathBuf::from(conf_path), false, &editor)
 }
 
+/// nice!view pictures saved in the config repo (or defaults).
+#[tauri::command]
+fn pictures_state(repo_path: String) -> pictures::PicturesState {
+    pictures::state(&PathBuf::from(repo_path))
+}
+
+/// The real 1-bit result for a picture with the given settings.
+#[tauri::command]
+async fn pictures_preview(
+    app: AppHandle,
+    repo_path: String,
+    picture: pictures::PictureRef,
+    mode: mxkeys_niceview::module::Mode,
+    options: mxkeys_niceview::Options,
+    budget_kib: u32,
+) -> Result<pictures::Preview, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let state = app.state::<pictures::Pictures>();
+        state.preview(&PathBuf::from(repo_path), &picture, mode, &options, budget_kib)
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+/// Write the pictures (and the small ZMK module showing them) into the config repo.
+#[tauri::command]
+async fn pictures_save(
+    repo_path: String,
+    config: mxkeys_niceview::module::ArtConfig,
+    left: Option<pictures::PictureRef>,
+    right: Option<pictures::PictureRef>,
+) -> Result<mxkeys_niceview::repo::Saved, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        pictures::save(&PathBuf::from(repo_path), config, left, right)
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+fn pictures_remove(repo_path: String) -> Result<(), String> {
+    pictures::remove(&PathBuf::from(repo_path))
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -332,6 +377,7 @@ pub fn run() {
         .manage(building::Jobs::default())
         .manage(flashing::Flashing::default())
         .manage(editor::Editor::default())
+        .manage(pictures::Pictures::default())
         .invoke_handler(tauri::generate_handler![
             open_config_repo,
             startup_path,
@@ -363,7 +409,11 @@ pub fn run() {
             recent_folders,
             git_history,
             git_diff,
-            git_run
+            git_run,
+            pictures_state,
+            pictures_preview,
+            pictures_save,
+            pictures_remove
         ])
         .run(tauri::generate_context!())
         .expect("error while running mxKeys");

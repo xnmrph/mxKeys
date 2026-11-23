@@ -25,3 +25,8 @@ mxkeys-git = { path = "../crates/git" }
 mxkeys-hardware = { path = "../crates/hardware" }
 mxkeys-probe = { path = "../crates/probe" }
 mxkeys-toolchain = { path = "../crates/toolchain" }
+mxkeys-niceview = { path = "../crates/niceview" }
+base64 = "0.22"
+
+[dev-dependencies]
+image = { version = "0.25", default-features = false, features = ["png"] }

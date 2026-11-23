@@ -50,9 +50,23 @@ pub fn firmware_state(fw: &Firmware, repo: &Path) -> FirmwareState {
         return FirmwareState::NotBuilt;
     };
     let built = l.min(r);
-    let mut sources: Vec<std::path::PathBuf> = vec![repo.join("build.yaml")];
+    let mut sources: Vec<std::path::PathBuf> = vec![repo.join("build.yaml"), repo.join("zephyr/module.yml")];
     if let Ok(dir) = std::fs::read_dir(repo.join("config")) {
         sources.extend(dir.flatten().map(|e| e.path()).filter(|p| p.is_file()));
+    }
+    // nice!view pictures (generated module), recursively.
+    let mut stack = vec![repo.join(mxkeys_niceview::module::DIR)];
+    while let Some(d) = stack.pop() {
+        if let Ok(dir) = std::fs::read_dir(&d) {
+            for e in dir.flatten() {
+                let p = e.path();
+                if p.is_dir() {
+                    stack.push(p);
+                } else {
+                    sources.push(p);
+                }
+            }
+        }
     }
     if sources.iter().filter_map(|p| mtime(p)).any(|t| t > built) {
         FirmwareState::Outdated

@@ -64,19 +64,44 @@ fn message(files: &[ChangedFile]) -> String {
             .collect()
     };
     let (keymap, conf) = (pick("keymap"), pick("conf"));
-    let others: Vec<String> = files
-        .iter()
-        .filter(|f| kind(&f.change.path) == "other" || f.change.kind == repo::ChangeKind::Deleted)
-        .map(|f| {
-            let verb = match f.change.kind {
-                repo::ChangeKind::Added => "Add",
-                repo::ChangeKind::Deleted => "Remove",
-                repo::ChangeKind::Renamed => "Rename",
-                _ => "Update",
-            };
-            format!("{verb} {}", f.change.path)
-        })
-        .collect();
+    let art_dir = format!("{}/", mxkeys_niceview::module::DIR);
+    let is_art = |f: &&ChangedFile| f.change.path.starts_with(&art_dir);
+    let mut others: Vec<String> = Vec::new();
+    if files.iter().any(|f| is_art(&f)) {
+        let all_new = files
+            .iter()
+            .filter(is_art)
+            .all(|f| f.change.kind == repo::ChangeKind::Added);
+        let all_gone = files
+            .iter()
+            .filter(is_art)
+            .all(|f| f.change.kind == repo::ChangeKind::Deleted);
+        others.push(
+            if all_new {
+                "Add nice!view pictures"
+            } else if all_gone {
+                "Remove nice!view pictures"
+            } else {
+                "Update nice!view pictures"
+            }
+            .to_string(),
+        );
+    }
+    others.extend(
+        files
+            .iter()
+            .filter(|f| !is_art(f) && f.change.path != mxkeys_niceview::module::MODULE_YML)
+            .filter(|f| kind(&f.change.path) == "other" || f.change.kind == repo::ChangeKind::Deleted)
+            .map(|f| {
+                let verb = match f.change.kind {
+                    repo::ChangeKind::Added => "Add",
+                    repo::ChangeKind::Deleted => "Remove",
+                    repo::ChangeKind::Renamed => "Rename",
+                    _ => "Update",
+                };
+                format!("{verb} {}", f.change.path)
+            }),
+    );
     let title = changes::title_for(&keymap, &conf, &others);
     let bullets: Vec<String> = keymap.iter().chain(&conf).chain(&others).cloned().collect();
     if bullets.len() <= 1 && bullets.first().is_none_or(|b| *b == title) {
@@ -279,6 +304,18 @@ mod tests {
         let d = diff(&dir, Some("config/corne.conf")).unwrap();
         assert_eq!((d[0].added, d[0].removed), (1, 1));
         assert_eq!(h.recent[0].summary, "Start");
+
+        // nice!view pictures (and the module.yml line) are one entry.
+        std::fs::create_dir_all(dir.join("nice_view_art/src")).unwrap();
+        std::fs::write(dir.join("nice_view_art/src/frames.c"), "x").unwrap();
+        std::fs::write(dir.join("nice_view_art/mxkeys.json"), "{}").unwrap();
+        std::fs::create_dir_all(dir.join("zephyr")).unwrap();
+        std::fs::write(dir.join("zephyr/module.yml"), "build:\n").unwrap();
+        let h = history(&dir).unwrap();
+        assert_eq!(
+            h.suggested_message,
+            "Update settings and other files\n\n- Screen: off → on\n- Add nice!view pictures\n- Add build.yaml"
+        );
 
         let data = dir.join("appdata");
         remember(&data, &dir);
