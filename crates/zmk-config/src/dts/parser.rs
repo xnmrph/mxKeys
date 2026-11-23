@@ -192,6 +192,17 @@ impl<'a> Parser<'a> {
                 if self.is_punct(next, "(") && labels.is_empty() {
                     return self.macro_call(name_tok);
                 }
+                // A bare object-like macro standing in for items, e.g. `&mt { MT_CORE };`
+                // or a top-level `MY_BEHAVIORS` line. Kept opaque.
+                let ends_scope =
+                    next.is_none_or(|n| n.kind == TokenKind::Directive) || self.is_punct(next, "}");
+                if labels.is_empty() && ends_scope {
+                    return Some(Item::MacroCall(MacroCall {
+                        span: name_tok.span,
+                        name: full.to_string(),
+                        args: Vec::new(),
+                    }));
+                }
                 if self.is_punct(next, "{") {
                     let open = self.bump();
                     let (name, unit) = match full.split_once('@') {

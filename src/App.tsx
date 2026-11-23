@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
-import type { KeymapSummary, RepoSummary, TargetSummary } from "./types";
+import type { ConfSummary, FirmwareSummary, KeymapSummary, RepoSummary, TargetSummary } from "./types";
+import { CloneForm } from "./CloneForm";
 import { CORNE_6COL } from "./corneLayout";
 import { bindingLabel } from "./bindingLabel";
 
@@ -35,7 +36,7 @@ export default function App() {
         </button>
       </header>
       {error && <p className="error" role="alert">{error}</p>}
-      {!repo ? <Welcome /> : <RepoView repo={repo} onKeymapChanged={(k) => setRepo(replaceKeymap(repo, k))} />}
+      {!repo ? <Welcome onCloned={setRepo} /> : <RepoView repo={repo} onKeymapChanged={(k) => setRepo(replaceKeymap(repo, k))} />}
     </main>
   );
 }
@@ -44,15 +45,17 @@ function replaceKeymap(repo: RepoSummary, k: KeymapSummary): RepoSummary {
   return { ...repo, keymaps: repo.keymaps.map((old) => (old.path === k.path ? k : old)) };
 }
 
-function Welcome() {
+function Welcome({ onCloned }: { onCloned: (r: RepoSummary) => void }) {
   return (
     <section className="welcome">
       <h2>Let's set up your keyboard</h2>
       <p>
-        Pick the folder with your keyboard's configuration (often called <em>zmk-config</em>). It
-        has a <code>config</code> folder inside. Nothing is changed until you edit something.
+        Your keyboard's settings live in a <em>config repository</em> (often called <em>zmk-config</em>)
+        on GitHub, Gitea or any other git server. Paste its address to download it, or use
+        <strong> Open config folder…</strong> above if it's already on this computer. Nothing is
+        changed until you edit something.
       </p>
-      <p className="muted">Cloning from GitHub, Gitea or any git server is coming next.</p>
+      <CloneForm onCloned={onCloned} />
     </section>
   );
 }
@@ -66,6 +69,8 @@ function RepoView({ repo, onKeymapChanged }: { repo: RepoSummary; onKeymapChange
         <p key={w} className="warning">{w}</p>
       ))}
       {keymap && <KeymapView keymap={keymap} onChanged={onKeymapChanged} />}
+      {repo.firmware && <Firmware firmware={repo.firmware} />}
+      {repo.confFiles.map((c) => <Settings key={c.path} conf={c} />)}
       {repo.build && <BuildTargets targets={repo.build.targets} />}
     </>
   );
@@ -196,6 +201,94 @@ function BuildTargets({ targets }: { targets: TargetSummary[] }) {
             ))}
           </tbody>
         </table>
+      </details>
+    </section>
+  );
+}
+
+function describeRevision(f: FirmwareSummary): string {
+  if (!f.zmkRevision) return "unknown";
+  switch (f.zmkRevisionKind) {
+    case "branch": return `latest development version (follows “${f.zmkRevision}”)`;
+    case "version": return `release ${f.zmkRevision}`;
+    case "commit": return `fixed version ${f.zmkRevision.slice(0, 7)}`;
+    default: return f.zmkRevision;
+  }
+}
+
+function Firmware({ firmware }: { firmware: FirmwareSummary }) {
+  return (
+    <section>
+      <h2>ZMK version</h2>
+      <p>Your config builds against the <strong>{describeRevision(firmware)}</strong> of ZMK.</p>
+      {firmware.extraModules.length > 0 && (
+        <p>
+          Add-ons: {firmware.extraModules.map((m) => m.name).join(", ")}
+        </p>
+      )}
+      <details>
+        <summary>Advanced</summary>
+        <table>
+          <thead><tr><th>project</th><th>revision</th><th>url</th></tr></thead>
+          <tbody>
+            <tr><td><code>zmk</code></td><td><code>{firmware.zmkRevision}</code></td><td><code>{firmware.zmkUrl}</code></td></tr>
+            {firmware.extraModules.map((m) => (
+              <tr key={m.name}><td><code>{m.name}</code></td><td><code>{m.revision}</code></td><td><code>{m.url}</code></td></tr>
+            ))}
+          </tbody>
+        </table>
+      </details>
+    </section>
+  );
+}
+
+const FRIENDLY_SETTINGS: Record<string, string> = {
+  CONFIG_ZMK_KEYBOARD_NAME: "Keyboard name (shown in Bluetooth)",
+  CONFIG_ZMK_SLEEP: "Deep sleep when idle",
+  CONFIG_ZMK_IDLE_TIMEOUT: "Idle after (ms)",
+  CONFIG_ZMK_IDLE_SLEEP_TIMEOUT: "Deep sleep after (ms)",
+  CONFIG_ZMK_STUDIO: "Live editing (ZMK Studio)",
+  CONFIG_ZMK_DISPLAY: "Screen",
+  CONFIG_ZMK_POINTING: "Mouse keys",
+  CONFIG_ZMK_RGB_UNDERGLOW: "RGB underglow",
+  CONFIG_BT_CTLR_TX_PWR_PLUS_8: "Stronger Bluetooth signal (+8 dBm)",
+};
+
+function friendlyValue(v: string): string {
+  if (v === "y") return "on";
+  if (v === "n") return "off";
+  return v.replace(/^"(.*)"$/, "$1");
+}
+
+function Settings({ conf }: { conf: ConfSummary }) {
+  const active = conf.settings.filter((s) => s.state !== "commented_out");
+  const off = conf.settings.filter((s) => s.state === "commented_out");
+  return (
+    <section>
+      <h2>Settings <span className="muted">· {conf.fileName}</span></h2>
+      {active.length === 0 ? <p className="muted">No settings changed from ZMK's defaults.</p> : (
+        <ul className="settings">
+          {active.map((s) => (
+            <li key={`${s.name}-${s.line}`}>
+              {FRIENDLY_SETTINGS[s.name] ?? s.name}: <strong>{friendlyValue(s.value)}</strong>
+            </li>
+          ))}
+        </ul>
+      )}
+      <details>
+        <summary>Advanced</summary>
+        <table>
+          <thead><tr><th>line</th><th>option</th><th>value</th><th></th></tr></thead>
+          <tbody>
+            {conf.settings.map((s) => (
+              <tr key={`${s.name}-${s.line}`}>
+                <td>{s.line}</td><td><code>{s.name}</code></td><td><code>{s.value}</code></td>
+                <td className="muted">{s.state === "commented_out" ? "commented out" : s.state === "not_set" ? "is not set" : ""}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {off.length > 0 && <p className="muted">{off.length} option(s) are commented out and have no effect.</p>}
       </details>
     </section>
   );

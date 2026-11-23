@@ -2005,6 +2005,7 @@ dependencies = [
 name = "mxkeys"
 version = "0.1.0"
 dependencies = [
+ "mxkeys-git",
  "serde",
  "serde_json",
  "tauri",

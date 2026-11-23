@@ -102,13 +102,21 @@ fn ssh_without_system_git_is_explained() {
 #[test]
 #[ignore]
 fn clone_public_https_both_backends() {
-    for (tag, backend) in [("net-system", detect_backend()), ("net-libgit2", Backend::Libgit2)] {
+    for (tag, backend) in [
+        ("net-system", detect_backend()),
+        ("net-libgit2", Backend::Libgit2),
+    ] {
         let dest = tmp(tag);
         let url = parse_repo_url("https://github.com/xnmrph/corne").unwrap();
         let mut events = Vec::new();
         clone(&url, &dest, &backend, |p| events.push(p)).unwrap();
         assert!(dest.join("config/corne.keymap").is_file(), "{tag}");
-        assert!(events.iter().any(|e| matches!(e, CloneProgress::Receiving { .. })), "{tag}: {events:?}");
+        assert!(
+            events
+                .iter()
+                .any(|e| matches!(e, CloneProgress::Receiving { .. })),
+            "{tag}: {events:?}"
+        );
         std::fs::remove_dir_all(&dest).ok();
     }
 }

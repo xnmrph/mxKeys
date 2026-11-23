@@ -26,12 +26,12 @@ Phases are done in order, one at a time. Tick boxes as work lands (keep this fil
 - [x] Tauri command: open a config folder → summary (layers, targets); `set_binding` writes the file
 - [x] Minimal UI: layer tabs on a visual Corne layout, edit one key's binding, build targets list
 - [x] CI workflow: fmt, clippy, tests (Linux/macOS/Windows), frontend typecheck/build — green on Linux, macOS, Windows (run 5, 2026-11-22)
-- [ ] Parse `config/west.yml` (ZMK revision, extra modules)
-- [ ] Parse `.conf` (Kconfig lines, lossless)
-- [ ] Clone a config repo from a URL (git2) in the first-run flow
+- [x] Parse `config/west.yml` (ZMK revision + kind, extra modules, resolved URLs)
+- [x] Parse `.conf` (Kconfig lines, lossless; set / uncomment / append / comment-out edits)
+- [x] Clone a config repo from any git URL (system git preferred, bundled libgit2 fallback) with progress, in the welcome screen
 - [x] Owner's real keymaps as fixtures (`xnmrph/corne`, `xnmrph/corne-macOS-Optimised`)
-- [ ] More real-world keymap fixtures (miryoku-style, heavy zmk-helpers `ZMK_LAYER` usage)
-- [ ] Binding-grid re-alignment formatter (optional op)
+- [x] Macro-generated keymaps (zmk-helpers `ZMK_LAYER`, keymap in another file) explained instead of failing; bare macros as node bodies parsed (checked locally against urob/zmk-config, which has no license so isn't vendored)
+- [~] Binding-grid re-alignment formatter — moved to Phase 5 (needed with the editor UI)
 
 ## Phase 2 — Hardware detection + first-run setup
 - [ ] `crates/hardware`: `HardwareProfile` types + Corne/nice!nano v2/nice!view profile data (physical layout from ZMK `foostan/corne/6column.dtsi`)
@@ -72,6 +72,7 @@ Phases are done in order, one at a time. Tick boxes as work lands (keep this fil
 - [ ] Visual Corne layout from physical layout data
 - [ ] Layer tabs, add/remove/rename/reorder layers (file patches)
 - [ ] Key binding editor with behavior picker + keycode search (plain names)
+- [ ] Binding-grid re-alignment after edits (keep columns tidy)
 - [ ] Undo/redo, file watcher reload
 - [ ] Read-only display for opaque/macro-generated bindings
 - [ ] Acceptance test: owner adds `&out OUT_TOG` next to the BT keys on the *System* layer of `xnmrph/corne` using only the app (deliberately not done by hand)

@@ -17,6 +17,7 @@ const ALL: &[&str] = &[
     "advanced.keymap",
     "helper_macros.keymap",
     "malformed.keymap",
+    "generated_layers.keymap",
     "xnmrph_corne.keymap",
     "xnmrph_corne_macos.keymap",
 ];
@@ -57,6 +58,7 @@ fn well_formed_fixtures_have_no_diagnostics() {
         "corne_stock.keymap",
         "advanced.keymap",
         "helper_macros.keymap",
+        "generated_layers.keymap",
         "xnmrph_corne.keymap",
         "xnmrph_corne_macos.keymap",
     ] {
@@ -392,4 +394,26 @@ fn owners_real_keymaps() {
             "&kp ESC"
         );
     }
+}
+
+#[test]
+fn bare_macro_body_and_generated_keymaps_are_explained() {
+    let doc = Document::parse(fixture("helper_macros.keymap"));
+    let mt = doc
+        .items
+        .iter()
+        .find_map(|i| match i {
+            Item::RefNode(r) if r.target == "mt" => Some(r),
+            _ => None,
+        })
+        .unwrap();
+    assert!(matches!(&mt.children[..], [Item::MacroCall(m)] if m.name == "MT_CORE" && m.args.is_empty()));
+
+    let doc = Document::parse(fixture("generated_layers.keymap"));
+    assert_eq!(
+        Keymap::from_document(&doc),
+        Err(KeymapError::GeneratedByMacros(
+            "ZMK_LAYER, #include \"shared.keymap\"".into()
+        ))
+    );
 }

@@ -30,6 +30,8 @@ pub enum RepoError {
     BuildYaml(#[from] BuildYamlError),
     #[error("{path}: {source}")]
     Keymap { path: PathBuf, source: KeymapError },
+    #[error(transparent)]
+    West(WestLoadError),
 }
 
 impl RepoFiles {
@@ -106,5 +108,43 @@ pub fn load_build_matrix(files: &RepoFiles) -> Result<Option<BuildMatrix>, RepoE
     match &files.build_yaml {
         Some(p) => Ok(Some(BuildMatrix::parse(&read(p)?)?)),
         None => Ok(None),
+    }
+}
+
+#[derive(Debug, thiserror::Error)]
+#[error("{path}: {source}")]
+pub struct WestLoadError {
+    pub path: PathBuf,
+    pub source: crate::west_yml::WestError,
+}
+
+/// Parse `config/west.yml` if present.
+pub fn load_west(files: &RepoFiles) -> Result<Option<crate::west_yml::WestManifest>, RepoError> {
+    match &files.west_yml {
+        Some(p) => crate::west_yml::WestManifest::parse(&read(p)?)
+            .map(Some)
+            .map_err(|source| {
+                RepoError::West(WestLoadError {
+                    path: p.clone(),
+                    source,
+                })
+            }),
+        None => Ok(None),
+    }
+}
+
+/// A loaded `.conf` file.
+#[derive(Debug, Clone)]
+pub struct ConfFile {
+    pub path: PathBuf,
+    pub file: crate::kconfig::KconfigFile,
+}
+
+impl ConfFile {
+    pub fn load(path: &Path) -> Result<ConfFile, RepoError> {
+        Ok(ConfFile {
+            path: path.to_path_buf(),
+            file: crate::kconfig::KconfigFile::parse(read(path)?),
+        })
     }
 }

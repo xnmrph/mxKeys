@@ -33,3 +33,6 @@ ZMK_LAYER(base,
         };
     };
 };
+
+#define MT_CORE flavor = "tap-preferred"; tapping-term-ms = <220>;
+&mt { MT_CORE };

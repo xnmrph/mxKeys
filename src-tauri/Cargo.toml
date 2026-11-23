@@ -20,3 +20,4 @@ tauri-plugin-dialog = "2"
 serde.workspace = true
 serde_json.workspace = true
 zmk-config = { path = "../crates/zmk-config" }
+mxkeys-git = { path = "../crates/git" }

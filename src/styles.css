@@ -32,3 +32,12 @@ button:disabled { cursor: default; opacity: .6; }
 .editor input { font-family: ui-monospace, monospace; padding: 6px 8px; min-width: 280px; border-radius: 6px; border: 1px solid var(--border); background: var(--card); color: var(--fg); }
 table { border-collapse: collapse; margin-top: 8px; }
 td, th { border-bottom: 1px solid var(--border); padding: 4px 8px; text-align: left; font-size: 13px; }
+.clone { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+.clone label { display: flex; flex-direction: column; gap: 4px; }
+.clone input { font: inherit; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--card); color: var(--fg); }
+.clone .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+button.primary { background: var(--accent); color: #fff; border-color: var(--accent); align-self: flex-start; }
+.progress { display: flex; flex-direction: column; gap: 4px; }
+.progress .bar { height: 6px; border-radius: 3px; background: var(--border); overflow: hidden; }
+.progress .bar > div { height: 100%; background: var(--accent); transition: width .2s; }
+.settings { padding-left: 20px; }
