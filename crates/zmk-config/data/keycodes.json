@@ -1,0 +1,4813 @@
+{
+ "source": "zmkfirmware/zmk app/include/dt-bindings/zmk/keys.h @ 4de313367288aad5aeaa1243890e40dc813f7008 (MIT)",
+ "keys": [
+  {
+   "names": [
+    "SYSTEM_POWER",
+    "SYS_PWR"
+   ],
+   "description": "System Power Down",
+   "page": "gd",
+   "usage": "HID_USAGE_GD_SYSTEM_POWER_DOWN",
+   "shifted": false,
+   "deprecated": [],
+   "category": "system",
+   "label": "SYS_PWR"
+  },
+  {
+   "names": [
+    "SYSTEM_SLEEP",
+    "SYS_SLEEP"
+   ],
+   "description": "System Sleep",
+   "page": "gd",
+   "usage": "HID_USAGE_GD_SYSTEM_SLEEP",
+   "shifted": false,
+   "deprecated": [],
+   "category": "system",
+   "label": "SYS_SLEEP"
+  },
+  {
+   "names": [
+    "SYSTEM_WAKE_UP",
+    "SYS_WAKE"
+   ],
+   "description": "System Wake Up",
+   "page": "gd",
+   "usage": "HID_USAGE_GD_SYSTEM_WAKE_UP",
+   "shifted": false,
+   "deprecated": [],
+   "category": "system",
+   "label": "SYS_WAKE"
+  },
+  {
+   "names": [
+    "A"
+   ],
+   "description": "Keyboard a and A",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_A",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "A"
+  },
+  {
+   "names": [
+    "B"
+   ],
+   "description": "Keyboard b and B",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_B",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "B"
+  },
+  {
+   "names": [
+    "C"
+   ],
+   "description": "Keyboard c and C",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_C",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "C"
+  },
+  {
+   "names": [
+    "D"
+   ],
+   "description": "Keyboard d and D",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_D",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "D"
+  },
+  {
+   "names": [
+    "E"
+   ],
+   "description": "Keyboard e and E",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_E",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "E"
+  },
+  {
+   "names": [
+    "F"
+   ],
+   "description": "Keyboard f and F",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_F",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "F"
+  },
+  {
+   "names": [
+    "G"
+   ],
+   "description": "Keyboard g and G",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_G",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "G"
+  },
+  {
+   "names": [
+    "H"
+   ],
+   "description": "Keyboard h and H",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_H",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "H"
+  },
+  {
+   "names": [
+    "I"
+   ],
+   "description": "Keyboard i and I",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_I",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "I"
+  },
+  {
+   "names": [
+    "J"
+   ],
+   "description": "Keyboard j and J",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_J",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "J"
+  },
+  {
+   "names": [
+    "K"
+   ],
+   "description": "Keyboard k and K",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_K",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "K"
+  },
+  {
+   "names": [
+    "L"
+   ],
+   "description": "Keyboard l and L",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_L",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "L"
+  },
+  {
+   "names": [
+    "M"
+   ],
+   "description": "Keyboard m and M",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_M",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "M"
+  },
+  {
+   "names": [
+    "N"
+   ],
+   "description": "Keyboard n and N",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_N",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "N"
+  },
+  {
+   "names": [
+    "O"
+   ],
+   "description": "Keyboard o and O",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_O",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "O"
+  },
+  {
+   "names": [
+    "P"
+   ],
+   "description": "Keyboard p and P",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_P",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "P"
+  },
+  {
+   "names": [
+    "Q"
+   ],
+   "description": "Keyboard q and Q",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_Q",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "Q"
+  },
+  {
+   "names": [
+    "R"
+   ],
+   "description": "Keyboard r and R",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_R",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "R"
+  },
+  {
+   "names": [
+    "S"
+   ],
+   "description": "Keyboard s and S",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_S",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "S"
+  },
+  {
+   "names": [
+    "T"
+   ],
+   "description": "Keyboard t and T",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_T",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "T"
+  },
+  {
+   "names": [
+    "U"
+   ],
+   "description": "Keyboard u and U",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_U",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "U"
+  },
+  {
+   "names": [
+    "V"
+   ],
+   "description": "Keyboard v and V",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_V",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "V"
+  },
+  {
+   "names": [
+    "W"
+   ],
+   "description": "Keyboard w and W",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_W",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "W"
+  },
+  {
+   "names": [
+    "X"
+   ],
+   "description": "Keyboard x and X",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_X",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "X"
+  },
+  {
+   "names": [
+    "Y"
+   ],
+   "description": "Keyboard y and Y",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_Y",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "Y"
+  },
+  {
+   "names": [
+    "Z"
+   ],
+   "description": "Keyboard z and Z",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_Z",
+   "shifted": false,
+   "deprecated": [],
+   "category": "letters",
+   "label": "Z"
+  },
+  {
+   "names": [
+    "NUMBER_1",
+    "N1"
+   ],
+   "description": "Keyboard 1 and ! (Exclamation)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_1_AND_EXCLAMATION",
+   "shifted": false,
+   "deprecated": [
+    "NUM_1"
+   ],
+   "category": "numbers",
+   "label": "1"
+  },
+  {
+   "names": [
+    "EXCLAMATION",
+    "EXCL"
+   ],
+   "description": "Keyboard ! (Exclamation)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_1_AND_EXCLAMATION",
+   "shifted": true,
+   "deprecated": [
+    "BANG"
+   ],
+   "category": "symbols",
+   "label": "!"
+  },
+  {
+   "names": [
+    "NUMBER_2",
+    "N2"
+   ],
+   "description": "Keyboard 2 and @ (At sign)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_2_AND_AT",
+   "shifted": false,
+   "deprecated": [
+    "NUM_2"
+   ],
+   "category": "numbers",
+   "label": "2"
+  },
+  {
+   "names": [
+    "AT_SIGN",
+    "AT"
+   ],
+   "description": "Keyboard @ (At sign)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_2_AND_AT",
+   "shifted": true,
+   "deprecated": [
+    "ATSN"
+   ],
+   "category": "symbols",
+   "label": "@"
+  },
+  {
+   "names": [
+    "NUMBER_3",
+    "N3"
+   ],
+   "description": "Keyboard 3 and # (Hash/Number)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_3_AND_HASH",
+   "shifted": false,
+   "deprecated": [
+    "NUM_3"
+   ],
+   "category": "numbers",
+   "label": "3"
+  },
+  {
+   "names": [
+    "HASH",
+    "POUND"
+   ],
+   "description": "Keyboard # (Hash/Number)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_3_AND_HASH",
+   "shifted": true,
+   "deprecated": [],
+   "category": "symbols",
+   "label": "#"
+  },
+  {
+   "names": [
+    "NUMBER_4",
+    "N4"
+   ],
+   "description": "Keyboard 4 and $ (Dollar)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_4_AND_DOLLAR",
+   "shifted": false,
+   "deprecated": [
+    "NUM_4"
+   ],
+   "category": "numbers",
+   "label": "4"
+  },
+  {
+   "names": [
+    "DOLLAR",
+    "DLLR"
+   ],
+   "description": "Keyboard $ (Dollar)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_4_AND_DOLLAR",
+   "shifted": true,
+   "deprecated": [],
+   "category": "symbols",
+   "label": "$"
+  },
+  {
+   "names": [
+    "NUMBER_5",
+    "N5"
+   ],
+   "description": "Keyboard 5 and % (Percent)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_5_AND_PERCENT",
+   "shifted": false,
+   "deprecated": [
+    "NUM_5"
+   ],
+   "category": "numbers",
+   "label": "5"
+  },
+  {
+   "names": [
+    "PERCENT",
+    "PRCNT"
+   ],
+   "description": "Keyboard % (Percent)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_5_AND_PERCENT",
+   "shifted": true,
+   "deprecated": [
+    "PRCT"
+   ],
+   "category": "symbols",
+   "label": "%"
+  },
+  {
+   "names": [
+    "NUMBER_6",
+    "N6"
+   ],
+   "description": "Keyboard 6 and ^ (Caret)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_6_AND_CARET",
+   "shifted": false,
+   "deprecated": [
+    "NUM_6"
+   ],
+   "category": "numbers",
+   "label": "6"
+  },
+  {
+   "names": [
+    "CARET"
+   ],
+   "description": "Keyboard ^ (Caret)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_6_AND_CARET",
+   "shifted": true,
+   "deprecated": [
+    "CRRT"
+   ],
+   "category": "symbols",
+   "label": "^"
+  },
+  {
+   "names": [
+    "NUMBER_7",
+    "N7"
+   ],
+   "description": "Keyboard 7 and & (Ampersand)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_7_AND_AMPERSAND",
+   "shifted": false,
+   "deprecated": [
+    "NUM_7"
+   ],
+   "category": "numbers",
+   "label": "7"
+  },
+  {
+   "names": [
+    "AMPERSAND",
+    "AMPS"
+   ],
+   "description": "Keyboard & (Ampersand)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_7_AND_AMPERSAND",
+   "shifted": true,
+   "deprecated": [],
+   "category": "symbols",
+   "label": "&"
+  },
+  {
+   "names": [
+    "NUMBER_8",
+    "N8"
+   ],
+   "description": "Keyboard 8 and * (Asterisk)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_8_AND_ASTERISK",
+   "shifted": false,
+   "deprecated": [
+    "NUM_8"
+   ],
+   "category": "numbers",
+   "label": "8"
+  },
+  {
+   "names": [
+    "ASTERISK",
+    "ASTRK",
+    "STAR"
+   ],
+   "description": "Keyboard * (Asterisk)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_8_AND_ASTERISK",
+   "shifted": true,
+   "deprecated": [],
+   "category": "symbols",
+   "label": "*"
+  },
+  {
+   "names": [
+    "NUMBER_9",
+    "N9"
+   ],
+   "description": "Keyboard 9 and ( (Left Parenthesis)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_9_AND_LEFT_PARENTHESIS",
+   "shifted": false,
+   "deprecated": [
+    "NUM_9"
+   ],
+   "category": "numbers",
+   "label": "9"
+  },
+  {
+   "names": [
+    "LEFT_PARENTHESIS",
+    "LPAR"
+   ],
+   "description": "Keyboard ( (Left Parenthesis)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_9_AND_LEFT_PARENTHESIS",
+   "shifted": true,
+   "deprecated": [
+    "LPRN"
+   ],
+   "category": "symbols",
+   "label": "("
+  },
+  {
+   "names": [
+    "NUMBER_0",
+    "N0"
+   ],
+   "description": "Keyboard 0 and ) (Right Parenthesis)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_0_AND_RIGHT_PARENTHESIS",
+   "shifted": false,
+   "deprecated": [
+    "NUM_0"
+   ],
+   "category": "numbers",
+   "label": "0"
+  },
+  {
+   "names": [
+    "RIGHT_PARENTHESIS",
+    "RPAR"
+   ],
+   "description": "Keyboard ) (Right Parenthesis)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_0_AND_RIGHT_PARENTHESIS",
+   "shifted": true,
+   "deprecated": [
+    "RPRN"
+   ],
+   "category": "symbols",
+   "label": ")"
+  },
+  {
+   "names": [
+    "RETURN",
+    "ENTER",
+    "RET"
+   ],
+   "description": "Keyboard Return (Enter)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_RETURN_ENTER",
+   "shifted": false,
+   "deprecated": [],
+   "category": "editing",
+   "label": "Enter"
+  },
+  {
+   "names": [
+    "ESCAPE",
+    "ESC"
+   ],
+   "description": "Keyboard Escape",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_ESCAPE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "editing",
+   "label": "Esc"
+  },
+  {
+   "names": [
+    "BACKSPACE",
+    "BSPC"
+   ],
+   "description": "Keyboard Backspace",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_DELETE_BACKSPACE",
+   "shifted": false,
+   "deprecated": [
+    "BKSP"
+   ],
+   "category": "editing",
+   "label": "⌫"
+  },
+  {
+   "names": [
+    "TAB"
+   ],
+   "description": "Keyboard Tab",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_TAB",
+   "shifted": false,
+   "deprecated": [],
+   "category": "editing",
+   "label": "Tab"
+  },
+  {
+   "names": [
+    "SPACE"
+   ],
+   "description": "Keyboard Space",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_SPACEBAR",
+   "shifted": false,
+   "deprecated": [
+    "SPC"
+   ],
+   "category": "editing",
+   "label": "Space"
+  },
+  {
+   "names": [
+    "MINUS"
+   ],
+   "description": "Keyboard - and _ (Minus and Underscore)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_MINUS_AND_UNDERSCORE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "symbols",
+   "label": "-"
+  },
+  {
+   "names": [
+    "UNDERSCORE",
+    "UNDER"
+   ],
+   "description": "Keyboard _ (Underscore)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_MINUS_AND_UNDERSCORE",
+   "shifted": true,
+   "deprecated": [],
+   "category": "symbols",
+   "label": "_"
+  },
+  {
+   "names": [
+    "EQUAL"
+   ],
+   "description": "Keyboard = and + (Equal and Plus)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_EQUAL_AND_PLUS",
+   "shifted": false,
+   "deprecated": [
+    "EQL"
+   ],
+   "category": "symbols",
+   "label": "="
+  },
+  {
+   "names": [
+    "PLUS"
+   ],
+   "description": "Keyboard + (Plus)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_EQUAL_AND_PLUS",
+   "shifted": true,
+   "deprecated": [],
+   "category": "symbols",
+   "label": "+"
+  },
+  {
+   "names": [
+    "LEFT_BRACKET",
+    "LBKT"
+   ],
+   "description": "Keyboard [ and { (Left Bracket and Left Brace)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_LEFT_BRACKET_AND_LEFT_BRACE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "symbols",
+   "label": "["
+  },
+  {
+   "names": [
+    "LEFT_BRACE",
+    "LBRC"
+   ],
+   "description": "Keyboard { (Left Brace)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_LEFT_BRACKET_AND_LEFT_BRACE",
+   "shifted": true,
+   "deprecated": [
+    "LCUR"
+   ],
+   "category": "symbols",
+   "label": "{"
+  },
+  {
+   "names": [
+    "RIGHT_BRACKET",
+    "RBKT"
+   ],
+   "description": "Keyboard ] and } (Right Bracket and Right Brace)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_RIGHT_BRACKET_AND_RIGHT_BRACE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "symbols",
+   "label": "]"
+  },
+  {
+   "names": [
+    "RIGHT_BRACE",
+    "RBRC"
+   ],
+   "description": "Keyboard } (Right Brace)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_RIGHT_BRACKET_AND_RIGHT_BRACE",
+   "shifted": true,
+   "deprecated": [
+    "RCUR"
+   ],
+   "category": "symbols",
+   "label": "}"
+  },
+  {
+   "names": [
+    "BACKSLASH",
+    "BSLH"
+   ],
+   "description": "Keyboard \\ and | (Backslash and Pipe)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_BACKSLASH_AND_PIPE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "symbols",
+   "label": "\\"
+  },
+  {
+   "names": [
+    "PIPE"
+   ],
+   "description": "Keyboard | (Pipe)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_BACKSLASH_AND_PIPE",
+   "shifted": true,
+   "deprecated": [],
+   "category": "symbols",
+   "label": "|"
+  },
+  {
+   "names": [
+    "NON_US_HASH",
+    "NUHS"
+   ],
+   "description": "Keyboard Non-US # and ~ (Non-US Hash/Number and Tilde)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_NON_US_HASH_AND_TILDE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "symbols",
+   "label": "NUHS"
+  },
+  {
+   "names": [
+    "TILDE2"
+   ],
+   "description": "Keyboard ~ (Tilde)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_NON_US_HASH_AND_TILDE",
+   "shifted": true,
+   "deprecated": [],
+   "category": "symbols",
+   "label": "~"
+  },
+  {
+   "names": [
+    "SEMICOLON",
+    "SEMI"
+   ],
+   "description": "Keyboard ; and : (Semicolon and Colon)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_SEMICOLON_AND_COLON",
+   "shifted": false,
+   "deprecated": [
+    "SCLN"
+   ],
+   "category": "symbols",
+   "label": ";"
+  },
+  {
+   "names": [
+    "COLON"
+   ],
+   "description": "Keyboard : (Colon)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_SEMICOLON_AND_COLON",
+   "shifted": true,
+   "deprecated": [
+    "COLN"
+   ],
+   "category": "symbols",
+   "label": ":"
+  },
+  {
+   "names": [
+    "SINGLE_QUOTE",
+    "SQT",
+    "APOSTROPHE",
+    "APOS"
+   ],
+   "description": "Keyboard ' and \" (Apostrophe and Quote)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_APOSTROPHE_AND_QUOTE",
+   "shifted": false,
+   "deprecated": [
+    "QUOT"
+   ],
+   "category": "symbols",
+   "label": "'"
+  },
+  {
+   "names": [
+    "DOUBLE_QUOTES",
+    "DQT"
+   ],
+   "description": "Keyboard \" (Quote)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_APOSTROPHE_AND_QUOTE",
+   "shifted": true,
+   "deprecated": [],
+   "category": "symbols",
+   "label": "\""
+  },
+  {
+   "names": [
+    "GRAVE"
+   ],
+   "description": "Keyboard ` and ~ (Grave Accent and Tilde)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_GRAVE_ACCENT_AND_TILDE",
+   "shifted": false,
+   "deprecated": [
+    "GRAV"
+   ],
+   "category": "symbols",
+   "label": "`"
+  },
+  {
+   "names": [
+    "TILDE"
+   ],
+   "description": "Keyboard ~ (Tilde)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_GRAVE_ACCENT_AND_TILDE",
+   "shifted": true,
+   "deprecated": [
+    "TILD"
+   ],
+   "category": "symbols",
+   "label": "~"
+  },
+  {
+   "names": [
+    "COMMA"
+   ],
+   "description": "Keyboard , and < (Comma and Less Than)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_COMMA_AND_LESS_THAN",
+   "shifted": false,
+   "deprecated": [
+    "CMMA"
+   ],
+   "category": "symbols",
+   "label": ","
+  },
+  {
+   "names": [
+    "LESS_THAN",
+    "LT"
+   ],
+   "description": "Keyboard < (Less Than)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_COMMA_AND_LESS_THAN",
+   "shifted": true,
+   "deprecated": [
+    "LABT"
+   ],
+   "category": "symbols",
+   "label": "<"
+  },
+  {
+   "names": [
+    "PERIOD",
+    "DOT"
+   ],
+   "description": "Keyboard . and > (Period and Greater Than)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_PERIOD_AND_GREATER_THAN",
+   "shifted": false,
+   "deprecated": [],
+   "category": "symbols",
+   "label": "."
+  },
+  {
+   "names": [
+    "GREATER_THAN",
+    "GT"
+   ],
+   "description": "Keyboard > (Greater Than)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_PERIOD_AND_GREATER_THAN",
+   "shifted": true,
+   "deprecated": [
+    "RABT"
+   ],
+   "category": "symbols",
+   "label": ">"
+  },
+  {
+   "names": [
+    "SLASH",
+    "FSLH"
+   ],
+   "description": "Keyboard / and ? (Forward Slash and Question)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_SLASH_AND_QUESTION_MARK",
+   "shifted": false,
+   "deprecated": [],
+   "category": "symbols",
+   "label": "/"
+  },
+  {
+   "names": [
+    "QUESTION",
+    "QMARK"
+   ],
+   "description": "Keyboard ? (Question)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_SLASH_AND_QUESTION_MARK",
+   "shifted": true,
+   "deprecated": [],
+   "category": "symbols",
+   "label": "?"
+  },
+  {
+   "names": [
+    "CAPSLOCK",
+    "CAPS",
+    "CLCK"
+   ],
+   "description": "Keyboard Caps Lock",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_CAPS_LOCK",
+   "shifted": false,
+   "deprecated": [],
+   "category": "editing",
+   "label": "Caps Lock"
+  },
+  {
+   "names": [
+    "F1"
+   ],
+   "description": "Keyboard F1",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_F1",
+   "shifted": false,
+   "deprecated": [],
+   "category": "function",
+   "label": "F1"
+  },
+  {
+   "names": [
+    "F2"
+   ],
+   "description": "Keyboard F2",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_F2",
+   "shifted": false,
+   "deprecated": [],
+   "category": "function",
+   "label": "F2"
+  },
+  {
+   "names": [
+    "F3"
+   ],
+   "description": "Keyboard F3",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_F3",
+   "shifted": false,
+   "deprecated": [],
+   "category": "function",
+   "label": "F3"
+  },
+  {
+   "names": [
+    "F4"
+   ],
+   "description": "Keyboard F4",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_F4",
+   "shifted": false,
+   "deprecated": [],
+   "category": "function",
+   "label": "F4"
+  },
+  {
+   "names": [
+    "F5"
+   ],
+   "description": "Keyboard F5",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_F5",
+   "shifted": false,
+   "deprecated": [],
+   "category": "function",
+   "label": "F5"
+  },
+  {
+   "names": [
+    "F6"
+   ],
+   "description": "Keyboard F6",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_F6",
+   "shifted": false,
+   "deprecated": [],
+   "category": "function",
+   "label": "F6"
+  },
+  {
+   "names": [
+    "F7"
+   ],
+   "description": "Keyboard F7",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_F7",
+   "shifted": false,
+   "deprecated": [],
+   "category": "function",
+   "label": "F7"
+  },
+  {
+   "names": [
+    "F8"
+   ],
+   "description": "Keyboard F8",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_F8",
+   "shifted": false,
+   "deprecated": [],
+   "category": "function",
+   "label": "F8"
+  },
+  {
+   "names": [
+    "F9"
+   ],
+   "description": "Keyboard F9",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_F9",
+   "shifted": false,
+   "deprecated": [],
+   "category": "function",
+   "label": "F9"
+  },
+  {
+   "names": [
+    "F10"
+   ],
+   "description": "Keyboard F10",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_F10",
+   "shifted": false,
+   "deprecated": [],
+   "category": "function",
+   "label": "F10"
+  },
+  {
+   "names": [
+    "F11"
+   ],
+   "description": "Keyboard F11",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_F11",
+   "shifted": false,
+   "deprecated": [],
+   "category": "function",
+   "label": "F11"
+  },
+  {
+   "names": [
+    "F12"
+   ],
+   "description": "Keyboard F12",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_F12",
+   "shifted": false,
+   "deprecated": [],
+   "category": "function",
+   "label": "F12"
+  },
+  {
+   "names": [
+    "PRINTSCREEN",
+    "PSCRN"
+   ],
+   "description": "Keyboard Print Screen",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_PRINTSCREEN",
+   "shifted": false,
+   "deprecated": [
+    "PRSC"
+   ],
+   "category": "editing",
+   "label": "PrtSc"
+  },
+  {
+   "names": [
+    "SCROLLLOCK",
+    "SLCK"
+   ],
+   "description": "Keyboard Scroll Lock",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_SCROLL_LOCK",
+   "shifted": false,
+   "deprecated": [
+    "SCLK"
+   ],
+   "category": "editing",
+   "label": "ScrLk"
+  },
+  {
+   "names": [
+    "PAUSE_BREAK"
+   ],
+   "description": "Keyboard Pause/Break",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_PAUSE",
+   "shifted": false,
+   "deprecated": [
+    "PAUS"
+   ],
+   "category": "editing",
+   "label": "Pause"
+  },
+  {
+   "names": [
+    "INSERT",
+    "INS"
+   ],
+   "description": "Keyboard Insert",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_INSERT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "navigation",
+   "label": "Ins"
+  },
+  {
+   "names": [
+    "HOME"
+   ],
+   "description": "Keyboard Home",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_HOME",
+   "shifted": false,
+   "deprecated": [],
+   "category": "navigation",
+   "label": "Home"
+  },
+  {
+   "names": [
+    "PAGE_UP",
+    "PG_UP"
+   ],
+   "description": "Keyboard Page Up",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_PAGEUP",
+   "shifted": false,
+   "deprecated": [
+    "PGUP"
+   ],
+   "category": "navigation",
+   "label": "PgUp"
+  },
+  {
+   "names": [
+    "DELETE",
+    "DEL"
+   ],
+   "description": "Keyboard Delete",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_DELETE_FORWARD",
+   "shifted": false,
+   "deprecated": [],
+   "category": "navigation",
+   "label": "Del"
+  },
+  {
+   "names": [
+    "END"
+   ],
+   "description": "Keyboard End",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_END",
+   "shifted": false,
+   "deprecated": [],
+   "category": "navigation",
+   "label": "End"
+  },
+  {
+   "names": [
+    "PAGE_DOWN",
+    "PG_DN"
+   ],
+   "description": "Keyboard Page Down",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_PAGEDOWN",
+   "shifted": false,
+   "deprecated": [
+    "PGDN"
+   ],
+   "category": "navigation",
+   "label": "PgDn"
+  },
+  {
+   "names": [
+    "RIGHT_ARROW",
+    "RIGHT"
+   ],
+   "description": "Keyboard Right Arrow",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_RIGHTARROW",
+   "shifted": false,
+   "deprecated": [
+    "RARW"
+   ],
+   "category": "navigation",
+   "label": "→"
+  },
+  {
+   "names": [
+    "LEFT_ARROW",
+    "LEFT"
+   ],
+   "description": "Keyboard Left Arrow",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_LEFTARROW",
+   "shifted": false,
+   "deprecated": [
+    "LARW"
+   ],
+   "category": "navigation",
+   "label": "←"
+  },
+  {
+   "names": [
+    "DOWN_ARROW",
+    "DOWN"
+   ],
+   "description": "Keyboard Down Arrow",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_DOWNARROW",
+   "shifted": false,
+   "deprecated": [
+    "DARW"
+   ],
+   "category": "navigation",
+   "label": "↓"
+  },
+  {
+   "names": [
+    "UP_ARROW",
+    "UP"
+   ],
+   "description": "Keyboard Up Arrow",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_UPARROW",
+   "shifted": false,
+   "deprecated": [
+    "UARW"
+   ],
+   "category": "navigation",
+   "label": "↑"
+  },
+  {
+   "names": [
+    "KP_NUMLOCK",
+    "KP_NUM",
+    "KP_NLCK"
+   ],
+   "description": "Keypad Numlock and Clear",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYPAD_NUM_LOCK_AND_CLEAR",
+   "shifted": false,
+   "deprecated": [],
+   "category": "keypad",
+   "label": "KP_NUM"
+  },
+  {
+   "names": [
+    "CLEAR2"
+   ],
+   "description": "Keypad Clear",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYPAD_NUM_LOCK_AND_CLEAR",
+   "shifted": true,
+   "deprecated": [],
+   "category": "symbols",
+   "label": "CLEAR2"
+  },
+  {
+   "names": [
+    "KP_DIVIDE",
+    "KP_SLASH"
+   ],
+   "description": "Keypad / (Slash/Divide)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYPAD_SLASH",
+   "shifted": false,
+   "deprecated": [
+    "KDIV"
+   ],
+   "category": "keypad",
+   "label": "KP_SLASH"
+  },
+  {
+   "names": [
+    "KP_MULTIPLY",
+    "KP_ASTERISK"
+   ],
+   "description": "Keypad * (Multiply)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYPAD_ASTERISK",
+   "shifted": false,
+   "deprecated": [
+    "KMLT"
+   ],
+   "category": "keypad",
+   "label": "KP_MULTIPLY"
+  },
+  {
+   "names": [
+    "KP_MINUS",
+    "KP_SUBTRACT"
+   ],
+   "description": "Keypad - (Minus)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYPAD_MINUS",
+   "shifted": false,
+   "deprecated": [
+    "KMIN"
+   ],
+   "category": "keypad",
+   "label": "KP_MINUS"
+  },
+  {
+   "names": [
+    "KP_PLUS"
+   ],
+   "description": "Keypad + (Plus)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYPAD_PLUS",
+   "shifted": false,
+   "deprecated": [
+    "KPLS"
+   ],
+   "category": "keypad",
+   "label": "KP_PLUS"
+  },
+  {
+   "names": [
+    "KP_ENTER"
+   ],
+   "description": "Keypad Enter",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYPAD_ENTER",
+   "shifted": false,
+   "deprecated": [],
+   "category": "keypad",
+   "label": "KP_ENTER"
+  },
+  {
+   "names": [
+    "KP_NUMBER_1",
+    "KP_N1"
+   ],
+   "description": "Keypad 1",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYPAD_1_AND_END",
+   "shifted": false,
+   "deprecated": [],
+   "category": "keypad",
+   "label": "KP_N1"
+  },
+  {
+   "names": [
+    "KP_NUMBER_2",
+    "KP_N2"
+   ],
+   "description": "Keypad 2",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYPAD_2_AND_DOWN_ARROW",
+   "shifted": false,
+   "deprecated": [],
+   "category": "keypad",
+   "label": "KP_N2"
+  },
+  {
+   "names": [
+    "KP_NUMBER_3",
+    "KP_N3"
+   ],
+   "description": "Keypad 3",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYPAD_3_AND_PAGEDN",
+   "shifted": false,
+   "deprecated": [],
+   "category": "keypad",
+   "label": "KP_N3"
+  },
+  {
+   "names": [
+    "KP_NUMBER_4",
+    "KP_N4"
+   ],
+   "description": "Keypad 4",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYPAD_4_AND_LEFT_ARROW",
+   "shifted": false,
+   "deprecated": [],
+   "category": "keypad",
+   "label": "KP_N4"
+  },
+  {
+   "names": [
+    "KP_NUMBER_5",
+    "KP_N5"
+   ],
+   "description": "Keypad 5",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYPAD_5",
+   "shifted": false,
+   "deprecated": [],
+   "category": "keypad",
+   "label": "KP_N5"
+  },
+  {
+   "names": [
+    "KP_NUMBER_6",
+    "KP_N6"
+   ],
+   "description": "Keypad 6",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYPAD_6_AND_RIGHT_ARROW",
+   "shifted": false,
+   "deprecated": [],
+   "category": "keypad",
+   "label": "KP_N6"
+  },
+  {
+   "names": [
+    "KP_NUMBER_7",
+    "KP_N7"
+   ],
+   "description": "Keypad 7",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYPAD_7_AND_HOME",
+   "shifted": false,
+   "deprecated": [],
+   "category": "keypad",
+   "label": "KP_N7"
+  },
+  {
+   "names": [
+    "KP_NUMBER_8",
+    "KP_N8"
+   ],
+   "description": "Keypad 8",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYPAD_8_AND_UP_ARROW",
+   "shifted": false,
+   "deprecated": [],
+   "category": "keypad",
+   "label": "KP_N8"
+  },
+  {
+   "names": [
+    "KP_NUMBER_9",
+    "KP_N9"
+   ],
+   "description": "Keypad 9",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYPAD_9_AND_PAGEUP",
+   "shifted": false,
+   "deprecated": [],
+   "category": "keypad",
+   "label": "KP_N9"
+  },
+  {
+   "names": [
+    "KP_NUMBER_0",
+    "KP_N0"
+   ],
+   "description": "Keypad 0",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYPAD_0_AND_INSERT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "keypad",
+   "label": "KP_N0"
+  },
+  {
+   "names": [
+    "KP_DOT"
+   ],
+   "description": "Keypad . (Dot)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYPAD_PERIOD_AND_DELETE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "keypad",
+   "label": "KP_DOT"
+  },
+  {
+   "names": [
+    "NON_US_BACKSLASH",
+    "NON_US_BSLH",
+    "NUBS"
+   ],
+   "description": "Keyboard Non-US \\ and | (Non-us Backslash and Pipe)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_NON_US_BACKSLASH_AND_PIPE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "symbols",
+   "label": "NUBS"
+  },
+  {
+   "names": [
+    "PIPE2"
+   ],
+   "description": "Keyboard Pipe",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_NON_US_BACKSLASH_AND_PIPE",
+   "shifted": true,
+   "deprecated": [],
+   "category": "symbols",
+   "label": "PIPE2"
+  },
+  {
+   "names": [
+    "K_APPLICATION",
+    "K_APP",
+    "K_CONTEXT_MENU",
+    "K_CMENU"
+   ],
+   "description": "Keyboard Application (Context Menu)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_APPLICATION",
+   "shifted": false,
+   "deprecated": [
+    "GUI"
+   ],
+   "category": "other",
+   "label": "K_APP"
+  },
+  {
+   "names": [
+    "K_POWER",
+    "K_PWR"
+   ],
+   "description": "Keyboard Power",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_POWER",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_PWR"
+  },
+  {
+   "names": [
+    "KP_EQUAL"
+   ],
+   "description": "Keypad = (Equal)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYPAD_EQUAL",
+   "shifted": false,
+   "deprecated": [],
+   "category": "keypad",
+   "label": "KP_EQUAL"
+  },
+  {
+   "names": [
+    "F13"
+   ],
+   "description": "Keyboard F13",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_F13",
+   "shifted": false,
+   "deprecated": [],
+   "category": "function",
+   "label": "F13"
+  },
+  {
+   "names": [
+    "F14"
+   ],
+   "description": "Keyboard F14",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_F14",
+   "shifted": false,
+   "deprecated": [],
+   "category": "function",
+   "label": "F14"
+  },
+  {
+   "names": [
+    "F15"
+   ],
+   "description": "Keyboard F15",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_F15",
+   "shifted": false,
+   "deprecated": [],
+   "category": "function",
+   "label": "F15"
+  },
+  {
+   "names": [
+    "F16"
+   ],
+   "description": "Keyboard F16",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_F16",
+   "shifted": false,
+   "deprecated": [],
+   "category": "function",
+   "label": "F16"
+  },
+  {
+   "names": [
+    "F17"
+   ],
+   "description": "Keyboard F17",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_F17",
+   "shifted": false,
+   "deprecated": [],
+   "category": "function",
+   "label": "F17"
+  },
+  {
+   "names": [
+    "F18"
+   ],
+   "description": "Keyboard F18",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_F18",
+   "shifted": false,
+   "deprecated": [],
+   "category": "function",
+   "label": "F18"
+  },
+  {
+   "names": [
+    "F19"
+   ],
+   "description": "Keyboard F19",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_F19",
+   "shifted": false,
+   "deprecated": [],
+   "category": "function",
+   "label": "F19"
+  },
+  {
+   "names": [
+    "F20"
+   ],
+   "description": "Keyboard F20",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_F20",
+   "shifted": false,
+   "deprecated": [],
+   "category": "function",
+   "label": "F20"
+  },
+  {
+   "names": [
+    "F21"
+   ],
+   "description": "Keyboard F21",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_F21",
+   "shifted": false,
+   "deprecated": [],
+   "category": "function",
+   "label": "F21"
+  },
+  {
+   "names": [
+    "F22"
+   ],
+   "description": "Keyboard F22",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_F22",
+   "shifted": false,
+   "deprecated": [],
+   "category": "function",
+   "label": "F22"
+  },
+  {
+   "names": [
+    "F23"
+   ],
+   "description": "Keyboard F23",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_F23",
+   "shifted": false,
+   "deprecated": [],
+   "category": "function",
+   "label": "F23"
+  },
+  {
+   "names": [
+    "F24"
+   ],
+   "description": "Keyboard F24",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_F24",
+   "shifted": false,
+   "deprecated": [],
+   "category": "function",
+   "label": "F24"
+  },
+  {
+   "names": [
+    "K_EXECUTE",
+    "K_EXEC"
+   ],
+   "description": "Keyboard Execute",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_EXECUTE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_EXEC"
+  },
+  {
+   "names": [
+    "K_HELP"
+   ],
+   "description": "Keyboard Help",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_HELP",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_HELP"
+  },
+  {
+   "names": [
+    "K_MENU"
+   ],
+   "description": "Keyboard Menu",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_MENU",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_MENU"
+  },
+  {
+   "names": [
+    "K_SELECT"
+   ],
+   "description": "Keyboard Select",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_SELECT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_SELECT"
+  },
+  {
+   "names": [
+    "K_STOP"
+   ],
+   "description": "Keyboard Stop",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_STOP",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_STOP"
+  },
+  {
+   "names": [
+    "K_AGAIN",
+    "K_REDO"
+   ],
+   "description": "Keyboard Again",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_AGAIN",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_REDO"
+  },
+  {
+   "names": [
+    "K_UNDO"
+   ],
+   "description": "Keyboard Undo",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_UNDO",
+   "shifted": false,
+   "deprecated": [
+    "UNDO"
+   ],
+   "category": "other",
+   "label": "K_UNDO"
+  },
+  {
+   "names": [
+    "K_CUT"
+   ],
+   "description": "Keyboard Cut",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_CUT",
+   "shifted": false,
+   "deprecated": [
+    "CUT"
+   ],
+   "category": "other",
+   "label": "K_CUT"
+  },
+  {
+   "names": [
+    "K_COPY"
+   ],
+   "description": "Keyboard Copy",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_COPY",
+   "shifted": false,
+   "deprecated": [
+    "COPY"
+   ],
+   "category": "other",
+   "label": "K_COPY"
+  },
+  {
+   "names": [
+    "K_PASTE"
+   ],
+   "description": "Keyboard Paste",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_PASTE",
+   "shifted": false,
+   "deprecated": [
+    "PSTE"
+   ],
+   "category": "other",
+   "label": "K_PASTE"
+  },
+  {
+   "names": [
+    "K_FIND"
+   ],
+   "description": "Keyboard Find",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_FIND",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_FIND"
+  },
+  {
+   "names": [
+    "K_MUTE"
+   ],
+   "description": "Keyboard Mute",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_MUTE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_MUTE"
+  },
+  {
+   "names": [
+    "K_VOLUME_UP",
+    "K_VOL_UP"
+   ],
+   "description": "Keyboard Volume Up",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_VOLUME_UP",
+   "shifted": false,
+   "deprecated": [
+    "VOLU"
+   ],
+   "category": "other",
+   "label": "K_VOL_UP"
+  },
+  {
+   "names": [
+    "K_VOLUME_DOWN",
+    "K_VOL_DN"
+   ],
+   "description": "Keyboard Volume Down",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_VOLUME_DOWN",
+   "shifted": false,
+   "deprecated": [
+    "VOLD"
+   ],
+   "category": "other",
+   "label": "K_VOL_DN"
+  },
+  {
+   "names": [
+    "LOCKING_CAPS",
+    "LCAPS"
+   ],
+   "description": "Keyboard Locking Caps Lock",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_LOCKING_CAPS_LOCK",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "LCAPS"
+  },
+  {
+   "names": [
+    "LOCKING_NUM",
+    "LNLCK"
+   ],
+   "description": "Keyboard Locking Num Lock",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_LOCKING_NUM_LOCK",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "LNLCK"
+  },
+  {
+   "names": [
+    "LOCKING_SCROLL",
+    "LSLCK"
+   ],
+   "description": "Keyboard Locking Scroll Lock",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_LOCKING_SCROLL_LOCK",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "LSLCK"
+  },
+  {
+   "names": [
+    "KP_COMMA"
+   ],
+   "description": "Keypad , (Comma)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYPAD_COMMA",
+   "shifted": false,
+   "deprecated": [],
+   "category": "keypad",
+   "label": "KP_COMMA"
+  },
+  {
+   "names": [
+    "KP_EQUAL_AS400"
+   ],
+   "description": "Keypad = (Equal) AS/400",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYPAD_EQUAL_SIGN",
+   "shifted": false,
+   "deprecated": [],
+   "category": "keypad",
+   "label": "KP_EQUAL_AS400"
+  },
+  {
+   "names": [
+    "INTERNATIONAL_1",
+    "INT1",
+    "INT_RO"
+   ],
+   "description": "Keyboard International 1",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_INTERNATIONAL1",
+   "shifted": false,
+   "deprecated": [],
+   "category": "international",
+   "label": "INT1"
+  },
+  {
+   "names": [
+    "INTERNATIONAL_2",
+    "INT2",
+    "INT_KATAKANAHIRAGANA",
+    "INT_KANA"
+   ],
+   "description": "Keyboard International 2",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_INTERNATIONAL2",
+   "shifted": false,
+   "deprecated": [],
+   "category": "international",
+   "label": "INT2"
+  },
+  {
+   "names": [
+    "INTERNATIONAL_3",
+    "INT3",
+    "INT_YEN"
+   ],
+   "description": "Keyboard International 3",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_INTERNATIONAL3",
+   "shifted": false,
+   "deprecated": [],
+   "category": "international",
+   "label": "INT3"
+  },
+  {
+   "names": [
+    "INTERNATIONAL_4",
+    "INT4",
+    "INT_HENKAN"
+   ],
+   "description": "Keyboard International 4",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_INTERNATIONAL4",
+   "shifted": false,
+   "deprecated": [],
+   "category": "international",
+   "label": "INT4"
+  },
+  {
+   "names": [
+    "INTERNATIONAL_5",
+    "INT5",
+    "INT_MUHENKAN"
+   ],
+   "description": "Keyboard International 5",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_INTERNATIONAL5",
+   "shifted": false,
+   "deprecated": [],
+   "category": "international",
+   "label": "INT5"
+  },
+  {
+   "names": [
+    "INTERNATIONAL_6",
+    "INT6",
+    "INT_KPJPCOMMA"
+   ],
+   "description": "Keyboard International 6",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_INTERNATIONAL6",
+   "shifted": false,
+   "deprecated": [],
+   "category": "international",
+   "label": "INT6"
+  },
+  {
+   "names": [
+    "INTERNATIONAL_7",
+    "INT7"
+   ],
+   "description": "Keyboard International 7",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_INTERNATIONAL7",
+   "shifted": false,
+   "deprecated": [],
+   "category": "international",
+   "label": "INT7"
+  },
+  {
+   "names": [
+    "INTERNATIONAL_8",
+    "INT8"
+   ],
+   "description": "Keyboard International 8",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_INTERNATIONAL8",
+   "shifted": false,
+   "deprecated": [],
+   "category": "international",
+   "label": "INT8"
+  },
+  {
+   "names": [
+    "INTERNATIONAL_9",
+    "INT9"
+   ],
+   "description": "Keyboard International 9",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_INTERNATIONAL9",
+   "shifted": false,
+   "deprecated": [],
+   "category": "international",
+   "label": "INT9"
+  },
+  {
+   "names": [
+    "LANGUAGE_1",
+    "LANG1",
+    "LANG_HANGEUL"
+   ],
+   "description": "Keyboard Language 1",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_LANG1",
+   "shifted": false,
+   "deprecated": [],
+   "category": "international",
+   "label": "LANG1"
+  },
+  {
+   "names": [
+    "LANGUAGE_2",
+    "LANG2",
+    "LANG_HANJA"
+   ],
+   "description": "Keyboard Language 2",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_LANG2",
+   "shifted": false,
+   "deprecated": [],
+   "category": "international",
+   "label": "LANG2"
+  },
+  {
+   "names": [
+    "LANGUAGE_3",
+    "LANG3",
+    "LANG_KATAKANA"
+   ],
+   "description": "Keyboard Language 3",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_LANG3",
+   "shifted": false,
+   "deprecated": [],
+   "category": "international",
+   "label": "LANG3"
+  },
+  {
+   "names": [
+    "LANGUAGE_4",
+    "LANG4",
+    "LANG_HIRAGANA"
+   ],
+   "description": "Keyboard Language 4",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_LANG4",
+   "shifted": false,
+   "deprecated": [],
+   "category": "international",
+   "label": "LANG4"
+  },
+  {
+   "names": [
+    "LANGUAGE_5",
+    "LANG5",
+    "LANG_ZENKAKUHANKAKU"
+   ],
+   "description": "Keyboard Language 5",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_LANG5",
+   "shifted": false,
+   "deprecated": [],
+   "category": "international",
+   "label": "LANG5"
+  },
+  {
+   "names": [
+    "LANGUAGE_6",
+    "LANG6"
+   ],
+   "description": "Keyboard Language 6",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_LANG6",
+   "shifted": false,
+   "deprecated": [],
+   "category": "international",
+   "label": "LANG6"
+  },
+  {
+   "names": [
+    "LANGUAGE_7",
+    "LANG7"
+   ],
+   "description": "Keyboard Language 7",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_LANG7",
+   "shifted": false,
+   "deprecated": [],
+   "category": "international",
+   "label": "LANG7"
+  },
+  {
+   "names": [
+    "LANGUAGE_8",
+    "LANG8"
+   ],
+   "description": "Keyboard Language 8",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_LANG8",
+   "shifted": false,
+   "deprecated": [],
+   "category": "international",
+   "label": "LANG8"
+  },
+  {
+   "names": [
+    "LANGUAGE_9",
+    "LANG9"
+   ],
+   "description": "Keyboard Language 9",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_LANG9",
+   "shifted": false,
+   "deprecated": [],
+   "category": "international",
+   "label": "LANG9"
+  },
+  {
+   "names": [
+    "ALT_ERASE"
+   ],
+   "description": "Keyboard Alternate Erase",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_ALTERNATE_ERASE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "ALT_ERASE"
+  },
+  {
+   "names": [
+    "SYSREQ",
+    "ATTENTION"
+   ],
+   "description": "Keyboard SysReq/Attention",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_SYSREQ_ATTENTION",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "SYSREQ"
+  },
+  {
+   "names": [
+    "K_CANCEL"
+   ],
+   "description": "Keyboard Cancel",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_CANCEL",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_CANCEL"
+  },
+  {
+   "names": [
+    "CLEAR"
+   ],
+   "description": "Keyboard Clear",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_CLEAR",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "CLEAR"
+  },
+  {
+   "names": [
+    "PRIOR"
+   ],
+   "description": "Keyboard Prior",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_PRIOR",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "PRIOR"
+  },
+  {
+   "names": [
+    "RETURN2",
+    "RET2"
+   ],
+   "description": "Keyboard Return",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_RETURN",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "RET2"
+  },
+  {
+   "names": [
+    "SEPARATOR"
+   ],
+   "description": "Keyboard Separator",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_SEPARATOR",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "SEPARATOR"
+  },
+  {
+   "names": [
+    "OUT"
+   ],
+   "description": "Keyboard Out",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_OUT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "OUT"
+  },
+  {
+   "names": [
+    "OPER"
+   ],
+   "description": "Keyboard Oper",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_OPER",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "OPER"
+  },
+  {
+   "names": [
+    "CLEAR_AGAIN"
+   ],
+   "description": "Keyboard Clear/Again",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_CLEAR_AGAIN",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "CLEAR_AGAIN"
+  },
+  {
+   "names": [
+    "CRSEL"
+   ],
+   "description": "Keyboard CrSel/Props",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_CRSEL_PROPS",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "CRSEL"
+  },
+  {
+   "names": [
+    "EXSEL"
+   ],
+   "description": "Keyboard ExSel",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_EXSEL",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "EXSEL"
+  },
+  {
+   "names": [
+    "CURU"
+   ],
+   "description": "Keyboard Currency Unit",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_CURRENCY_UNIT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "CURU"
+  },
+  {
+   "names": [
+    "KP_LEFT_PARENTHESIS",
+    "KP_LPAR"
+   ],
+   "description": "Keypad ( (Left Parenthesis)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYPAD_LEFT_PARENTHESIS",
+   "shifted": false,
+   "deprecated": [],
+   "category": "keypad",
+   "label": "KP_LPAR"
+  },
+  {
+   "names": [
+    "KP_RIGHT_PARENTHESIS",
+    "KP_RPAR"
+   ],
+   "description": "Keypad ) (Right Parenthesis)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYPAD_RIGHT_PARENTHESIS",
+   "shifted": false,
+   "deprecated": [],
+   "category": "keypad",
+   "label": "KP_RPAR"
+  },
+  {
+   "names": [
+    "KSPC"
+   ],
+   "description": "Keypad Space",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYPAD_SPACE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "keypad",
+   "label": "KSPC"
+  },
+  {
+   "names": [
+    "KP_CLEAR"
+   ],
+   "description": "Keypad Clear",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYPAD_CLEAR",
+   "shifted": false,
+   "deprecated": [],
+   "category": "keypad",
+   "label": "KP_CLEAR"
+  },
+  {
+   "names": [
+    "LEFT_CONTROL",
+    "LCTRL"
+   ],
+   "description": "Keyboard Left Control",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_LEFTCONTROL",
+   "shifted": false,
+   "deprecated": [
+    "LCTL"
+   ],
+   "category": "modifiers",
+   "label": "Ctrl"
+  },
+  {
+   "names": [
+    "LEFT_SHIFT",
+    "LSHIFT",
+    "LSHFT"
+   ],
+   "description": "Keyboard Left Shift",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_LEFTSHIFT",
+   "shifted": false,
+   "deprecated": [
+    "LSFT"
+   ],
+   "category": "modifiers",
+   "label": "Shift"
+  },
+  {
+   "names": [
+    "LEFT_ALT",
+    "LALT"
+   ],
+   "description": "Keyboard Left Alt",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_LEFTALT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "modifiers",
+   "label": "Alt"
+  },
+  {
+   "names": [
+    "LEFT_GUI",
+    "LGUI",
+    "LEFT_WIN",
+    "LWIN",
+    "LEFT_COMMAND",
+    "LCMD",
+    "LEFT_META",
+    "LMETA"
+   ],
+   "description": "Keyboard Left GUI (Windows / Command / Meta)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_LEFT_GUI",
+   "shifted": false,
+   "deprecated": [],
+   "category": "modifiers",
+   "label": "Cmd/Win"
+  },
+  {
+   "names": [
+    "RIGHT_CONTROL",
+    "RCTRL"
+   ],
+   "description": "Keyboard Right Control",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_RIGHTCONTROL",
+   "shifted": false,
+   "deprecated": [
+    "RCTL"
+   ],
+   "category": "modifiers",
+   "label": "Ctrl"
+  },
+  {
+   "names": [
+    "RIGHT_SHIFT",
+    "RSHIFT",
+    "RSHFT"
+   ],
+   "description": "Keyboard Right Shift",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_RIGHTSHIFT",
+   "shifted": false,
+   "deprecated": [
+    "RSFT"
+   ],
+   "category": "modifiers",
+   "label": "Shift"
+  },
+  {
+   "names": [
+    "RIGHT_ALT",
+    "RALT"
+   ],
+   "description": "Keyboard Right Alt",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_RIGHTALT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "modifiers",
+   "label": "AltGr"
+  },
+  {
+   "names": [
+    "RIGHT_GUI",
+    "RGUI",
+    "RIGHT_WIN",
+    "RWIN",
+    "RIGHT_COMMAND",
+    "RCMD",
+    "RIGHT_META",
+    "RMETA"
+   ],
+   "description": "Keyboard Right GUI (Windows / Command / Meta)",
+   "page": "key",
+   "usage": "HID_USAGE_KEY_KEYBOARD_RIGHT_GUI",
+   "shifted": false,
+   "deprecated": [],
+   "category": "modifiers",
+   "label": "Cmd/Win"
+  },
+  {
+   "names": [
+    "K_PLAY_PAUSE",
+    "K_PP"
+   ],
+   "description": "Keyboard Play/Pause",
+   "page": "key",
+   "usage": "0xE8",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_PP"
+  },
+  {
+   "names": [
+    "K_STOP2"
+   ],
+   "description": "Keyboard Stop",
+   "page": "key",
+   "usage": "0xE9",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_STOP2"
+  },
+  {
+   "names": [
+    "K_PREVIOUS",
+    "K_PREV"
+   ],
+   "description": "Keyboard Previous",
+   "page": "key",
+   "usage": "0xEA",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_PREV"
+  },
+  {
+   "names": [
+    "K_NEXT"
+   ],
+   "description": "Keyboard Next",
+   "page": "key",
+   "usage": "0xEB",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_NEXT"
+  },
+  {
+   "names": [
+    "K_EJECT"
+   ],
+   "description": "Keyboard Eject",
+   "page": "key",
+   "usage": "0xEC",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_EJECT"
+  },
+  {
+   "names": [
+    "K_VOLUME_UP2",
+    "K_VOL_UP2"
+   ],
+   "description": "Keyboard Volume Up",
+   "page": "key",
+   "usage": "0xED",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_VOL_UP2"
+  },
+  {
+   "names": [
+    "K_VOLUME_DOWN2",
+    "K_VOL_DN2"
+   ],
+   "description": "Keyboard Volume Down",
+   "page": "key",
+   "usage": "0xEE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_VOL_DN2"
+  },
+  {
+   "names": [
+    "K_MUTE2"
+   ],
+   "description": "Keyboard Mute",
+   "page": "key",
+   "usage": "0xEF",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_MUTE2"
+  },
+  {
+   "names": [
+    "K_WWW"
+   ],
+   "description": "Keyboard WWW",
+   "page": "key",
+   "usage": "0xF0",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_WWW"
+  },
+  {
+   "names": [
+    "K_BACK"
+   ],
+   "description": "Keyboard Back",
+   "page": "key",
+   "usage": "0xF1",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_BACK"
+  },
+  {
+   "names": [
+    "K_FORWARD"
+   ],
+   "description": "Keyboard Forward",
+   "page": "key",
+   "usage": "0xF2",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_FORWARD"
+  },
+  {
+   "names": [
+    "K_STOP3"
+   ],
+   "description": "Keyboard Stop",
+   "page": "key",
+   "usage": "0xF3",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_STOP3"
+  },
+  {
+   "names": [
+    "K_FIND2"
+   ],
+   "description": "Keyboard Find",
+   "page": "key",
+   "usage": "0xF4",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_FIND2"
+  },
+  {
+   "names": [
+    "K_SCROLL_UP"
+   ],
+   "description": "Keyboard Scroll Up",
+   "page": "key",
+   "usage": "0xF5",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_SCROLL_UP"
+  },
+  {
+   "names": [
+    "K_SCROLL_DOWN"
+   ],
+   "description": "Keyboard Scroll Down",
+   "page": "key",
+   "usage": "0xF6",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_SCROLL_DOWN"
+  },
+  {
+   "names": [
+    "K_EDIT"
+   ],
+   "description": "Keyboard Edit",
+   "page": "key",
+   "usage": "0xF7",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_EDIT"
+  },
+  {
+   "names": [
+    "K_SLEEP"
+   ],
+   "description": "Keyboard Sleep",
+   "page": "key",
+   "usage": "0xF8",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_SLEEP"
+  },
+  {
+   "names": [
+    "K_LOCK",
+    "K_SCREENSAVER",
+    "K_COFFEE"
+   ],
+   "description": "Keyboard Lock",
+   "page": "key",
+   "usage": "0xF9",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_LOCK"
+  },
+  {
+   "names": [
+    "K_REFRESH"
+   ],
+   "description": "Keyboard Refresh",
+   "page": "key",
+   "usage": "0xFA",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_REFRESH"
+  },
+  {
+   "names": [
+    "K_CALCULATOR",
+    "K_CALC"
+   ],
+   "description": "Keyboard Calculator",
+   "page": "key",
+   "usage": "0xFB",
+   "shifted": false,
+   "deprecated": [],
+   "category": "other",
+   "label": "K_CALC"
+  },
+  {
+   "names": [
+    "C_POWER",
+    "C_PWR"
+   ],
+   "description": "Consumer Power",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_POWER",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_PWR"
+  },
+  {
+   "names": [
+    "C_RESET"
+   ],
+   "description": "Consumer Reset",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_RESET",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_RESET"
+  },
+  {
+   "names": [
+    "C_SLEEP"
+   ],
+   "description": "Consumer Sleep",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_SLEEP",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_SLEEP"
+  },
+  {
+   "names": [
+    "C_SLEEP_MODE"
+   ],
+   "description": "Consumer Sleep Mode",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_SLEEP_MODE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_SLEEP_MODE"
+  },
+  {
+   "names": [
+    "C_MENU"
+   ],
+   "description": "Consumer Menu",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MENU",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MENU"
+  },
+  {
+   "names": [
+    "C_MENU_PICK",
+    "C_MENU_SELECT"
+   ],
+   "description": "Consumer Menu Pick",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MENU_PICK",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MENU_PICK"
+  },
+  {
+   "names": [
+    "C_MENU_UP"
+   ],
+   "description": "Consumer Menu Up",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MENU_UP",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MENU_UP"
+  },
+  {
+   "names": [
+    "C_MENU_DOWN"
+   ],
+   "description": "Consumer Menu Down",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MENU_DOWN",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MENU_DOWN"
+  },
+  {
+   "names": [
+    "C_MENU_LEFT"
+   ],
+   "description": "Consumer Menu Left",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MENU_LEFT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MENU_LEFT"
+  },
+  {
+   "names": [
+    "C_MENU_RIGHT"
+   ],
+   "description": "Consumer Menu Right",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MENU_RIGHT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MENU_RIGHT"
+  },
+  {
+   "names": [
+    "C_MENU_ESCAPE",
+    "C_MENU_ESC"
+   ],
+   "description": "Consumer Menu Escape",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MENU_ESCAPE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MENU_ESC"
+  },
+  {
+   "names": [
+    "C_MENU_INCREASE",
+    "C_MENU_INC"
+   ],
+   "description": "Consumer Menu Value Increase",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MENU_VALUE_INCREASE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MENU_INC"
+  },
+  {
+   "names": [
+    "C_MENU_DECREASE",
+    "C_MENU_DEC"
+   ],
+   "description": "Consumer Menu Value Decrease",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MENU_VALUE_DECREASE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MENU_DEC"
+  },
+  {
+   "names": [
+    "C_DATA_ON_SCREEN"
+   ],
+   "description": "Consumer Data On Screen",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_DATA_ON_SCREEN",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_DATA_ON_SCREEN"
+  },
+  {
+   "names": [
+    "C_CAPTIONS",
+    "C_SUBTITLES"
+   ],
+   "description": "Consumer Closed Caption",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_CLOSED_CAPTION",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_CAPTIONS"
+  },
+  {
+   "names": [
+    "C_SNAPSHOT"
+   ],
+   "description": "Consumer Snapshot",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_SNAPSHOT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_SNAPSHOT"
+  },
+  {
+   "names": [
+    "C_PIP"
+   ],
+   "description": "Consumer Picture-in-Picture Toggle",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_PICTURE_IN_PICTURE_TOGGLE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_PIP"
+  },
+  {
+   "names": [
+    "C_RED_BUTTON",
+    "C_RED"
+   ],
+   "description": "Consumer Red Menu Button",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_RED_MENU_BUTTON",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_RED"
+  },
+  {
+   "names": [
+    "C_GREEN_BUTTON",
+    "C_GREEN"
+   ],
+   "description": "Consumer Green Menu Button",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_GREEN_MENU_BUTTON",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_GREEN"
+  },
+  {
+   "names": [
+    "C_BLUE_BUTTON",
+    "C_BLUE"
+   ],
+   "description": "Consumer Blue Menu Button",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_BLUE_MENU_BUTTON",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_BLUE"
+  },
+  {
+   "names": [
+    "C_YELLOW_BUTTON",
+    "C_YELLOW"
+   ],
+   "description": "Consumer Yellow Menu Button",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_YELLOW_MENU_BUTTON",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_YELLOW"
+  },
+  {
+   "names": [
+    "C_ASPECT"
+   ],
+   "description": "Consumer Aspect",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_ASPECT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_ASPECT"
+  },
+  {
+   "names": [
+    "C_BRIGHTNESS_INC",
+    "C_BRI_INC",
+    "C_BRI_UP"
+   ],
+   "description": "Consumer Display Brightness Increment",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_DISPLAY_BRIGHTNESS_INCREMENT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "Bright+"
+  },
+  {
+   "names": [
+    "C_BRIGHTNESS_DEC",
+    "C_BRI_DEC",
+    "C_BRI_DN"
+   ],
+   "description": "Consumer Display Brightness Decrement",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_DISPLAY_BRIGHTNESS_DECREMENT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "Bright−"
+  },
+  {
+   "names": [
+    "C_BACKLIGHT_TOGGLE",
+    "C_BKLT_TOG"
+   ],
+   "description": "Consumer Display Backlight Toggle",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_DISPLAY_BACKLIGHT_TOGGLE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_BKLT_TOG"
+  },
+  {
+   "names": [
+    "C_BRIGHTNESS_MINIMUM",
+    "C_BRI_MIN"
+   ],
+   "description": "Consumer Display Set Brightness to Minimum",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_DISPLAY_SET_BRIGHTNESS_TO_MINIMUM",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_BRI_MIN"
+  },
+  {
+   "names": [
+    "C_BRIGHTNESS_MAXIMUM",
+    "C_BRI_MAX"
+   ],
+   "description": "Consumer Display Set Brightness to Maximum",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_DISPLAY_SET_BRIGHTNESS_TO_MAXIMUM",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_BRI_MAX"
+  },
+  {
+   "names": [
+    "C_BRIGHTNESS_AUTO",
+    "C_BRI_AUTO"
+   ],
+   "description": "Consumer Display Set Auto Brightness",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_DISPLAY_SET_AUTO_BRIGHTNESS",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_BRI_AUTO"
+  },
+  {
+   "names": [
+    "C_MEDIA_STEP",
+    "C_MODE_STEP"
+   ],
+   "description": "Consumer Mode Step",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MODE_STEP",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MODE_STEP"
+  },
+  {
+   "names": [
+    "C_RECALL_LAST",
+    "C_CHAN_LAST"
+   ],
+   "description": "Consumer Recall Last",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_RECALL_LAST",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_CHAN_LAST"
+  },
+  {
+   "names": [
+    "C_MEDIA_COMPUTER"
+   ],
+   "description": "Consumer Media Select Computer",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MEDIA_SELECT_COMPUTER",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MEDIA_COMPUTER"
+  },
+  {
+   "names": [
+    "C_MEDIA_TV"
+   ],
+   "description": "Consumer Media Select TV",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MEDIA_SELECT_TV",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MEDIA_TV"
+  },
+  {
+   "names": [
+    "C_MEDIA_WWW"
+   ],
+   "description": "Consumer Media Select WWW",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MEDIA_SELECT_WWW",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MEDIA_WWW"
+  },
+  {
+   "names": [
+    "C_MEDIA_DVD"
+   ],
+   "description": "Consumer Media Select DVD",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MEDIA_SELECT_DVD",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MEDIA_DVD"
+  },
+  {
+   "names": [
+    "C_MEDIA_PHONE"
+   ],
+   "description": "Consumer Media Select Telephone",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MEDIA_SELECT_TELEPHONE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MEDIA_PHONE"
+  },
+  {
+   "names": [
+    "C_MEDIA_GUIDE"
+   ],
+   "description": "Consumer Media Select Program Guide",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MEDIA_SELECT_PROGRAM_GUIDE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MEDIA_GUIDE"
+  },
+  {
+   "names": [
+    "C_MEDIA_VIDEOPHONE"
+   ],
+   "description": "Consumer Media Select Video Phone",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MEDIA_SELECT_VIDEO_PHONE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MEDIA_VIDEOPHONE"
+  },
+  {
+   "names": [
+    "C_MEDIA_GAMES"
+   ],
+   "description": "Consumer Media Select Games",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MEDIA_SELECT_GAMES",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MEDIA_GAMES"
+  },
+  {
+   "names": [
+    "C_MEDIA_MESSAGES"
+   ],
+   "description": "Consumer Media Select Messages",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MEDIA_SELECT_MESSAGES",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MEDIA_MESSAGES"
+  },
+  {
+   "names": [
+    "C_MEDIA_CD"
+   ],
+   "description": "Consumer Media Select CD",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MEDIA_SELECT_CD",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MEDIA_CD"
+  },
+  {
+   "names": [
+    "C_MEDIA_VCR"
+   ],
+   "description": "Consumer Media Select VCR",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MEDIA_SELECT_VCR",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MEDIA_VCR"
+  },
+  {
+   "names": [
+    "C_MEDIA_TUNER"
+   ],
+   "description": "Consumer Media Select Tuner",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MEDIA_SELECT_TUNER",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MEDIA_TUNER"
+  },
+  {
+   "names": [
+    "C_QUIT"
+   ],
+   "description": "Consumer Quit",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_QUIT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_QUIT"
+  },
+  {
+   "names": [
+    "C_HELP"
+   ],
+   "description": "Consumer Help",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_HELP",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_HELP"
+  },
+  {
+   "names": [
+    "C_MEDIA_TAPE"
+   ],
+   "description": "Consumer Media Select Tape",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MEDIA_SELECT_TAPE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MEDIA_TAPE"
+  },
+  {
+   "names": [
+    "C_MEDIA_CABLE"
+   ],
+   "description": "Consumer Media Select Cable",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MEDIA_SELECT_CABLE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MEDIA_CABLE"
+  },
+  {
+   "names": [
+    "C_MEDIA_SATELLITE"
+   ],
+   "description": "Consumer Media Select Satellite",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MEDIA_SELECT_SATELLITE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MEDIA_SATELLITE"
+  },
+  {
+   "names": [
+    "C_MEDIA_HOME"
+   ],
+   "description": "Consumer Media Select Home",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MEDIA_SELECT_HOME",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MEDIA_HOME"
+  },
+  {
+   "names": [
+    "C_CHANNEL_INC",
+    "C_CHAN_INC"
+   ],
+   "description": "Consumer Channel Increment",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_CHANNEL_INCREMENT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_CHAN_INC"
+  },
+  {
+   "names": [
+    "C_CHANNEL_DEC",
+    "C_CHAN_DEC"
+   ],
+   "description": "Consumer Channel Decrement",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_CHANNEL_DECREMENT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_CHAN_DEC"
+  },
+  {
+   "names": [
+    "C_MEDIA_VCR_PLUS"
+   ],
+   "description": "Consumer VCR Plus",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_VCR_PLUS",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_MEDIA_VCR_PLUS"
+  },
+  {
+   "names": [
+    "C_PLAY"
+   ],
+   "description": "Consumer Play",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_PLAY",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_PLAY"
+  },
+  {
+   "names": [
+    "C_PAUSE"
+   ],
+   "description": "Consumer Pause",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_PAUSE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_PAUSE"
+  },
+  {
+   "names": [
+    "C_RECORD",
+    "C_REC"
+   ],
+   "description": "Consumer Record",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_RECORD",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_REC"
+  },
+  {
+   "names": [
+    "C_FAST_FORWARD",
+    "C_FF"
+   ],
+   "description": "Consumer Fast Forward",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_FAST_FORWARD",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_FF"
+  },
+  {
+   "names": [
+    "C_REWIND",
+    "C_RW"
+   ],
+   "description": "Consumer Rewind",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_REWIND",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_RW"
+  },
+  {
+   "names": [
+    "C_NEXT"
+   ],
+   "description": "Consumer Scan Next Track",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_SCAN_NEXT_TRACK",
+   "shifted": false,
+   "deprecated": [
+    "M_NEXT"
+   ],
+   "category": "media",
+   "label": "Next"
+  },
+  {
+   "names": [
+    "C_PREVIOUS",
+    "C_PREV"
+   ],
+   "description": "Consumer Scan Previous Track",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_SCAN_PREVIOUS_TRACK",
+   "shifted": false,
+   "deprecated": [
+    "M_PREV"
+   ],
+   "category": "media",
+   "label": "Prev"
+  },
+  {
+   "names": [
+    "C_STOP"
+   ],
+   "description": "Consumer Stop",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_STOP",
+   "shifted": false,
+   "deprecated": [
+    "M_STOP"
+   ],
+   "category": "media",
+   "label": "C_STOP"
+  },
+  {
+   "names": [
+    "C_EJECT"
+   ],
+   "description": "Consumer Eject",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_EJECT",
+   "shifted": false,
+   "deprecated": [
+    "M_EJCT"
+   ],
+   "category": "media",
+   "label": "C_EJECT"
+  },
+  {
+   "names": [
+    "C_RANDOM_PLAY",
+    "C_SHUFFLE"
+   ],
+   "description": "Consumer Random Play",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_RANDOM_PLAY",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_SHUFFLE"
+  },
+  {
+   "names": [
+    "C_REPEAT"
+   ],
+   "description": "Consumer Repeat",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_REPEAT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_REPEAT"
+  },
+  {
+   "names": [
+    "C_SLOW_TRACKING",
+    "C_SLOW2"
+   ],
+   "description": "Consumer Slow Tracking",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_SLOW_TRACKING",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_SLOW2"
+  },
+  {
+   "names": [
+    "C_STOP_EJECT"
+   ],
+   "description": "Consumer Stop/Eject",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_STOP_EJECT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_STOP_EJECT"
+  },
+  {
+   "names": [
+    "C_PLAY_PAUSE",
+    "C_PP"
+   ],
+   "description": "Consumer Play/Pause",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_PLAY_PAUSE",
+   "shifted": false,
+   "deprecated": [
+    "M_PLAY"
+   ],
+   "category": "media",
+   "label": "Play/Pause"
+  },
+  {
+   "names": [
+    "C_VOICE_COMMAND"
+   ],
+   "description": "Consumer Voice Command",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_VOICE_COMMAND",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_VOICE_COMMAND"
+  },
+  {
+   "names": [
+    "C_MUTE"
+   ],
+   "description": "Consumer Mute",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_MUTE",
+   "shifted": false,
+   "deprecated": [
+    "M_MUTE"
+   ],
+   "category": "media",
+   "label": "Mute"
+  },
+  {
+   "names": [
+    "C_BASS_BOOST"
+   ],
+   "description": "Consumer Bass Boost",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_BASS_BOOST",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_BASS_BOOST"
+  },
+  {
+   "names": [
+    "C_VOLUME_UP",
+    "C_VOL_UP"
+   ],
+   "description": "Consumer Volume Increment",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_VOLUME_INCREMENT",
+   "shifted": false,
+   "deprecated": [
+    "M_VOLU"
+   ],
+   "category": "media",
+   "label": "Vol+"
+  },
+  {
+   "names": [
+    "C_VOLUME_DOWN",
+    "C_VOL_DN"
+   ],
+   "description": "Consumer Volume Decrement",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_VOLUME_DECREMENT",
+   "shifted": false,
+   "deprecated": [
+    "M_VOLD"
+   ],
+   "category": "media",
+   "label": "Vol−"
+  },
+  {
+   "names": [
+    "C_SLOW"
+   ],
+   "description": "Consumer Slow",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_SLOW",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_SLOW"
+  },
+  {
+   "names": [
+    "C_ALTERNATE_AUDIO_INCREMENT",
+    "C_ALT_AUDIO_INC"
+   ],
+   "description": "Consumer Alternate Audio Increment",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_ALTERNATE_AUDIO_INCREMENT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_ALT_AUDIO_INC"
+  },
+  {
+   "names": [
+    "C_AL_CCC"
+   ],
+   "description": "Consumer AL Consumer Control Configuration",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_CONSUMER_CONTROL_CONFIGURATION",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_CCC"
+  },
+  {
+   "names": [
+    "C_AL_WORD"
+   ],
+   "description": "Consumer AL Word Processor",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_WORD_PROCESSOR",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_WORD"
+  },
+  {
+   "names": [
+    "C_AL_TEXT_EDITOR"
+   ],
+   "description": "Consumer AL Text Editor",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_TEXT_EDITOR",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_TEXT_EDITOR"
+  },
+  {
+   "names": [
+    "C_AL_SPREADSHEET",
+    "C_AL_SHEET"
+   ],
+   "description": "Consumer AL Spreadsheet",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_SPREADSHEET",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_SHEET"
+  },
+  {
+   "names": [
+    "C_AL_GRAPHICS_EDITOR"
+   ],
+   "description": "Consumer AL Graphics Editor",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_GRAPHICS_EDITOR",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_GRAPHICS_EDITOR"
+  },
+  {
+   "names": [
+    "C_AL_PRESENTATION"
+   ],
+   "description": "Consumer AL Presentation App",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_PRESENTATION_APP",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_PRESENTATION"
+  },
+  {
+   "names": [
+    "C_AL_DATABASE",
+    "C_AL_DB"
+   ],
+   "description": "Consumer AL Database App",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_DATABASE_APP",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_DB"
+  },
+  {
+   "names": [
+    "C_AL_EMAIL",
+    "C_AL_MAIL"
+   ],
+   "description": "Consumer AL Email Reader",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_EMAIL_READER",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_MAIL"
+  },
+  {
+   "names": [
+    "C_AL_NEWS"
+   ],
+   "description": "Consumer AL Newsreader",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_NEWSREADER",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_NEWS"
+  },
+  {
+   "names": [
+    "C_AL_VOICEMAIL"
+   ],
+   "description": "Consumer AL Voicemail",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_VOICEMAIL",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_VOICEMAIL"
+  },
+  {
+   "names": [
+    "C_AL_CONTACTS",
+    "C_AL_ADDRESS_BOOK"
+   ],
+   "description": "Consumer AL Contacts/Address Book",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_CONTACTS_ADDRESS_BOOK",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_CONTACTS"
+  },
+  {
+   "names": [
+    "C_AL_CALENDAR",
+    "C_AL_CAL"
+   ],
+   "description": "Consumer AL Calendar/Schedule",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_CALENDAR_SCHEDULE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_CAL"
+  },
+  {
+   "names": [
+    "C_AL_TASK_MANAGER"
+   ],
+   "description": "Consumer AL Task/Project Manager",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_TASK_PROJECT_MANAGER",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_TASK_MANAGER"
+  },
+  {
+   "names": [
+    "C_AL_JOURNAL"
+   ],
+   "description": "Consumer AL Log/Journal/Timecard",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_LOG_JOURNAL_TIMECARD",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_JOURNAL"
+  },
+  {
+   "names": [
+    "C_AL_FINANCE"
+   ],
+   "description": "Consumer AL Checkbook/Finance",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_CHECKBOOK_FINANCE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_FINANCE"
+  },
+  {
+   "names": [
+    "C_AL_CALCULATOR",
+    "C_AL_CALC"
+   ],
+   "description": "Consumer AL Calculator",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_CALCULATOR",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_CALC"
+  },
+  {
+   "names": [
+    "C_AL_AV_CAPTURE_PLAYBACK"
+   ],
+   "description": "Consumer AL A/V Capture/Playback",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_A_V_CAPTURE_PLAYBACK",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_AV_CAPTURE_PLAYBACK"
+  },
+  {
+   "names": [
+    "C_AL_MY_COMPUTER"
+   ],
+   "description": "Consumer AL Local Machine Browser",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_LOCAL_MACHINE_BROWSER",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_MY_COMPUTER"
+  },
+  {
+   "names": [
+    "C_AL_WWW"
+   ],
+   "description": "Consumer AL Internet Browser",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_INTERNET_BROWSER",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_WWW"
+  },
+  {
+   "names": [
+    "C_AL_NETWORK_CHAT",
+    "C_AL_CHAT"
+   ],
+   "description": "Consumer AL Network Chat",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_NETWORK_CHAT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_CHAT"
+  },
+  {
+   "names": [
+    "C_AL_LOGOFF"
+   ],
+   "description": "Consumer AL Logoff",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_LOGOFF",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_LOGOFF"
+  },
+  {
+   "names": [
+    "C_AL_LOCK",
+    "C_AL_SCREENSAVER",
+    "C_AL_COFFEE"
+   ],
+   "description": "Consumer AL Terminal Lock/Screensaver",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_TERMINAL_LOCK_SCREENSAVER",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_LOCK"
+  },
+  {
+   "names": [
+    "C_AL_CONTROL_PANEL"
+   ],
+   "description": "Consumer AL Control Panel",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_CONTROL_PANEL",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_CONTROL_PANEL"
+  },
+  {
+   "names": [
+    "C_AL_SELECT_TASK"
+   ],
+   "description": "Consumer AL Select Task/Application",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_SELECT_TASK_APPLICATION",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_SELECT_TASK"
+  },
+  {
+   "names": [
+    "C_AL_NEXT_TASK"
+   ],
+   "description": "Consumer AL Next Task/Application",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_NEXT_TASK_APPLICATION",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_NEXT_TASK"
+  },
+  {
+   "names": [
+    "C_AL_PREVIOUS_TASK",
+    "C_AL_PREV_TASK"
+   ],
+   "description": "Consumer AL Previous Task/Application",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_PREVIOUS_TASK_APPLICATION",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_PREV_TASK"
+  },
+  {
+   "names": [
+    "C_AL_HELP"
+   ],
+   "description": "Consumer AL Integrated Help Center",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_INTEGRATED_HELP_CENTER",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_HELP"
+  },
+  {
+   "names": [
+    "C_AL_DOCUMENTS",
+    "C_AL_DOCS"
+   ],
+   "description": "Consumer AL Documents",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_DOCUMENTS",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_DOCS"
+  },
+  {
+   "names": [
+    "C_AL_SPELLCHECK",
+    "C_AL_SPELL"
+   ],
+   "description": "Consumer AL Spell Check",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_SPELL_CHECK",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_SPELL"
+  },
+  {
+   "names": [
+    "C_AL_KEYBOARD_LAYOUT"
+   ],
+   "description": "Consumer AL Keyboard Layout",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_KEYBOARD_LAYOUT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_KEYBOARD_LAYOUT"
+  },
+  {
+   "names": [
+    "C_AL_SCREEN_SAVER"
+   ],
+   "description": "Consumer AL Screen Saver",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_SCREEN_SAVER",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_SCREEN_SAVER"
+  },
+  {
+   "names": [
+    "C_AL_FILE_BROWSER",
+    "C_AL_FILES"
+   ],
+   "description": "Consumer AL File Browser",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_FILE_BROWSER",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_FILES"
+  },
+  {
+   "names": [
+    "C_AL_IMAGE_BROWSER",
+    "C_AL_IMAGES"
+   ],
+   "description": "Consumer AL Image Browser",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_IMAGE_BROWSER",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_IMAGES"
+  },
+  {
+   "names": [
+    "C_AL_AUDIO_BROWSER",
+    "C_AL_AUDIO",
+    "C_AL_MUSIC"
+   ],
+   "description": "Consumer AL Audio Browser",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_AUDIO_BROWSER",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_AUDIO"
+  },
+  {
+   "names": [
+    "C_AL_MOVIE_BROWSER",
+    "C_AL_MOVIES"
+   ],
+   "description": "Consumer AL Movie Browser",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_MOVIE_BROWSER",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_MOVIES"
+  },
+  {
+   "names": [
+    "C_AL_INSTANT_MESSAGING",
+    "C_AL_IM"
+   ],
+   "description": "Consumer AL Instant Messaging",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_INSTANT_MESSAGING",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_IM"
+  },
+  {
+   "names": [
+    "C_AL_OEM_FEATURES",
+    "C_AL_TIPS",
+    "C_AL_TUTORIAL"
+   ],
+   "description": "Consumer AL OEM Features/Tips/Tutorial Browser",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AL_OEM_FEATURES_TIPS_TUTORIAL_BROWSER",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AL_TIPS"
+  },
+  {
+   "names": [
+    "C_AC_NEW"
+   ],
+   "description": "Consumer AC New",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_NEW",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_NEW"
+  },
+  {
+   "names": [
+    "C_AC_OPEN"
+   ],
+   "description": "Consumer AC Open",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_OPEN",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_OPEN"
+  },
+  {
+   "names": [
+    "C_AC_CLOSE"
+   ],
+   "description": "Consumer AC Close",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_CLOSE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_CLOSE"
+  },
+  {
+   "names": [
+    "C_AC_EXIT"
+   ],
+   "description": "Consumer AC Exit",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_EXIT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_EXIT"
+  },
+  {
+   "names": [
+    "C_AC_SAVE"
+   ],
+   "description": "Consumer AC Save",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_SAVE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_SAVE"
+  },
+  {
+   "names": [
+    "C_AC_PRINT"
+   ],
+   "description": "Consumer AC Print",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_PRINT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_PRINT"
+  },
+  {
+   "names": [
+    "C_AC_PROPERTIES",
+    "C_AC_PROPS"
+   ],
+   "description": "Consumer AC Properties",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_PROPERTIES",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_PROPS"
+  },
+  {
+   "names": [
+    "C_AC_UNDO"
+   ],
+   "description": "Consumer AC Undo",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_UNDO",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_UNDO"
+  },
+  {
+   "names": [
+    "C_AC_COPY"
+   ],
+   "description": "Consumer AC Copy",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_COPY",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_COPY"
+  },
+  {
+   "names": [
+    "C_AC_CUT"
+   ],
+   "description": "Consumer AC Cut",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_CUT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_CUT"
+  },
+  {
+   "names": [
+    "C_AC_PASTE"
+   ],
+   "description": "Consumer AC Paste",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_PASTE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_PASTE"
+  },
+  {
+   "names": [
+    "C_AC_FIND"
+   ],
+   "description": "Consumer AC Find",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_FIND",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_FIND"
+  },
+  {
+   "names": [
+    "C_AC_SEARCH"
+   ],
+   "description": "Consumer AC Search",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_SEARCH",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_SEARCH"
+  },
+  {
+   "names": [
+    "C_AC_GOTO"
+   ],
+   "description": "Consumer AC Go To",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_GO_TO",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_GOTO"
+  },
+  {
+   "names": [
+    "C_AC_HOME"
+   ],
+   "description": "Consumer AC Home",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_HOME",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_HOME"
+  },
+  {
+   "names": [
+    "C_AC_BACK"
+   ],
+   "description": "Consumer AC Back",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_BACK",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_BACK"
+  },
+  {
+   "names": [
+    "C_AC_FORWARD"
+   ],
+   "description": "Consumer AC Forward",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_FORWARD",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_FORWARD"
+  },
+  {
+   "names": [
+    "C_AC_STOP"
+   ],
+   "description": "Consumer AC Stop",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_STOP",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_STOP"
+  },
+  {
+   "names": [
+    "C_AC_REFRESH"
+   ],
+   "description": "Consumer AC Refresh",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_REFRESH",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_REFRESH"
+  },
+  {
+   "names": [
+    "C_AC_BOOKMARKS",
+    "C_AC_FAVORITES",
+    "C_AC_FAVOURITES"
+   ],
+   "description": "Consumer AC Bookmarks",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_BOOKMARKS",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_BOOKMARKS"
+  },
+  {
+   "names": [
+    "C_AC_ZOOM_IN"
+   ],
+   "description": "Consumer AC Zoom In",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_ZOOM_IN",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_ZOOM_IN"
+  },
+  {
+   "names": [
+    "C_AC_ZOOM_OUT"
+   ],
+   "description": "Consumer AC Zoom Out",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_ZOOM_OUT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_ZOOM_OUT"
+  },
+  {
+   "names": [
+    "C_AC_ZOOM"
+   ],
+   "description": "Consumer AC Zoom",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_ZOOM",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_ZOOM"
+  },
+  {
+   "names": [
+    "C_AC_VIEW_TOGGLE"
+   ],
+   "description": "Consumer AC View Toggle",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_VIEW_TOGGLE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_VIEW_TOGGLE"
+  },
+  {
+   "names": [
+    "C_AC_SCROLL_UP"
+   ],
+   "description": "Consumer AC Scroll Up",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_SCROLL_UP",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_SCROLL_UP"
+  },
+  {
+   "names": [
+    "C_AC_SCROLL_DOWN"
+   ],
+   "description": "Consumer AC Scroll Down",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_SCROLL_DOWN",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_SCROLL_DOWN"
+  },
+  {
+   "names": [
+    "C_AC_EDIT"
+   ],
+   "description": "Consumer AC Edit",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_EDIT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_EDIT"
+  },
+  {
+   "names": [
+    "C_AC_CANCEL"
+   ],
+   "description": "Consumer AC Cancel",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_CANCEL",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_CANCEL"
+  },
+  {
+   "names": [
+    "C_AC_INSERT",
+    "C_AC_INS"
+   ],
+   "description": "Consumer AC Insert Mode",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_INSERT_MODE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_INS"
+  },
+  {
+   "names": [
+    "C_AC_DEL"
+   ],
+   "description": "Consumer AC Delete",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_DELETE",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_DEL"
+  },
+  {
+   "names": [
+    "C_AC_REDO"
+   ],
+   "description": "Consumer AC Redo/Repeat",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_REDO_REPEAT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_REDO"
+  },
+  {
+   "names": [
+    "C_AC_REPLY"
+   ],
+   "description": "Consumer AC Reply",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_REPLY",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_REPLY"
+  },
+  {
+   "names": [
+    "C_AC_FORWARD_MAIL"
+   ],
+   "description": "Consumer AC Forward Msg",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_FORWARD_MSG",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_FORWARD_MAIL"
+  },
+  {
+   "names": [
+    "C_AC_SEND"
+   ],
+   "description": "Consumer AC Send",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_SEND",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_SEND"
+  },
+  {
+   "names": [
+    "C_AC_DESKTOP_SHOW_ALL_WINDOWS"
+   ],
+   "description": "Consumer AC Desktop Show All Windows",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_DESKTOP_SHOW_ALL_WINDOWS",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_DESKTOP_SHOW_ALL_WINDOWS"
+  },
+  {
+   "names": [
+    "C_AC_DESKTOP_SHOW_ALL_APPLICATIONS"
+   ],
+   "description": "Consumer AC Desktop Show All Applications",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_AC_DESKTOP_SHOW_ALL_APPLICATIONS",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_AC_DESKTOP_SHOW_ALL_APPLICATIONS"
+  },
+  {
+   "names": [
+    "C_KEYBOARD_INPUT_ASSIST_PREVIOUS",
+    "C_KBIA_PREV"
+   ],
+   "description": "Consumer Keyboard Input Assist Previous",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_KEYBOARD_INPUT_ASSIST_PREVIOUS",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_KBIA_PREV"
+  },
+  {
+   "names": [
+    "C_KEYBOARD_INPUT_ASSIST_NEXT",
+    "C_KBIA_NEXT"
+   ],
+   "description": "Consumer Keyboard Input Assist Next",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_KEYBOARD_INPUT_ASSIST_NEXT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_KBIA_NEXT"
+  },
+  {
+   "names": [
+    "C_KEYBOARD_INPUT_ASSIST_PREVIOUS_GROUP",
+    "C_KBIA_PREV_GRP"
+   ],
+   "description": "Consumer Keyboard Input Assist Previous Group",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_KEYBOARD_INPUT_ASSIST_PREVIOUS_GROUP",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_KBIA_PREV_GRP"
+  },
+  {
+   "names": [
+    "C_KEYBOARD_INPUT_ASSIST_NEXT_GROUP",
+    "C_KBIA_NEXT_GRP"
+   ],
+   "description": "Consumer Keyboard Input Assist Next Group",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_KEYBOARD_INPUT_ASSIST_NEXT_GROUP",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_KBIA_NEXT_GRP"
+  },
+  {
+   "names": [
+    "C_KEYBOARD_INPUT_ASSIST_ACCEPT",
+    "C_KBIA_ACCEPT"
+   ],
+   "description": "Consumer Keyboard Input Assist Accept",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_KEYBOARD_INPUT_ASSIST_ACCEPT",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_KBIA_ACCEPT"
+  },
+  {
+   "names": [
+    "C_KEYBOARD_INPUT_ASSIST_CANCEL",
+    "C_KBIA_CANCEL"
+   ],
+   "description": "Consumer Keyboard Input Assist Cancel",
+   "page": "consumer",
+   "usage": "HID_USAGE_CONSUMER_KEYBOARD_INPUT_ASSIST_CANCEL",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "C_KBIA_CANCEL"
+  },
+  {
+   "names": [
+    "C_AC_NEXT_KEYBOARD_LAYOUT_SELECT",
+    "GLOBE"
+   ],
+   "description": "Apple Globe key",
+   "page": "consumer",
+   "usage": "0x029D",
+   "shifted": false,
+   "deprecated": [],
+   "category": "media",
+   "label": "GLOBE"
+  }
+ ]
+}
