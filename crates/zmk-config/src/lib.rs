@@ -6,6 +6,7 @@
 //! - [`catalog`]: keycodes (from ZMK's keys.h) and behaviors with parameter types
 //! - [`kconfig`]: lossless `.conf` (Kconfig fragment) model
 //! - [`west_yml`]: `config/west.yml` manifest (ZMK revision, extra modules)
+//! - [`settings`]: the settings page catalog (plain names, units, defaults) over `.conf`
 //! - [`repo`]: locating the files of a zmk-config checkout
 
 pub mod build_yaml;
@@ -14,4 +15,5 @@ pub mod dts;
 pub mod kconfig;
 pub mod keymap;
 pub mod repo;
+pub mod settings;
 pub mod west_yml;
