@@ -20,7 +20,7 @@ of truth.
 ## Develop
 
 Requirements: Rust (stable), Node 22. On Linux also the WebKitGTK 4.1 dev packages
-(Debian/Ubuntu: `libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev libudev-dev`; NixOS:
+(Debian/Ubuntu: `libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev libudev-dev libssl-dev`; NixOS:
 `nix-shell`).
 
 ```bash
