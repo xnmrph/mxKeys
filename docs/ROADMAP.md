@@ -63,7 +63,7 @@ Phases are done in order, one at a time. Tick boxes as work lands (keep this fil
 - [x] Log classifier → plain-language errors mapped to layer/key (from real error output)
 - [x] Measure sizes; write `docs/build-toolchain.md` with trade-offs
 - [x] App: Firmware panel (auto background tool download after hardware confirm, Build button, per-target status, problems, log, versions)
-- [ ] CI job building the Corne firmware on Linux, macOS and Windows runners (workflow added; first runs in progress)
+- [x] CI job building the Corne firmware on Linux, macOS and Windows runners — green (Firmware run 3: Linux 3 min, macOS 6.5 min, Windows 8 min with bundled MinGit, all cold)
 - [ ] Hash-locked Python constraints per manifest
 - [ ] git-free builds (own manifest resolver + libgit2 + direct CMake) — see build-toolchain.md "Open: git"
 - [ ] Skip the SDK "minimal" download by shipping its CMake package files

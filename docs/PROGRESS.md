@@ -28,9 +28,13 @@ that needs testing on real hardware.
 6. Windows: drive letter detection; macOS: `/Volumes/NICENANO`; NixOS: needs an
    automounter (udisks2) or the drive is never mounted.
 
+- Firmware CI is green on all three OSes (run 3): the managed toolchain builds the
+  pinned Corne test config from scratch on Linux (3 min), macOS (6.5 min) and Windows
+  (8 min, bundled MinGit forced). Two CI-only bugs were fixed on the way (empty env var
+  forcing bundled git; a Windows path separator in a test).
+
 ### Next
-1. Firmware CI on macOS/Windows (scheduled check running).
-2. Phase 5: keymap editor UI (visual binding editor, layer management, undo, file
+1. Phase 5: keymap editor UI (visual binding editor, layer management, undo, file
    watcher), including the acceptance test: add `&out OUT_TOG` on the System layer.
 
 ## Session 3 — 2026-11-23 — Phase 3
