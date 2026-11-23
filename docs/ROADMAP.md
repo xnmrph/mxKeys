@@ -52,17 +52,22 @@ Phases are done in order, one at a time. Tick boxes as work lands (keep this fil
 - [ ] Replace synthesised INFO_UF2.TXT / USB fixtures with real captures
 
 ## Phase 3 — Toolchain + build
-- [ ] `toolchain/manifest.toml` (all pinned versions + sha256 per host)
-- [ ] Downloader with resume, sha256 verification, extraction (tar.xz, zip, 7z where needed)
-- [ ] Zephyr SDK (arm-zephyr-eabi only) per host OS/arch
-- [ ] Standalone Python (python-build-standalone) + uv-managed venv with west + Zephyr requirements
-- [ ] cmake, ninja, dtc per platform (verify whether dtc is optional on Windows)
-- [ ] West workspace: generated manifest importing user's west.yml; `--narrow`, depth 1; cache keyed by ZMK revision
-- [ ] Module allow-list strategy + fallback (see ARCHITECTURE §6 OPEN)
-- [ ] `west build` runner per target; streamed logs as Tauri events
-- [ ] Log classifier → plain-language errors mapped to keymap positions
-- [ ] Measure sizes; write `docs/build-toolchain.md` with trade-offs
-- [ ] CI job building the Corne firmware on Linux, macOS and Windows runners
+- [x] `toolchain/manifest.toml` (all pinned versions + sha256 per host) — SDK 0.16.9 (matches ZMK's build image), stripped Python 3.12, CMake 3.31, ninja; MinGit for Windows
+- [x] Downloader with resume, sha256 verification, extraction (tar.xz, tar.gz, zip, 7z)
+- [x] Zephyr SDK (arm-zephyr-eabi only) per host OS/arch, trimmed to the needed multilib (1.1 GB → 256 MB, byte-identical firmware)
+- [x] Standalone Python + venv with west + Zephyr base / nanopb requirements (no uv needed; pip is enough)
+- [x] cmake, ninja per platform; dtc verified unnecessary (Zephyr 4.1 only uses it for extra warnings)
+- [x] West workspace: generated manifest from the user's west.yml; `--narrow`, depth 1; shared per manifest; lock of resolved commits
+- [x] Module allow-list strategy + automatic fallback to the full manifest (ARCHITECTURE §6 option c)
+- [x] `west build` runner per target; streamed logs as Tauri events
+- [x] Log classifier → plain-language errors mapped to layer/key (from real error output)
+- [x] Measure sizes; write `docs/build-toolchain.md` with trade-offs
+- [x] App: Firmware panel (auto background tool download after hardware confirm, Build button, per-target status, problems, log, versions)
+- [ ] CI job building the Corne firmware on Linux, macOS and Windows runners (workflow added; first runs in progress)
+- [ ] Hash-locked Python constraints per manifest
+- [ ] git-free builds (own manifest resolver + libgit2 + direct CMake) — see build-toolchain.md "Open: git"
+- [ ] Skip the SDK "minimal" download by shipping its CMake package files
+- [ ] Cancel button for running builds/downloads; disk-usage view + "remove old toolchains"
 
 ## Phase 4 — Flash
 - [ ] UF2 file reader (family id, block count) + verification against profile

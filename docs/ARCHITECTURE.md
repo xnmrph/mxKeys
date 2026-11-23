@@ -268,7 +268,7 @@ Summary of the plan:
     builds/<project-id>/<target>/     build dirs (incremental)
     downloads/                        verified archives cache
   ```
-- Steps: download → verify sha256 → extract → create venv with uv → `west init -l` on a
+- Steps: download → verify sha256 → extract → create venv (pip) → `west init -l` on a
   generated workspace manifest that imports the user's `config/west.yml` → `west update
   --narrow -o=--depth=1` → `west zephyr-export` is not needed (we pass
   `ZEPHYR_SDK_INSTALL_DIR` / `-DZephyr_DIR` explicitly) → `west build -s zmk/app -b
@@ -277,14 +277,15 @@ Summary of the plan:
   plain language ("Unknown keycode `LCTL` on layer *Lower*, key 13 — did you mean
   `LCTRL`?"), mapping devicetree errors back to keymap positions via our CST spans.
 - ZMK `main` pins Zephyr `v4.1.0+zmk-fixes` and already blocks many unneeded HALs in
-  `app/west.yml`; ZMK CI uses the `zmk-build-arm:4.1` container (Zephyr SDK 0.17.x).
+  `app/west.yml`; ZMK CI uses the `zmk-build-arm:4.1` container, built with Zephyr SDK
+  **0.16.9** (verified in `zmkfirmware/zmk-docker`).
 
-**Size (estimates, to be measured in Phase 3):** arm-only Zephyr SDK ~100–150 MB download
-(~0.5–1 GB unpacked); standalone Python + venv ~100–150 MB; cmake ~50–100 MB; ninja/dtc
-< 5 MB; west workspace with ZMK's blocklist ~1–2 GB (shallow), **~300–600 MB** if we
-restrict imports to an allow-list (`zephyr`, `cmsis_6`, `hal_nordic`, `lvgl`, `nanopb`,
-`zmk-studio-messages`, `tinycrypt`/`mbedtls` as needed). Total ≈ 1.5–3 GB naive vs
-≈ 1–1.5 GB optimised.
+**Size (measured in Phase 3, Linux x86-64 — details in `docs/build-toolchain.md`):**
+≈ 500 MB download; ≈ 1.85 GB on disk with mxKeys' trimming (toolchain 256 MB after
+multilib trim, Python 105 MB, venv 60 MB, CMake ~110 MB, workspace 1.2 GB with the
+module allow-list, builds ~125 MB) vs ≈ 4.9 GB naive. Both trims were verified to
+produce byte-identical firmware. The SDK must be **0.16.9** (what ZMK's build image
+uses); 0.17.x does not compile Zephyr 4.1. Board ids need the `//zmk` variant.
 
 **OPEN — toolchain size vs completeness.** Options:
 (a) honour the user's `west.yml` as-is (most compatible, biggest);
@@ -292,7 +293,7 @@ restrict imports to an allow-list (`zephyr`, `cmsis_6`, `hal_nordic`, `lvgl`, `n
     `name-allowlist` tuned for nRF52840 + nice!view (small, but a user module that needs
     another HAL breaks);
 (c) (b) by default with automatic fallback to (a) if CMake reports a missing module.
-**Recommendation: (c).**
+**Recommendation: (c).** — *Implemented in Phase 3.*
 
 ## 7. ZMK version upgrades
 

@@ -3,6 +3,43 @@
 Newest first. Each session: what was done, what's next, open questions, and anything
 that needs testing on real hardware.
 
+## Session 3 — 2026-11-23 — Phase 3
+
+### Done
+- Manual end-to-end build first (to learn, not guess): your `xnmrph/corne` builds for
+  left (nice!view + Studio), right and settings reset with a fully app-managed
+  toolchain. Findings that changed the plan:
+  - **SDK must be 0.16.9** (ZMK's build image); 0.17.4 fails on Zephyr 4.1's picolibc.
+  - **Board id must be `nice_nano@2.0.0//zmk`** on ZMK main. The owner's build.yaml
+    (`nice_nano@2.0.0`) fails for the nice!view targets — likely why their GitHub
+    builds with the screen fail. Detection now warns about it.
+  - dtc not needed; `west zephyr-export` avoided via `-DZephyr_DIR`; nanopb needs
+    `grpcio-tools` (bundles protoc); `west packages pip` is overkill (285 MB venv).
+  - Your built firmware confirms the screen is off (`# CONFIG_ZMK_DISPLAY is not set`)
+    and the USB name is "Corne xnmrph".
+- Size work, all verified byte-identical: ARM toolchain multilib trim 1.1 GB → 256 MB;
+  workspace allow-list 3.0 GB → 1.2 GB; stripped Python; total ≈ 1.85 GB vs 4.9 GB.
+  `docs/build-toolchain.md` has the numbers and trade-offs.
+- `crates/toolchain`: manifest, resumable verified downloads, extraction (tar.xz/gz,
+  zip, 7z) with traversal protection, trimming, idempotent install with markers,
+  venv health check, workspace generation + lock, `west build` (as `python -m west`),
+  UF2 check, log classifier with layer/key, pipeline + `mxkeys-build` CLI. 31 tests.
+- App: Firmware panel after hardware confirmation — background tool download,
+  Build button, per-target status, plain-language problems, log, exact versions.
+  Verified in the real app (Xvfb): Build → three `.uf2` files.
+- CI: `firmware.yml` builds a pinned test config on Linux/macOS/Windows (Windows forces
+  the bundled MinGit). First run found a bug (empty env var forced bundled git) — fixed.
+
+### Open questions / decisions for the owner
+- Fix your `build.yaml` board id (`nice_nano@2.0.0//zmk`)? The app builds correctly
+  regardless; this only matters for your GitHub Actions builds.
+- Git on macOS still needs Apple's Command Line Tools (see build-toolchain.md "Open: git").
+
+### Next
+1. Watch the firmware CI on macOS/Windows; fix what it finds.
+2. Phase 4: guided UF2 flashing (UF2 parsing already exists in `crates/toolchain/src/uf2.rs`;
+   move it into a `flash` crate).
+
 ## Session 2 (cont.) — 2026-11-23 — Phase 2
 
 ### Done
