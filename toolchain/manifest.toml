@@ -1,0 +1,289 @@
+# mxKeys managed toolchain — every pinned version, URL and checksum in one place.
+#
+# Changing anything here changes the toolchain directory hash, so the app installs the
+# new toolchain next to the old one (and can clean up the old one later).
+# See docs/build-toolchain.md for how these were chosen and measured.
+
+schema = 1
+
+[zephyr_sdk]
+# Must match the SDK ZMK itself builds with — zmkfirmware/zmk-docker, branch 4.1-branch,
+# `zephyr-sdk-version: 0.16.9` (Zephyr 4.1.0). SDK 0.17.x fails to compile Zephyr 4.1's
+# picolibc lock code (conflicting `__lock___libc_recursive_mutex`).
+version = "0.16.9"
+toolchain = "arm-zephyr-eabi"
+
+[python]
+version = "3.12.16"
+# Installed into the venv before the west workspace exists.
+bootstrap = ["west==1.5.0"]
+# Installed from the workspace after `west update` (paths relative to the workspace).
+# Deliberately NOT `west packages pip --install`, which pulls all of Zephyr's developer
+# tooling (~285 MB venv instead of ~60 MB). nanopb's extras bring `grpcio-tools`, which
+# bundles `protoc` (needed for ZMK Studio's protobuf messages).
+workspace_requirements = [
+  "zephyr/scripts/requirements-base.txt",
+  "modules/lib/nanopb/extra/requirements.txt",
+]
+
+[workspace]
+# Projects kept from ZMK's `app/west.yml` import (applied transitively to Zephyr's own
+# module list). Everything a nice!nano/nRF52840 ZMK build compiles or reads. The user's
+# own extra projects (e.g. urob/zmk-helpers) are always kept. If a build reports a
+# missing module the app falls back to the full, unfiltered manifest.
+allowlist = [
+  "zephyr",
+  "cmsis",
+  "cmsis_6",
+  "hal_nordic",
+  "mbedtls",
+  "nanopb",
+  "lvgl",
+  "zmk-studio-messages",
+  "tinycrypt",
+  "segger",
+]
+clone_depth = 1
+
+# Paths removed after extraction (relative to the component's install dir; globs ok).
+[trim]
+cmake = ["doc", "man", "share/cmake-3.31/Help"]
+zephyr_sdk = ["zephyr-sdk-*-hosttools-standalone-*.sh"]
+
+# ---------------------------------------------------------------------------------------
+# Artifacts. `strip` = leading path components removed when extracting; `dest` is
+# relative to the toolchain root. Checksums are the publishers' own (sha256.sum,
+# SHA-256.txt, SHA256SUMS) except ninja, which publishes none (hashed on download).
+# ---------------------------------------------------------------------------------------
+
+# ---- Zephyr SDK minimal bundle (cmake package files, sdk_version) ----
+[[artifact]]
+component = "zephyr_sdk"
+host = "linux-x86_64"
+url = "https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.16.9/zephyr-sdk-0.16.9_linux-x86_64_minimal.tar.xz"
+sha256 = "b433f19b334cd15f4d7696a958dda214a7737cf41432900d076adce4253782a5"
+format = "tar.xz"
+strip = 1
+dest = "zephyr-sdk"
+
+[[artifact]]
+component = "zephyr_sdk"
+host = "linux-aarch64"
+url = "https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.16.9/zephyr-sdk-0.16.9_linux-aarch64_minimal.tar.xz"
+sha256 = "e6b1f22a9727c4e5322676d9c18d95f7bd881218795f9e08ca4ef25e8f5d1551"
+format = "tar.xz"
+strip = 1
+dest = "zephyr-sdk"
+
+[[artifact]]
+component = "zephyr_sdk"
+host = "macos-x86_64"
+url = "https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.16.9/zephyr-sdk-0.16.9_macos-x86_64_minimal.tar.xz"
+sha256 = "9d1c7153aa851d9fe86831577e6795e4b1a22894eff145c08317f1bacb793814"
+format = "tar.xz"
+strip = 1
+dest = "zephyr-sdk"
+
+[[artifact]]
+component = "zephyr_sdk"
+host = "macos-aarch64"
+url = "https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.16.9/zephyr-sdk-0.16.9_macos-aarch64_minimal.tar.xz"
+sha256 = "acf582d5eb994e515107384fc59313b0737253a9d64f7b3dc6057b7491caae60"
+format = "tar.xz"
+strip = 1
+dest = "zephyr-sdk"
+
+[[artifact]]
+component = "zephyr_sdk"
+host = "windows-x86_64"
+url = "https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.16.9/zephyr-sdk-0.16.9_windows-x86_64_minimal.7z"
+sha256 = "dad0ce0163ad19688f5eec9192aa554bc3d1bb42f4534838b0172d4eb2f52900"
+format = "7z"
+strip = 1
+dest = "zephyr-sdk"
+
+# ---- arm-zephyr-eabi toolchain (the only one needed) ----
+[[artifact]]
+component = "arm_toolchain"
+host = "linux-x86_64"
+url = "https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.16.9/toolchain_linux-x86_64_arm-zephyr-eabi.tar.xz"
+sha256 = "81162a8326e3cb82fcc53f20528aa7abec29a0bf8376fa009e0c887ba864aaf8"
+format = "tar.xz"
+strip = 1
+dest = "zephyr-sdk/arm-zephyr-eabi"
+
+[[artifact]]
+component = "arm_toolchain"
+host = "linux-aarch64"
+url = "https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.16.9/toolchain_linux-aarch64_arm-zephyr-eabi.tar.xz"
+sha256 = "f21b0c5b45cd05c5cd7cb46fcf5ae27a0eeca73c18633706b790708110893ba0"
+format = "tar.xz"
+strip = 1
+dest = "zephyr-sdk/arm-zephyr-eabi"
+
+[[artifact]]
+component = "arm_toolchain"
+host = "macos-x86_64"
+url = "https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.16.9/toolchain_macos-x86_64_arm-zephyr-eabi.tar.xz"
+sha256 = "4f516ee9891f3706af4778ebbd79ce2558cbe97ea507c695bfa2d9c0e78fe01b"
+format = "tar.xz"
+strip = 1
+dest = "zephyr-sdk/arm-zephyr-eabi"
+
+[[artifact]]
+component = "arm_toolchain"
+host = "macos-aarch64"
+url = "https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.16.9/toolchain_macos-aarch64_arm-zephyr-eabi.tar.xz"
+sha256 = "0bb79308920b8449fd307664790ebfefa94dd9700bd5d746bf4d466b756b089e"
+format = "tar.xz"
+strip = 1
+dest = "zephyr-sdk/arm-zephyr-eabi"
+
+[[artifact]]
+component = "arm_toolchain"
+host = "windows-x86_64"
+url = "https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.16.9/toolchain_windows-x86_64_arm-zephyr-eabi.7z"
+sha256 = "e14aff6e51fba580016a9c5c6181308bb9770e655b297f105bd781edb3512532"
+format = "7z"
+strip = 1
+dest = "zephyr-sdk/arm-zephyr-eabi"
+
+# ---- Python (python-build-standalone, stripped install-only builds) ----
+[[artifact]]
+component = "python"
+host = "linux-x86_64"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261110/cpython-3.12.16%2B20261110-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz"
+sha256 = "6a9e62dad033790aef722dbd370e0ce76ce17b73627ba3ae679f537049350b39"
+format = "tar.gz"
+strip = 1
+dest = "python"
+
+[[artifact]]
+component = "python"
+host = "linux-aarch64"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261110/cpython-3.12.16%2B20261110-aarch64-unknown-linux-gnu-install_only_stripped.tar.gz"
+sha256 = "b6a41defec4975d94b4ff1950236e7383e5c02ba40ea48c9ec33c66087a35aab"
+format = "tar.gz"
+strip = 1
+dest = "python"
+
+[[artifact]]
+component = "python"
+host = "macos-x86_64"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261110/cpython-3.12.16%2B20261110-x86_64-apple-darwin-install_only_stripped.tar.gz"
+sha256 = "b78a4c479f1964ec484880bee567568266f68da102269fb93a05fe8716b45f91"
+format = "tar.gz"
+strip = 1
+dest = "python"
+
+[[artifact]]
+component = "python"
+host = "macos-aarch64"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261110/cpython-3.12.16%2B20261110-aarch64-apple-darwin-install_only_stripped.tar.gz"
+sha256 = "2f11b8aa3726bdbd87dd9eb76568412faddf4f47e26913fa45d6a2e424972acd"
+format = "tar.gz"
+strip = 1
+dest = "python"
+
+[[artifact]]
+component = "python"
+host = "windows-x86_64"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261110/cpython-3.12.16%2B20261110-x86_64-pc-windows-msvc-install_only_stripped.tar.gz"
+sha256 = "355ee61b8207b91574491b1c6dc9b0ebb4408fc56bfafe498f3ef439314b52dc"
+format = "tar.gz"
+strip = 1
+dest = "python"
+
+# ---- CMake 3.31 (3.x on purpose: CMake 4 drops compatibility with old
+#      cmake_minimum_required versions that some Zephyr modules still declare) ----
+[[artifact]]
+component = "cmake"
+host = "linux-x86_64"
+url = "https://github.com/Kitware/CMake/releases/download/v3.31.12/cmake-3.31.12-linux-x86_64.tar.gz"
+sha256 = "0dc2e9a6860f06bf10bd8fadc03e35d9eeb4df46e33763a7e480e987758f385c"
+format = "tar.gz"
+strip = 1
+dest = "cmake"
+
+[[artifact]]
+component = "cmake"
+host = "linux-aarch64"
+url = "https://github.com/Kitware/CMake/releases/download/v3.31.12/cmake-3.31.12-linux-aarch64.tar.gz"
+sha256 = "83f8fd91d2038a56556e1400390fcfe42f79602940c494f6c6f1cdae7f9e7f40"
+format = "tar.gz"
+strip = 1
+dest = "cmake"
+
+[[artifact]]
+component = "cmake"
+host = "macos-x86_64"
+url = "https://github.com/Kitware/CMake/releases/download/v3.31.12/cmake-3.31.12-macos-universal.tar.gz"
+sha256 = "799af7fd545db9bf1b9cfe72f8095880e727a2d4e0df0e3dffc3bc7b95c2d3b0"
+format = "tar.gz"
+# cmake-3.31.12-macos-universal/CMake.app/Contents/{bin,share}
+strip = 3
+dest = "cmake"
+
+[[artifact]]
+component = "cmake"
+host = "macos-aarch64"
+url = "https://github.com/Kitware/CMake/releases/download/v3.31.12/cmake-3.31.12-macos-universal.tar.gz"
+sha256 = "799af7fd545db9bf1b9cfe72f8095880e727a2d4e0df0e3dffc3bc7b95c2d3b0"
+format = "tar.gz"
+strip = 3
+dest = "cmake"
+
+[[artifact]]
+component = "cmake"
+host = "windows-x86_64"
+url = "https://github.com/Kitware/CMake/releases/download/v3.31.12/cmake-3.31.12-windows-x86_64.zip"
+sha256 = "0c4baa40f28b3f8225eb3fdf6946c987b4fe901403b4eaf2fbbd9378100aaa0c"
+format = "zip"
+strip = 1
+dest = "cmake"
+
+# ---- Ninja 1.13.2 (no published checksums; hashed by us) ----
+[[artifact]]
+component = "ninja"
+host = "linux-x86_64"
+url = "https://github.com/ninja-build/ninja/releases/download/v1.13.2/ninja-linux.zip"
+sha256 = "5749cbc4e668273514150a80e387a957f933c6ed3f5f11e03fb30955e2bbead6"
+format = "zip"
+strip = 0
+dest = "ninja"
+
+[[artifact]]
+component = "ninja"
+host = "linux-aarch64"
+url = "https://github.com/ninja-build/ninja/releases/download/v1.13.2/ninja-linux-aarch64.zip"
+sha256 = "fd2cacc8050a7f12a16a2e48f9e06fca5c14fc4c2bee2babb67b58be17a607fc"
+format = "zip"
+strip = 0
+dest = "ninja"
+
+[[artifact]]
+component = "ninja"
+host = "macos-x86_64"
+url = "https://github.com/ninja-build/ninja/releases/download/v1.13.2/ninja-mac.zip"
+sha256 = "c99048673aa765960a99cf10c6ddb9f1fad506099ff0a0e137ad8960a88f321b"
+format = "zip"
+strip = 0
+dest = "ninja"
+
+[[artifact]]
+component = "ninja"
+host = "macos-aarch64"
+url = "https://github.com/ninja-build/ninja/releases/download/v1.13.2/ninja-mac.zip"
+sha256 = "c99048673aa765960a99cf10c6ddb9f1fad506099ff0a0e137ad8960a88f321b"
+format = "zip"
+strip = 0
+dest = "ninja"
+
+[[artifact]]
+component = "ninja"
+host = "windows-x86_64"
+url = "https://github.com/ninja-build/ninja/releases/download/v1.13.2/ninja-win.zip"
+sha256 = "07fc8261b42b20e71d1720b39068c2e14ffcee6396b76fb7a795fb460b78dc65"
+format = "zip"
+strip = 0
+dest = "ninja"

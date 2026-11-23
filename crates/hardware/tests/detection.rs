@@ -66,8 +66,13 @@ fn owners_repo_alone() {
     let warning = d
         .notes
         .iter()
-        .find(|n| n.level == NoteLevel::Warning)
+        .find(|n| n.level == NoteLevel::Warning && n.text.contains("CONFIG_ZMK_DISPLAY"))
         .expect("screen-off warning");
+    // The board id lacks ZMK's `//zmk` variant, which current ZMK requires.
+    assert!(d
+        .notes
+        .iter()
+        .any(|n| n.level == NoteLevel::Warning && n.text.contains("“nice_nano@2.0.0//zmk”")));
     assert!(
         warning.text.contains("CONFIG_ZMK_DISPLAY=n") && warning.text.contains("nice!view"),
         "{}",

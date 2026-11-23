@@ -125,6 +125,18 @@ pub fn from_build_yaml(m: &BuildMatrix) -> Findings {
                     conf,
                     because,
                 ));
+                let b = zmk_config::build_yaml::BoardId::parse(raw);
+                let hwmv2 = b.revision.is_some() || b.qualifiers.is_some() || !raw.contains("_v");
+                let has_zmk_variant = b
+                    .qualifiers
+                    .as_deref()
+                    .is_some_and(|q| q.split('/').any(|p| p.ends_with("zmk")));
+                if hwmv2 && !has_zmk_variant {
+                    let fixed = catalog::controller(id).board;
+                    f.notes.push(Note::warning(format!(
+                        "build.yaml builds for “{raw}”. Current ZMK needs the “zmk” variant (“{fixed}”); without it the screen and other ZMK features fail to build. The app uses “{fixed}” when it builds.",
+                    )));
+                }
                 if raw == "nice_nano_v2" {
                     f.notes.push(Note::info(
                         "build.yaml uses the old board name “nice_nano_v2”. Current ZMK calls it “nice_nano@2.0.0”; the app uses the new name when it builds.",

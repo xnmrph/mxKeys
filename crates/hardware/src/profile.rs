@@ -141,16 +141,20 @@ mod tests {
             flat,
             [
                 (
-                    "nice_nano@2.0.0",
+                    "nice_nano@2.0.0//zmk",
                     "corne_left nice_view_adapter nice_view".to_string(),
                     "studio-rpc-usb-uart".to_string()
                 ),
                 (
-                    "nice_nano@2.0.0",
+                    "nice_nano@2.0.0//zmk",
                     "corne_right nice_view_adapter nice_view".to_string(),
                     String::new()
                 ),
-                ("nice_nano@2.0.0", "settings_reset".to_string(), String::new()),
+                (
+                    "nice_nano@2.0.0//zmk",
+                    "settings_reset".to_string(),
+                    String::new()
+                ),
             ]
         );
     }
