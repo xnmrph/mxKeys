@@ -145,7 +145,7 @@ Phases are done in order, one at a time. Tick boxes as work lands (keep this fil
 - [ ] Pictures for other displays (128×32 OLED)
 
 ## Phase 10 — Live editing (Studio RPC)
-- [ ] Write `docs/live-sync.md` (detailed design, review before coding)
+- [x] Write `docs/live-sync.md` (detailed design, review before coding) — draft done; waiting for the owner's decisions A–E
 - [ ] `StudioSession` trait; adapter over `zmk-studio-api` (serial first, BLE later)
 - [ ] Behavior/keycode mapping tables generated from pinned ZMK revision
 - [ ] Transactional live edits (device + file patch)

@@ -3,6 +3,23 @@
 Newest first. Each session: what was done, what's next, open questions, and anything
 that needs testing on real hardware.
 
+## Session 3 (cont.) — 2026-11-23 — Phase 10 (design)
+
+### Done
+- `docs/live-sync.md`: design for live editing, checked against ZMK 4de3133 and
+  `zmk-studio-messages`. Findings that shape it:
+  - Studio changes are RAM-only until saved; **saved changes override the compiled
+    keymap even after flashing new firmware** (separate settings partition).
+  - `core.reset_settings` clears only keymap overrides (Bluetooth pairings stay).
+  - Behavior ids are assigned per keyboard (settings table) → mapped by display name;
+    display name = `display-name` ?? `label` ?? node name (the owner's macros show as
+    “AE”, `&hm` as “homerow_mods”).
+  - The build's `zephyr.dts` contains the fully resolved keymap (numbers, defines and
+    helper macros expanded) → exact expected device keymap.
+
+### Waiting for
+- The owner's answers to decisions A–E at the end of `docs/live-sync.md` before coding.
+
 ## Session 3 (cont.) — 2026-11-23 — Phase 9
 
 ### Done
