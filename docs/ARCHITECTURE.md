@@ -192,6 +192,20 @@ support it, and any **conflicts** with a plain-language explanation.
 | Studio RPC (ph. 10) | device name, physical layouts (key count + geometry ⇒ keyboard) | Strong |
 | Quiz fallback | user answers ("does your screen look like A or B?") | Medium (user may be unsure) |
 
+Combining rules (implemented in `crates/hardware/src/detect/combine.rs`):
+
+- Per field, evidence is grouped by value; the winning value has the highest
+  confidence, then the most trustworthy source (live connection > bootloader > USB >
+  user's answers > build.yaml > settings), then the most distinct sources.
+- Independent sources agreeing raise confidence one level, but **only a hardware source
+  (bootloader, USB, live connection) can make it "sure"** — config files describe what is
+  *built*, not what is on the desk (and the user may not know what's flashed).
+- A disagreement lowers confidence only if it is as confident *and* from an equally or
+  more trustworthy source (two halves' bootloaders disagreeing, say). build.yaml
+  disagreeing with the user's answer does not downgrade the answer; it's explained.
+- `CONFIG_ZMK_DISPLAY` is treated as "screen software on/off", not as hardware; if the
+  chosen screen is real but the software is off, a warning says the screen will stay blank.
+
 Conflict example: build.yaml has only `corne_left` (no display shield) but the user
 answers "my screen looks like the nice!view picture" ⇒ *"Your config doesn't turn on the
 screen yet. We'll add the nice!view to your build so the screen works."*

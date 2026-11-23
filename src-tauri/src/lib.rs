@@ -1,11 +1,15 @@
 //! Tauri shell. Keep this thin: commands validate input, call into `crates/*`, and map
 //! errors to plain-language strings for the UI.
 
+pub mod detection;
+pub mod profiles;
 pub mod summary;
 
 use std::path::PathBuf;
 
-use tauri::{AppHandle, Emitter};
+use mxkeys_hardware::detect::quiz::{self, QuizAnswers};
+use mxkeys_hardware::HardwareProfile;
+use tauri::{AppHandle, Emitter, Manager};
 use zmk_config::keymap;
 use zmk_config::repo::KeymapFile;
 
@@ -64,6 +68,51 @@ async fn clone_config_repo(
     .map_err(|e| e.to_string())?
 }
 
+/// Detect the hardware from the config repo, connected USB devices and mounted
+/// bootloader drives, plus quiz answers if the user gave any.
+#[tauri::command]
+async fn detect_hardware(
+    repo_path: String,
+    quiz: Option<QuizAnswers>,
+) -> Result<detection::DetectionReport, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let inputs = detection::repo_inputs(&PathBuf::from(repo_path));
+        let snap = mxkeys_probe::snapshot(
+            &mxkeys_probe::NusbEnumerator,
+            &mxkeys_probe::FsDriveScanner::system(),
+        );
+        detection::report(&inputs, snap, quiz.as_ref())
+    })
+    .await
+    .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn quiz_questions() -> Vec<quiz::QuizQuestion> {
+    quiz::questions()
+}
+
+/// Physical key positions for drawing the keyboard.
+#[tauri::command]
+fn physical_layout() -> Vec<mxkeys_hardware::catalog::KeyGeom> {
+    mxkeys_hardware::catalog::corne_layout()
+}
+
+fn data_dir(app: &AppHandle) -> Result<PathBuf, String> {
+    app.path().app_data_dir().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn load_profile(app: AppHandle, repo_path: String) -> Result<Option<HardwareProfile>, String> {
+    Ok(profiles::load(&data_dir(&app)?, &PathBuf::from(repo_path)))
+}
+
+#[tauri::command]
+fn save_profile(app: AppHandle, repo_path: String, profile: HardwareProfile) -> Result<(), String> {
+    profiles::save(&data_dir(&app)?, &PathBuf::from(repo_path), profile)
+        .map_err(|e| format!("couldn't save your hardware choice: {e}"))
+}
+
 /// Replace one key's binding and write the keymap file back (minimal, lossless edit).
 #[tauri::command]
 fn set_binding(
@@ -98,6 +147,11 @@ pub fn run() {
             git_backend,
             check_repo_url,
             clone_config_repo,
+            detect_hardware,
+            quiz_questions,
+            physical_layout,
+            load_profile,
+            save_profile,
             set_binding
         ])
         .run(tauri::generate_context!())

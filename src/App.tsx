@@ -3,7 +3,8 @@ import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import type { ConfSummary, FirmwareSummary, KeymapSummary, RepoSummary, TargetSummary } from "./types";
 import { CloneForm } from "./CloneForm";
-import { CORNE_6COL } from "./corneLayout";
+import { HardwareSetup } from "./HardwareSetup";
+import type { KeyGeom } from "./types";
 import { bindingLabel } from "./bindingLabel";
 
 const UNIT = 54; // px per key unit
@@ -76,6 +77,7 @@ function RepoView({ repo, onKeymapChanged }: { repo: RepoSummary; onKeymapChange
   return (
     <>
       <p className="muted path">{repo.root}</p>
+      <HardwareSetup repoRoot={repo.root} />
       {repo.warnings.map((w) => (
         <p key={w} className="warning">{w}</p>
       ))}
@@ -92,12 +94,16 @@ function KeymapView({ keymap, onChanged }: { keymap: KeymapSummary; onChanged: (
   const [selected, setSelected] = useState<number | null>(null);
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [geometry, setGeometry] = useState<KeyGeom[]>([]);
+  useEffect(() => {
+    invoke<KeyGeom[]>("physical_layout").then(setGeometry).catch(() => setGeometry([]));
+  }, []);
   const layer = keymap.layers[Math.min(layerIndex, keymap.layers.length - 1)];
   if (!layer) return <p className="warning">This keymap has no layers yet.</p>;
 
-  const fitsCorne = layer.bindings.length === CORNE_6COL.length;
-  const width = Math.max(...CORNE_6COL.map((g) => g.x + g.w)) / 100;
-  const height = Math.max(...CORNE_6COL.map((g) => g.y + g.h)) / 100 + 0.4;
+  const fitsCorne = geometry.length > 0 && layer.bindings.length === geometry.length;
+  const width = Math.max(0, ...geometry.map((g) => g.x + g.w)) / 100;
+  const height = Math.max(0, ...geometry.map((g) => g.y + g.h)) / 100 + 0.4;
 
   function select(i: number) {
     setSelected(i);
@@ -136,7 +142,7 @@ function KeymapView({ keymap, onChanged }: { keymap: KeymapSummary; onChanged: (
       )}
       {fitsCorne ? (
         <div className="board" style={{ width: width * UNIT, height: height * UNIT }}>
-          {CORNE_6COL.map((g, i) => {
+          {geometry.map((g, i) => {
             const label = bindingLabel(layer.bindings[i] ?? "");
             return (
               <button

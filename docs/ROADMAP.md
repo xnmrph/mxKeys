@@ -34,19 +34,22 @@ Phases are done in order, one at a time. Tick boxes as work lands (keep this fil
 - [~] Binding-grid re-alignment formatter — moved to Phase 5 (needed with the editor UI)
 
 ## Phase 2 — Hardware detection + first-run setup
-- [ ] `crates/hardware`: `HardwareProfile` types + Corne/nice!nano v2/nice!view profile data (physical layout from ZMK `foostan/corne/6column.dtsi`)
-- [ ] Derive needed build targets from profile (left+nice!view+studio snippet, right+nice!view, settings_reset)
-- [ ] Evidence/confidence model + combiner with conflict explanations
-- [ ] Detector: build.yaml (boards, shields, displays, snippets → central/Studio half)
-- [ ] Detector: west.yml / config files (extra modules, `.conf` display hints)
-- [ ] `INFO_UF2.TXT` parser + detector (fixtures for nice!nano, XIAO BLE, nRFMicro)
-- [ ] USB descriptor table (VID/PID/product) + detector (fixtures)
-- [ ] `crates/probe`: traits `UsbEnumerator`, `DriveWatcher`, `SerialPorts` + mocks
-- [ ] OS impls: Linux (mounts, udisks paths), macOS (`/Volumes`), Windows (drive letters)
-- [ ] Guided quiz data (controllers: nice!nano, XIAO BLE, nRFMicro; displays: nice!view, 128×32 OLED, none) + illustrations
-- [ ] First-run UI: open/clone repo → detect → summary "Corne · nice!nano v2 · nice!view — detected from …" → confirm/correct → start toolchain download in background
-- [ ] Advanced view showing board ids/shields/snippets
-- [ ] Manual hardware test checklist in PROGRESS.md
+- [x] `crates/hardware`: `HardwareProfile` types + Corne/nice!nano v2/nice!view profile data (physical layout from ZMK `foostan/corne/6column.dtsi`)
+- [x] Derive needed build targets from profile (left+nice!view+studio snippet, right+nice!view, settings_reset)
+- [x] Evidence/confidence model + combiner with conflict explanations
+- [x] Detector: build.yaml (boards, shields, displays, snippets → central/Studio half)
+- [x] Detector: `.conf` (Studio, screen switched on/off); west.yml extra modules shown in the repo view (no hardware facts yet)
+- [x] `INFO_UF2.TXT` parser + detector (fixtures for nice!nano, XIAO BLE, nRFMicro, RP2040 — synthesised, verify on hardware)
+- [x] USB descriptor table (VID/PID/product) + detector (fixtures)
+- [x] `crates/probe`: traits `UsbEnumerator`, `DriveScanner` + mocks (serial ports come with Phase 10)
+- [x] OS impls: Linux (`/proc/self/mounts` FAT mounts + udisks paths), macOS (`/Volumes`), Windows (drive letters) — Linux exercised; macOS/Windows only via CI smoke test
+- [x] Guided quiz data (controllers: nice!nano, XIAO BLE, nRFMicro; displays: nice!view, 128×32 OLED, none) + original SVG illustrations
+- [x] First-run UI: detect → summary "Corne · nice!nano v2 · nice!view — detected from …" → confirm/correct; live re-check while a half is in bootloader mode; profile remembered per config folder (app data, not the repo)
+- [x] Advanced view showing evidence, board ids/shields/snippets
+- [x] Manual hardware test checklist in PROGRESS.md
+- [ ] Start the toolchain download in the background after confirming (needs Phase 3)
+- [ ] Keyboard question in the quiz (only matters once a second keyboard is supported)
+- [ ] Replace synthesised INFO_UF2.TXT / USB fixtures with real captures
 
 ## Phase 3 — Toolchain + build
 - [ ] `toolchain/manifest.toml` (all pinned versions + sha256 per host)

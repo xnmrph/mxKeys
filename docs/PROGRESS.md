@@ -3,6 +3,47 @@
 Newest first. Each session: what was done, what's next, open questions, and anything
 that needs testing on real hardware.
 
+## Session 2 (cont.) — 2026-11-23 — Phase 2
+
+### Done
+- `crates/hardware`: catalog (Corne, nice!nano v2, nice!view supported; nice!nano v1,
+  XIAO BLE, nRFMicro, 128×32 OLED recognised only), `HardwareProfile` → needed build
+  targets, pure detectors (build.yaml, .conf, INFO_UF2.TXT, USB lists, quiz), combiner
+  with confidence/sources/plain-language conflicts and notes. 18 tests incl. the owner's
+  two real repos.
+- `crates/probe`: `UsbEnumerator` (nusb; CDC-ACM detection) and `DriveScanner`
+  (INFO_UF2.TXT at FAT mount points / `/Volumes` / drive letters) + mocks.
+- App: "Your keyboard" panel — summary line, per-field value + confidence + sources,
+  conflicts and notes (e.g. the owner's screen-off setting), live re-check every 2.5 s
+  while the panel is open (double-tap reset → controller confirmed by the bootloader),
+  quiz with original SVG illustrations, Advanced evidence table + build targets,
+  "Looks right" saves the profile per config folder in app data; afterwards a compact
+  chip with "Change". The keyboard drawing now comes from the Rust catalog.
+- Verified in the real Tauri app under Xvfb (with a simulated bootloader drive folder).
+
+### Design decisions made (see ARCHITECTURE §5.2)
+- Only hardware sources can make a field "sure"; config + answers max out at "fairly sure".
+- The user's answer isn't downgraded by build.yaml disagreeing — it's explained instead.
+
+### Manual hardware test checklist (needs the real keyboard)
+1. Linux (NixOS): double-tap reset on the left half → within ~3 s the panel shows
+   "Found …/NICENANO" and Controller becomes "sure · build.yaml + bootloader".
+   Note the real `INFO_UF2.TXT` contents and mount path → replace the synthesised
+   fixture in `crates/hardware/tests/fixtures/uf2/`.
+   (NixOS: needs udisks2 automount, e.g. `services.udisks2.enable = true` + a desktop
+   automounter; otherwise the drive isn't mounted and can't be seen.)
+2. Same on the right half.
+3. With the keyboard running normally over USB: Advanced shows a USB note
+   "A keyboard running ZMK is connected: “Corne xnmrph”" (or the firmware's actual
+   name — tells us which firmware is flashed!) and Live editing gets USB evidence if
+   Studio is in the firmware. Record `lsusb -v` for the keyboard and the bootloader
+   (VID/PID, product strings) → replace `usb/*.json` fixtures.
+4. macOS and Windows: repeat 1 (drive under `/Volumes/…` / a drive letter).
+
+### Next
+1. Phase 3: toolchain manifest + downloader, west workspace, building the Corne firmware
+   in the app, CI job building it on all three OSes.
+
 ## Session 2 — 2026-11-23
 
 ### Done — Phase 1 complete

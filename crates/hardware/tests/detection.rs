@@ -122,6 +122,11 @@ fn user_says_there_is_a_screen_but_config_has_none() {
     });
     assert_eq!(d.display.value, Some(DisplayKind::NiceView));
     assert_eq!(
+        d.display.confidence,
+        Some(Confidence::Medium),
+        "the user's answer isn't downgraded by config"
+    );
+    assert_eq!(
         d.display.conflicts,
         ["Your config doesn't build firmware for a screen yet, but according to your answers, you have a nice!view. The app will build with the nice!view so the screen works."]
     );
@@ -267,4 +272,15 @@ fn quiz_questions_come_from_the_catalog() {
         q[1].options.iter().map(|o| o.value.as_str()).collect::<Vec<_>>(),
         ["nice_view", "oled128x32", "none"]
     );
+}
+
+#[test]
+fn equally_trusted_sources_disagreeing_lowers_confidence() {
+    // Two bootloader drives (left and right half) reporting different controllers.
+    let d = detect(&Inputs {
+        bootloader_drives: &[uf2("nice_nano_v2.txt"), uf2("xiao_ble.txt")],
+        ..Default::default()
+    });
+    assert_eq!(d.controller.confidence, Some(Confidence::Medium));
+    assert_eq!(d.controller.conflicts.len(), 1);
 }

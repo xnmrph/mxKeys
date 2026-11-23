@@ -2041,6 +2041,8 @@ name = "mxkeys"
 version = "0.1.0"
 dependencies = [
  "mxkeys-git",
+ "mxkeys-hardware",
+ "mxkeys-probe",
  "serde",
  "serde_json",
  "tauri",

@@ -144,8 +144,15 @@ fn decide<T: Clone + PartialEq>(items: Vec<(T, &Evidence)>, wording: Wording<'_,
             )
         });
         out.conflicts.push(text);
-        // An equally strong disagreement lowers our certainty.
-        if les.iter().map(|e| e.confidence).max() >= Some(conf) && conf > Confidence::Weak {
+        // A disagreement that is just as confident *and* from an equally (or more)
+        // trustworthy source lowers our certainty. build.yaml disagreeing with what the
+        // user sees doesn't: it only says what's built, not what's on the desk.
+        let winner_trust = sources.iter().map(|s| s.trust()).max();
+        let loser_trust = lsrc.iter().map(|s| s.trust()).max();
+        if les.iter().map(|e| e.confidence).max() >= Some(conf)
+            && loser_trust >= winner_trust
+            && conf > Confidence::Weak
+        {
             conf = match conf {
                 Confidence::Strong => Confidence::Medium,
                 _ => Confidence::Weak,
