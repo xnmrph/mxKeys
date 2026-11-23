@@ -10,6 +10,7 @@ const CATEGORY_NAMES: Record<string, string> = {
   mouse: "Mouse",
   system: "System",
   custom: "Your behaviors",
+  macro: "Macro steps",
 };
 
 const PARAM_NAMES: Record<string, string> = {

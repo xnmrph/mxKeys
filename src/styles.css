@@ -140,3 +140,34 @@ button.link { border: none; background: none; padding: 0; cursor: pointer; }
 .raw-options { margin-top: 14px; }
 .raw-options form { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .settings-panel .warning { font-size: 13px; }
+.behaviors { margin-top: 28px; }
+.def-layout { display: grid; grid-template-columns: 260px 1fr; gap: 16px; align-items: start; }
+@media (max-width: 760px) { .def-layout { grid-template-columns: 1fr; } }
+.def-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; max-height: 560px; overflow-y: auto; }
+.def-list li > button { width: 100%; text-align: left; display: flex; flex-direction: column; gap: 2px; padding: 6px 10px; }
+.def-list li > button.active { border-color: var(--accent); }
+.def-list .def-title { font-weight: 600; }
+.def-summary { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.def-list .tune { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-top: 8px; }
+.def-card { border: 1px solid var(--border); border-radius: 10px; background: var(--card); padding: 10px 16px; }
+.def-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+.def-control { margin-top: 6px; }
+.def-control select { font: inherit; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--card); color: var(--fg); max-width: 100%; }
+.def-control input:not([type=checkbox]) { font: inherit; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--card); color: var(--fg); }
+.def-control .number input { width: 90px; }
+.def-control input.wide { width: 100%; box-sizing: border-box; font-family: ui-monospace, monospace; }
+.mods { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.small { font-size: 12px; }
+.board.mini { margin: 4px 0 8px; }
+.board.mini .key { font-size: 10px; padding: 0; }
+.key.chosen { background: var(--accent); color: #fff; border-color: var(--accent); }
+.binding-steps ol { padding-left: 0; list-style: none; margin: 0 0 6px; }
+.binding-steps li { display: flex; gap: 8px; align-items: baseline; padding: 3px 0; border-bottom: 1px dashed var(--border); flex-wrap: wrap; }
+.binding-steps .step-name { min-width: 28px; font-size: 12px; }
+.binding-steps .step-control { font-style: italic; }
+.binding-steps .step-tools { margin-left: auto; }
+.bare-bindings { display: flex; gap: 12px; flex-wrap: wrap; }
+.bare-bindings .field { display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
+.behaviors button.link { color: var(--accent); padding: 2px 4px; font-size: 13px; }
+.behaviors button.link:disabled { color: var(--muted); }
+.def-prop .badge { margin-left: auto; }

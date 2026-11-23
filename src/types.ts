@@ -16,6 +16,7 @@ export interface KeymapSummary {
   macros: number;
   combos: number;
   conditionalLayers: number;
+  definitions: Definition[];
   parseProblems: string[];
 }
 
@@ -210,7 +211,7 @@ export interface BehaviorParam { name: string; kind: ParamKind }
 export interface BehaviorInfo { reference: string; name: string; description: string; category: string; params: BehaviorParam[] }
 export interface LayerRef { index: number; title: string; define: string | null }
 
-export interface EditorCatalog { keycodes: KeycodeInfo[]; keycodesSource: string; behaviors: BehaviorInfo[]; layers: LayerRef[] }
+export interface EditorCatalog { keycodes: KeycodeInfo[]; keycodesSource: string; behaviors: BehaviorInfo[]; macroControls: BehaviorInfo[]; layers: LayerRef[]; schemas: DefSchema[] }
 
 export interface EditResult { keymap: KeymapSummary; version: string; canUndo: boolean; canRedo: boolean }
 
@@ -219,7 +220,30 @@ export type EditOp =
   | { op: "rename_layer"; layer: number; name: string }
   | { op: "add_layer"; name: string }
   | { op: "remove_layer"; layer: number }
-  | { op: "move_layer"; from: number; to: number };
+  | { op: "move_layer"; from: number; to: number }
+  | { op: "set_def_prop"; id: string; prop: string; value: NewProp }
+  | { op: "add_def"; def_type: DefType; name: string; props?: [string, NewProp][] }
+  | { op: "remove_def"; id: string }
+  | { op: "tune_builtin"; target: string };
+
+// ---- Behaviors, macros, combos (Phase 7) ----
+export type DefType = "hold_tap" | "mod_morph" | "tap_dance" | "sticky_key" | "caps_word" | "macro" | "combo" | "conditional_layer" | "other";
+export type PropTypeInfo =
+  | { type: "ms" } | { type: "flag" } | { type: "mods" } | { type: "positions" } | { type: "layers" } | { type: "layer" } | { type: "keys" }
+  | { type: "choice"; options: [string, string][] }
+  | { type: "bindings"; count: number | null; bare: boolean };
+export type PropSchema = PropTypeInfo & { name: string; label: string; help: string; required: boolean; default: string | null };
+export interface DefSchema { def_type: DefType; compatible: string | null; title: string; help: string; binding_cells: number | null; props: PropSchema[] }
+export type PropValue =
+  | { type: "int"; value: number } | { type: "flag"; value: boolean } | { type: "text"; value: string }
+  | { type: "bindings"; value: string[] } | { type: "numbers"; value: number[] } | { type: "layers"; value: number[] }
+  | { type: "names"; value: string[] } | { type: "raw"; value: string };
+export type NewProp = Exclude<PropValue, { type: "raw" }> | { type: "remove" };
+export interface PropView { name: string; value: PropValue | null; raw: string | null; line: number | null }
+export interface Definition {
+  id: string; def_type: DefType; source: "node" | "override" | "helper"; label: string | null; node_name: string; title: string;
+  compatible: string | null; props: PropView[]; other_props: [string, string][]; uses: number; read_only: string | null; line: number;
+}
 
 // ---- Settings page (Phase 6) ----
 export type SettingGroup = "power" | "bluetooth" | "screen" | "lights" | "typing" | "live_editing";

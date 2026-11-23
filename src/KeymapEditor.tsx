@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import type { EditOp, EditResult, EditorCatalog, KeyGeom, KeymapSummary } from "./types";
 import { Catalog, describe } from "./bindings";
 import { KeyPicker } from "./KeyPicker";
+import { BehaviorsPanel } from "./BehaviorsPanel";
 
 const UNIT = 54; // px per key unit
 
@@ -94,6 +95,7 @@ export function KeymapEditor({ keymap, onChanged, onReload }: {
 
   const layer = keymap.layers[Math.min(layerIndex, keymap.layers.length - 1)];
   const labels = useMemo(() => layer?.bindings.map((b) => describe(b, catalog)) ?? [], [layer, catalog]);
+  const baseLabels = useMemo(() => keymap.layers[0]?.bindings.map((b) => describe(b, catalog)) ?? [], [keymap, catalog]);
   if (!layer) return <p className="warning">This keymap has no layers yet.</p>;
 
   const fitsBoard = geometry.length > 0 && layer.bindings.length === geometry.length;
@@ -197,9 +199,9 @@ export function KeymapEditor({ keymap, onChanged, onReload }: {
           onSave={async (binding) => { if (await edit({ op: "set_binding", layer: layer.index, position: selected, binding })) setSelected(null); }}
         />
       )}
-      <p className="muted">
-        {keymap.behaviors} custom behaviors · {keymap.macros} macros · {keymap.combos} combos · {keymap.conditionalLayers} conditional layers
-      </p>
+      {catalog && (
+        <BehaviorsPanel definitions={keymap.definitions} cat={catalog} geometry={geometry.length === keymap.layers[0]?.bindings.length ? geometry : []} baseLabels={baseLabels} edit={edit} />
+      )}
       {keymap.parseProblems.length > 0 && (
         <details>
           <summary>Parts of this file the app didn't understand (kept unchanged)</summary>
