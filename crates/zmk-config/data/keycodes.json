@@ -1420,7 +1420,7 @@
     "KDIV"
    ],
    "category": "keypad",
-   "label": "KP_SLASH"
+   "label": "Num /"
   },
   {
    "names": [
@@ -1435,7 +1435,7 @@
     "KMLT"
    ],
    "category": "keypad",
-   "label": "KP_MULTIPLY"
+   "label": "Num *"
   },
   {
    "names": [
@@ -1450,7 +1450,7 @@
     "KMIN"
    ],
    "category": "keypad",
-   "label": "KP_MINUS"
+   "label": "Num -"
   },
   {
    "names": [
@@ -1464,7 +1464,7 @@
     "KPLS"
    ],
    "category": "keypad",
-   "label": "KP_PLUS"
+   "label": "Num +"
   },
   {
    "names": [
@@ -1489,7 +1489,7 @@
    "shifted": false,
    "deprecated": [],
    "category": "keypad",
-   "label": "KP_N1"
+   "label": "Num 1"
   },
   {
    "names": [
@@ -1502,7 +1502,7 @@
    "shifted": false,
    "deprecated": [],
    "category": "keypad",
-   "label": "KP_N2"
+   "label": "Num 2"
   },
   {
    "names": [
@@ -1515,7 +1515,7 @@
    "shifted": false,
    "deprecated": [],
    "category": "keypad",
-   "label": "KP_N3"
+   "label": "Num 3"
   },
   {
    "names": [
@@ -1528,7 +1528,7 @@
    "shifted": false,
    "deprecated": [],
    "category": "keypad",
-   "label": "KP_N4"
+   "label": "Num 4"
   },
   {
    "names": [
@@ -1541,7 +1541,7 @@
    "shifted": false,
    "deprecated": [],
    "category": "keypad",
-   "label": "KP_N5"
+   "label": "Num 5"
   },
   {
    "names": [
@@ -1554,7 +1554,7 @@
    "shifted": false,
    "deprecated": [],
    "category": "keypad",
-   "label": "KP_N6"
+   "label": "Num 6"
   },
   {
    "names": [
@@ -1567,7 +1567,7 @@
    "shifted": false,
    "deprecated": [],
    "category": "keypad",
-   "label": "KP_N7"
+   "label": "Num 7"
   },
   {
    "names": [
@@ -1580,7 +1580,7 @@
    "shifted": false,
    "deprecated": [],
    "category": "keypad",
-   "label": "KP_N8"
+   "label": "Num 8"
   },
   {
    "names": [
@@ -1593,7 +1593,7 @@
    "shifted": false,
    "deprecated": [],
    "category": "keypad",
-   "label": "KP_N9"
+   "label": "Num 9"
   },
   {
    "names": [
@@ -1606,7 +1606,7 @@
    "shifted": false,
    "deprecated": [],
    "category": "keypad",
-   "label": "KP_N0"
+   "label": "Num 0"
   },
   {
    "names": [
@@ -1618,7 +1618,7 @@
    "shifted": false,
    "deprecated": [],
    "category": "keypad",
-   "label": "KP_DOT"
+   "label": "Num ."
   },
   {
    "names": [
@@ -1686,7 +1686,7 @@
    "shifted": false,
    "deprecated": [],
    "category": "keypad",
-   "label": "KP_EQUAL"
+   "label": "Num ="
   },
   {
    "names": [
@@ -2065,7 +2065,7 @@
    "shifted": false,
    "deprecated": [],
    "category": "keypad",
-   "label": "KP_COMMA"
+   "label": "Num ,"
   },
   {
    "names": [
@@ -2077,7 +2077,7 @@
    "shifted": false,
    "deprecated": [],
    "category": "keypad",
-   "label": "KP_EQUAL_AS400"
+   "label": "Num ="
   },
   {
    "names": [
@@ -2494,7 +2494,7 @@
    "shifted": false,
    "deprecated": [],
    "category": "keypad",
-   "label": "KP_LPAR"
+   "label": "Num ("
   },
   {
    "names": [
@@ -2507,7 +2507,7 @@
    "shifted": false,
    "deprecated": [],
    "category": "keypad",
-   "label": "KP_RPAR"
+   "label": "Num )"
   },
   {
    "names": [

@@ -70,6 +70,10 @@ def label(canonical, names, desc):
     m = re.match(r"Keyboard (\S{1,2}) \(", desc)
     if m:
         return m.group(1)
+    # "Keypad 0" → "Num 0", "Keypad - (Minus)" → "Num -"
+    m = re.match(r"Keypad (\S{1,2})(?: |$)", desc)
+    if m:
+        return "Num " + m.group(1)
     short = min(names, key=len)
     return short
 
