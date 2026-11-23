@@ -929,6 +929,15 @@ mod tests {
         let work = base.join("work");
         git2::Repository::clone(server.to_str().unwrap(), &work).unwrap();
         set_identity(&work, "Test User", "test@example.com").unwrap();
+        // Tests compare file bytes; don't let a machine-wide core.autocrlf (set on
+        // Windows CI runners) convert line endings on checkout.
+        let repo = git2::Repository::open(&work).unwrap();
+        repo.config()
+            .unwrap()
+            .open_level(git2::ConfigLevel::Local)
+            .unwrap()
+            .set_bool("core.autocrlf", false)
+            .unwrap();
         Fixture { base, server, work }
     }
 
