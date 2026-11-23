@@ -399,7 +399,11 @@ mod tests {
         assert!(lw.venv_python().ends_with("venv/Scripts/python.exe"));
         assert!(lw.python().ends_with("python/python.exe"));
         let ll = Layout::new(Path::new("/data"), &m, Host::LinuxX86_64);
-        assert!(ll.west().display().ends_with("venv/bin/python -m west"));
+        assert!(ll
+            .west()
+            .display()
+            .replace('\\', "/")
+            .ends_with("venv/bin/python -m west"));
         assert_eq!(ll.root, Path::new("/data/toolchain").join(&m.id));
     }
 
