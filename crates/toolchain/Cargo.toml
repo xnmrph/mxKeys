@@ -1,0 +1,25 @@
+[package]
+name = "mxkeys-toolchain"
+version = "0.1.0"
+description = "Managed ZMK build toolchain for mxKeys: downloads, west workspace, firmware builds"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+flate2 = "1"
+hex = "0.4"
+liblzma = { version = "0.4", features = ["static"] }
+mxkeys-hardware = { path = "../hardware" }
+reqwest = { version = "0.13", features = ["blocking"] }
+serde.workspace = true
+serde_json.workspace = true
+serde_yaml.workspace = true
+sevenz-rust2 = "0.20"
+sha2 = "0.11"
+tar = "0.4"
+thiserror.workspace = true
+toml = "1"
+zip = { version = "7", default-features = false, features = ["deflate"] }
+zmk-config = { path = "../zmk-config" }
