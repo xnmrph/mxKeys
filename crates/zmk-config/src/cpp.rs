@@ -430,10 +430,7 @@ impl Parser<'_> {
 
     fn expr(&mut self, min: u8) -> Result<i64, CppError> {
         let mut lhs = self.unary()?;
-        loop {
-            let Some(op) = self.peek().map(str::to_string) else {
-                break;
-            };
+        while let Some(op) = self.peek().map(str::to_string) {
             if op == "?" && min == 0 {
                 self.i += 1;
                 let a = self.expr(0)?;
@@ -582,7 +579,7 @@ mod tests {
         let mut m = Macros::default();
         m.load_with_includes(
             "#include <dt-bindings/zmk/keys.h>\n#include <behaviors.dtsi>\n#define X B\n",
-            &[dir.clone()],
+            std::slice::from_ref(&dir),
         );
         assert_eq!(m.cells("X").unwrap(), [0x070005]);
         std::fs::remove_dir_all(&dir).unwrap();
