@@ -77,6 +77,8 @@ pub fn tokenize(s: &str) -> Vec<Tok> {
 struct Def {
     params: Option<Vec<String>>,
     body: Vec<Tok>,
+    /// File name of the header it came from (`bt.h`), `None` for the keymap itself.
+    origin: Option<String>,
 }
 
 #[derive(Debug, Clone, Default)]
@@ -136,6 +138,7 @@ fn parse_define(rest: &str) -> Option<(String, Def)> {
             Def {
                 params: Some(params),
                 body: tokenize(&p[close + 1..]),
+                origin: None,
             },
         ))
     } else {
@@ -144,6 +147,7 @@ fn parse_define(rest: &str) -> Option<(String, Def)> {
             Def {
                 params: None,
                 body: tokenize(after),
+                origin: None,
             },
         ))
     }
@@ -153,12 +157,17 @@ impl Macros {
     /// `#define`s in `text`. `overwrite`: later definitions replace earlier ones (for the
     /// keymap itself); otherwise the first definition wins (header defaults).
     pub fn add_source(&mut self, text: &str, overwrite: bool) {
+        self.add_source_from(text, overwrite, None);
+    }
+
+    fn add_source_from(&mut self, text: &str, overwrite: bool, origin: Option<&str>) {
         for line in logical_lines(text) {
             let t = line.trim_start();
             let Some(rest) = t.strip_prefix('#') else { continue };
             let rest = rest.trim_start();
             if let Some(d) = rest.strip_prefix("define") {
-                if let Some((name, def)) = parse_define(d) {
+                if let Some((name, mut def)) = parse_define(d) {
+                    def.origin = origin.map(str::to_string);
                     if overwrite || !self.defs.contains_key(&name) {
                         self.defs.insert(name, def);
                     }
@@ -177,8 +186,22 @@ impl Macros {
             Def {
                 params: None,
                 body: tokenize(body),
+                origin: None,
             },
         );
+    }
+
+    /// Object-like macros defined in a header named `file` (e.g. `bt.h`), with the
+    /// numbers they expand to. Used to turn the keyboard's numbers back into names.
+    pub fn names_from(&self, file: &str) -> Vec<(String, Vec<u32>)> {
+        let mut out: Vec<(String, Vec<u32>)> = self
+            .defs
+            .iter()
+            .filter(|(_, d)| d.params.is_none() && d.origin.as_deref() == Some(file))
+            .filter_map(|(n, _)| Some((n.clone(), self.cells(n).ok()?)))
+            .collect();
+        out.sort();
+        out
     }
 
     pub fn is_defined(&self, name: &str) -> bool {
@@ -219,7 +242,8 @@ impl Macros {
                         let mut s = vec![p.parent().map(Path::to_path_buf).unwrap_or_default()];
                         s.extend(search.iter().cloned());
                         self.load_includes(&inc, &s, seen, depth + 1);
-                        self.add_source(&inc, false);
+                        let file = p.file_name().map(|f| f.to_string_lossy().into_owned());
+                        self.add_source_from(&inc, false, file.as_deref());
                     }
                 }
             }

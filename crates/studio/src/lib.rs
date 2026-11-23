@@ -9,9 +9,11 @@
 pub mod ble;
 pub mod client;
 pub mod framing;
+pub mod live;
 pub mod mapping;
 pub mod proto;
 pub mod serial;
 pub mod sim;
+pub mod sync;
 
 pub use client::{Client, DeviceInfo, Error, Notification, Transport};

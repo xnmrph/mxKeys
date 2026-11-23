@@ -385,6 +385,36 @@ mod tests {
         }
         assert!(compared > 20, "compared {compared}");
         eprintln!("compared {compared} behavior display names");
+        // Decoding the keyboard's numbers gives source text that means the same thing.
+        let mut device_names: Vec<String> = ours.values().cloned().collect();
+        device_names.sort();
+        device_names.dedup();
+        let device = DeviceBehaviors::new(
+            device_names
+                .into_iter()
+                .enumerate()
+                .map(|(i, n)| (i as u32 + 1, n)),
+        );
+        let mapper = Mapper {
+            macros: macros.clone(),
+            names: ours.clone(),
+            device,
+        };
+        let tokens: Vec<String> = zmk_config::catalog::layer_refs(&km_doc, &km)
+            .iter()
+            .map(|r| r.define.clone().unwrap_or(r.index.to_string()))
+            .collect();
+        let mut round_trips = 0;
+        for layer in &km.layers {
+            for b in &layer.bindings.as_ref().unwrap().bindings {
+                let Ok(enc) = mapper.encode(&b.raw) else { continue };
+                let text = mapper.decode(&enc, None, &tokens);
+                assert_eq!(mapper.encode(&text), Ok(enc), "{} → {text}", b.raw);
+                round_trips += 1;
+            }
+        }
+        assert!(round_trips > 200);
+        eprintln!("{round_trips} bindings decode and re-encode to the same numbers");
         eprintln!("checked {checked} bindings against the build");
     }
 }
