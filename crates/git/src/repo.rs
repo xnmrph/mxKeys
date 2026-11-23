@@ -824,33 +824,22 @@ pub fn discard(dir: &Path, files: &[String]) -> Result<(), GitError> {
         }
     }
     if !checkout_paths.is_empty() {
-        let head = repo.head().map_err(g)?.peel_to_tree().map_err(g)?;
-        let mut co = git2::build::CheckoutBuilder::new();
-        co.force().update_index(true);
-        for p in &checkout_paths {
-            co.path(p);
-        }
-        // Reset the index entries first so staged changes go too.
-        let mut index = repo.index().map_err(g)?;
-        for p in &checkout_paths {
-            match head.get_path(Path::new(p)) {
-                Ok(_) => {}
-                Err(_) => {
-                    let _ = index.remove_path(Path::new(p));
-                }
-            }
-        }
-        index.write().map_err(g)?;
-        repo.checkout_tree(head.as_object(), Some(&mut co)).map_err(g)?;
-        let mut index = repo.index().map_err(g)?;
-        index.read(true).map_err(g)?;
-        let obj = repo
+        // Like `git restore --staged --worktree`: first put the index entries back to
+        // the last commit (unstage), then write the files from the index, recording
+        // fresh file stats so the files read as unchanged afterwards.
+        let head_commit = repo
             .head()
             .map_err(g)?
             .peel(git2::ObjectType::Commit)
             .map_err(g)?;
-        repo.reset_default(Some(&obj), checkout_paths.iter().copied())
+        repo.reset_default(Some(&head_commit), checkout_paths.iter().copied())
             .map_err(g)?;
+        let mut co = git2::build::CheckoutBuilder::new();
+        co.force().update_index(true).disable_pathspec_match(true);
+        for p in &checkout_paths {
+            co.path(p);
+        }
+        repo.checkout_index(None, Some(&mut co)).map_err(g)?;
     }
     Ok(())
 }
@@ -940,6 +929,10 @@ mod tests {
             .unwrap();
         // The clone already checked files out with the machine's setting: write them
         // again with LF so the working copy matches the commits.
+        // (Delete them first: libgit2 skips files whose cached stat looks unchanged.)
+        for e in repo.index().unwrap().iter() {
+            let _ = std::fs::remove_file(work.join(String::from_utf8_lossy(&e.path).as_ref()));
+        }
         repo.checkout_head(Some(git2::build::CheckoutBuilder::new().force()))
             .unwrap();
         Fixture { base, server, work }
@@ -1095,10 +1088,11 @@ mod tests {
                 std::fs::read_to_string(f.work.join("config/corne.keymap")).unwrap(),
                 "a\nb\nc\n"
             );
-            assert_eq!(
-                pull(&f.work, &b).unwrap(),
-                PullOutcome::Updated { commits: 1 },
-                "{b:?}"
+            let r = pull(&f.work, &b);
+            assert!(
+                matches!(r, Ok(PullOutcome::Updated { commits: 1 })),
+                "{b:?} {r:?} still changed: {:?}",
+                status(&f.work).map(|s| s.files)
             );
             assert_eq!(
                 std::fs::read_to_string(f.work.join("config/corne.conf")).unwrap(),
