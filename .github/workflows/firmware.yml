@@ -1,0 +1,61 @@
+name: Firmware
+
+# Builds real Corne firmware with the app's managed toolchain (the same Rust code path the
+# app uses) on all three desktop OSes. Heavy (downloads ~250 MB + ZMK sources), so it runs
+# when toolchain-related code changes, weekly, and on demand.
+on:
+  push:
+    paths:
+      - "crates/toolchain/**"
+      - "crates/hardware/**"
+      - "crates/zmk-config/**"
+      - "toolchain/**"
+      - "tests/zmk-config-corne/**"
+      - ".github/workflows/firmware.yml"
+  workflow_dispatch:
+  schedule:
+    - cron: "17 4 * * 1"
+
+concurrency:
+  group: firmware-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: corne (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+          - os: macos-latest
+          - os: windows-latest
+            # Exercise the bundled portable git (runners have git installed already).
+            force_bundled_git: "1"
+    runs-on: ${{ matrix.os }}
+    env:
+      MXKEYS_DATA: ${{ github.workspace }}/../mxkeys-data
+    steps:
+      - uses: actions/checkout@v4
+      - name: Linux libraries
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libssl-dev
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Cache toolchain downloads and ZMK workspace
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.MXKEYS_DATA }}/toolchain
+            ${{ env.MXKEYS_DATA }}/workspaces
+          key: mxkeys-${{ runner.os }}-${{ hashFiles('toolchain/manifest.toml', 'tests/zmk-config-corne/config/west.yml') }}
+      # mxkeys-build checks every .uf2 (UF2 magic + nRF52840 family id) before copying it.
+      - name: Build firmware
+        shell: bash
+        env:
+          MXKEYS_FORCE_BUNDLED_GIT: ${{ matrix.force_bundled_git }}
+        run: cargo run --release -p mxkeys-toolchain --bin mxkeys-build -- tests/zmk-config-corne --data "$MXKEYS_DATA" --out firmware --pristine
+      - uses: actions/upload-artifact@v4
+        with:
+          name: corne-firmware-${{ runner.os }}
+          path: firmware/*.uf2

@@ -58,6 +58,8 @@ pub enum Component {
     Python,
     Cmake,
     Ninja,
+    /// Optional: portable git where the system has none (Windows).
+    Git,
 }
 
 impl Component {
@@ -76,6 +78,7 @@ impl Component {
             Component::Python => "Python",
             Component::Cmake => "CMake",
             Component::Ninja => "Ninja",
+            Component::Git => "Git",
         }
     }
 }
@@ -101,6 +104,9 @@ pub struct Artifact {
     pub format: Format,
     pub strip: usize,
     pub dest: String,
+    /// Installed only when needed (e.g. git when the system has none).
+    #[serde(default)]
+    pub optional: bool,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -136,7 +142,14 @@ impl Manifest {
         Manifest::parse(EMBEDDED).expect("embedded toolchain manifest is valid (checked by tests)")
     }
 
-    /// Artifacts for `host`, in install order; error if a component is missing.
+    /// An optional artifact (e.g. portable git) for `host`, if the manifest has one.
+    pub fn optional_for(&self, host: Host, component: Component) -> Option<&Artifact> {
+        self.artifacts
+            .iter()
+            .find(|a| a.optional && a.host == host && a.component == component)
+    }
+
+    /// Required artifacts for `host`, in install order; error if a component is missing.
     pub fn artifacts_for(&self, host: Host) -> Result<Vec<&Artifact>, ManifestError> {
         Component::ALL
             .iter()
@@ -166,6 +179,8 @@ mod tests {
             assert!(a[1].dest.starts_with(&a[0].dest));
         }
         assert!(m.workspace.allowlist.contains(&"hal_nordic".to_string()));
+        assert!(m.optional_for(Host::WindowsX86_64, Component::Git).is_some());
+        assert!(m.optional_for(Host::LinuxX86_64, Component::Git).is_none());
     }
 
     #[test]

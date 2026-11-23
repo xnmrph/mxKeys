@@ -87,6 +87,9 @@ pub struct ControllerDef {
     pub uf2_family: u32,
     /// USB VID:PID of the UF2 bootloader.
     pub bootloader_usb: &'static [(u16, u16)],
+    /// The compiler library variant ("multilib") this CPU uses. The managed toolchain
+    /// keeps only these (nRF52840 = Cortex-M4F, hard float → ~1.1 GB → ~256 MB).
+    pub multilib: &'static str,
     pub supported: bool,
     pub verified: bool,
 }
@@ -104,6 +107,8 @@ pub struct DisplayDef {
 }
 
 pub const NRF52840_FAMILY: u32 = 0xADA5_2840;
+/// `-mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16` (verified from a real build).
+pub const NRF52840_MULTILIB: &str = "thumb/v7e-m+fp/hard";
 
 pub const CORNE: KeyboardDef = KeyboardDef {
     id: KeyboardId::Corne,
@@ -145,6 +150,7 @@ pub const CONTROLLERS: &[ControllerDef] = &[
         uf2_models: &["nice!nano"],
         uf2_board_ids: &["nRF52840-nicenano"],
         uf2_family: NRF52840_FAMILY,
+        multilib: NRF52840_MULTILIB,
         bootloader_usb: &[(0x239A, 0x00B3)],
         supported: true,
         verified: false,
@@ -158,6 +164,7 @@ pub const CONTROLLERS: &[ControllerDef] = &[
         uf2_models: &[],
         uf2_board_ids: &[],
         uf2_family: NRF52840_FAMILY,
+        multilib: NRF52840_MULTILIB,
         bootloader_usb: &[],
         supported: false,
         verified: false,
@@ -171,6 +178,7 @@ pub const CONTROLLERS: &[ControllerDef] = &[
         uf2_models: &["xiao"],
         uf2_board_ids: &[],
         uf2_family: NRF52840_FAMILY,
+        multilib: NRF52840_MULTILIB,
         bootloader_usb: &[],
         supported: false,
         verified: false,
@@ -191,6 +199,7 @@ pub const CONTROLLERS: &[ControllerDef] = &[
         uf2_models: &["nrfmicro"],
         uf2_board_ids: &[],
         uf2_family: NRF52840_FAMILY,
+        multilib: NRF52840_MULTILIB,
         bootloader_usb: &[],
         supported: false,
         verified: false,
@@ -226,6 +235,18 @@ pub const DISPLAYS: &[DisplayDef] = &[
         supported: true,
     },
 ];
+
+/// Multilibs the managed toolchain must keep: those of every supported controller.
+pub fn toolchain_multilibs() -> Vec<&'static str> {
+    let mut v: Vec<&str> = CONTROLLERS
+        .iter()
+        .filter(|c| c.supported)
+        .map(|c| c.multilib)
+        .collect();
+    v.sort();
+    v.dedup();
+    v
+}
 
 pub fn keyboard(id: KeyboardId) -> &'static KeyboardDef {
     KEYBOARDS

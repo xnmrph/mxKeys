@@ -1,0 +1,12 @@
+# Test config for mxKeys CI: ZMK pinned to a fixed commit so builds are reproducible.
+manifest:
+  remotes:
+    - name: zmkfirmware
+      url-base: https://github.com/zmkfirmware
+  projects:
+    - name: zmk
+      remote: zmkfirmware
+      revision: 4de313367288aad5aeaa1243890e40dc813f7008
+      import: app/west.yml
+  self:
+    path: config

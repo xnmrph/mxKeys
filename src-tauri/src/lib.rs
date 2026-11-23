@@ -1,6 +1,7 @@
 //! Tauri shell. Keep this thin: commands validate input, call into `crates/*`, and map
 //! errors to plain-language strings for the UI.
 
+pub mod building;
 pub mod detection;
 pub mod profiles;
 pub mod summary;
@@ -113,6 +114,51 @@ fn save_profile(app: AppHandle, repo_path: String, profile: HardwareProfile) -> 
         .map_err(|e| format!("couldn't save your hardware choice: {e}"))
 }
 
+#[tauri::command]
+fn toolchain_info(
+    app: AppHandle,
+    jobs: tauri::State<'_, building::Jobs>,
+) -> Result<building::ToolchainInfo, String> {
+    Ok(building::info(&data_dir(&app)?, &jobs))
+}
+
+/// Download/finish installing the build tools in the background (`toolchain-event`s).
+#[tauri::command]
+fn start_toolchain_setup(app: AppHandle, jobs: tauri::State<'_, building::Jobs>) -> Result<bool, String> {
+    let data = data_dir(&app)?;
+    let handle = app.clone();
+    Ok(building::start_setup(data, &jobs, move |e| {
+        let _ = handle.emit("toolchain-event", e);
+    }))
+}
+
+/// Build firmware for the config repo in the background (`build-event`s).
+#[tauri::command]
+fn start_build(
+    app: AppHandle,
+    jobs: tauri::State<'_, building::Jobs>,
+    repo_path: String,
+    targets: Option<Vec<mxkeys_hardware::profile::TargetId>>,
+    update: Option<bool>,
+    pristine: Option<bool>,
+) -> Result<bool, String> {
+    let data = data_dir(&app)?;
+    let repo = PathBuf::from(&repo_path);
+    let profile = profiles::load(&data, &repo);
+    let handle = app.clone();
+    let req = building::BuildRequest {
+        data,
+        repo,
+        profile,
+        only: targets.unwrap_or_default(),
+        update: update.unwrap_or(false),
+        pristine: pristine.unwrap_or(false),
+    };
+    Ok(building::start_build(req, &jobs, move |e| {
+        let _ = handle.emit("build-event", e);
+    }))
+}
+
 /// Replace one key's binding and write the keymap file back (minimal, lossless edit).
 #[tauri::command]
 fn set_binding(
@@ -141,6 +187,7 @@ fn set_binding(
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .manage(building::Jobs::default())
         .invoke_handler(tauri::generate_handler![
             open_config_repo,
             startup_path,
@@ -152,6 +199,9 @@ pub fn run() {
             physical_layout,
             load_profile,
             save_profile,
+            toolchain_info,
+            start_toolchain_setup,
+            start_build,
             set_binding
         ])
         .run(tauri::generate_context!())

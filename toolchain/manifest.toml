@@ -287,3 +287,17 @@ sha256 = "07fc8261b42b20e71d1720b39068c2e14ffcee6396b76fb7a795fb460b78dc65"
 format = "zip"
 strip = 0
 dest = "ninja"
+
+# ---- Git, only where the system has none. west needs a git binary. Windows only:
+#      Linux virtually always has git; on macOS it comes with Apple's Command Line Tools
+#      (the app asks the user to install them). See docs/build-toolchain.md for the
+#      git-free alternative (own manifest resolver + libgit2).
+[[artifact]]
+component = "git"
+host = "windows-x86_64"
+optional = true
+url = "https://github.com/git-for-windows/git/releases/download/v2.56.1.windows.1/MinGit-2.56.1-64-bit.zip"
+sha256 = "4a92850b6e917da4fd010669b614b55dccf5b0ec333a534cc4be4700dfefdafd"
+format = "zip"
+strip = 0
+dest = "git"

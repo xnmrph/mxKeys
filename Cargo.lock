@@ -2325,6 +2325,7 @@ dependencies = [
  "mxkeys-git",
  "mxkeys-hardware",
  "mxkeys-probe",
+ "mxkeys-toolchain",
  "serde",
  "serde_json",
  "tauri",

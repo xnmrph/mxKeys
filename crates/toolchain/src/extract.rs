@@ -20,15 +20,19 @@ pub enum ExtractError {
     Io { path: PathBuf, source: io::Error },
 }
 
+/// An archive path that is absolute or contains `..`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct UnsafeEntry;
+
 /// Strip `n` leading components from a relative archive path; `None` if nothing remains.
 /// Errors on absolute paths and `..`.
-pub fn strip_path(entry: &Path, n: usize) -> Result<Option<PathBuf>, ()> {
+pub fn strip_path(entry: &Path, n: usize) -> Result<Option<PathBuf>, UnsafeEntry> {
     let mut parts = Vec::new();
     for c in entry.components() {
         match c {
             Component::Normal(p) => parts.push(p),
             Component::CurDir => {}
-            Component::ParentDir | Component::RootDir | Component::Prefix(_) => return Err(()),
+            Component::ParentDir | Component::RootDir | Component::Prefix(_) => return Err(UnsafeEntry),
         }
     }
     if parts.len() <= n {
@@ -69,7 +73,7 @@ fn target(archive: &Path, dest: &Path, entry: &Path, strip: usize) -> Result<Opt
     match strip_path(entry, strip) {
         Ok(Some(rel)) => Ok(Some(dest.join(rel))),
         Ok(None) => Ok(None),
-        Err(()) => Err(ExtractError::UnsafePath {
+        Err(UnsafeEntry) => Err(ExtractError::UnsafePath {
             archive: archive.to_path_buf(),
             entry: entry.display().to_string(),
         }),
@@ -231,8 +235,8 @@ mod tests {
         );
         assert_eq!(strip_path(Path::new("./a/b"), 1), Ok(Some(PathBuf::from("b"))));
         assert_eq!(strip_path(Path::new("a/"), 1), Ok(None));
-        assert_eq!(strip_path(Path::new("a/../../etc/passwd"), 1), Err(()));
-        assert_eq!(strip_path(Path::new("/etc/passwd"), 0), Err(()));
+        assert_eq!(strip_path(Path::new("a/../../etc/passwd"), 1), Err(UnsafeEntry));
+        assert_eq!(strip_path(Path::new("/etc/passwd"), 0), Err(UnsafeEntry));
     }
 
     fn tar_bytes() -> Vec<u8> {

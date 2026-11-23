@@ -23,3 +23,4 @@ zmk-config = { path = "../crates/zmk-config" }
 mxkeys-git = { path = "../crates/git" }
 mxkeys-hardware = { path = "../crates/hardware" }
 mxkeys-probe = { path = "../crates/probe" }
+mxkeys-toolchain = { path = "../crates/toolchain" }
