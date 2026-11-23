@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
+import { FlashWizard } from "./FlashWizard";
 import type {
   BuildEvent, BuildOutcome, InstallProgress, Problem, TargetId, ToolchainEvent, ToolchainInfo,
 } from "./types";
@@ -56,6 +57,10 @@ export function BuildPanel({ repoRoot, autoSetup }: { repoRoot: string; autoSetu
   const [outcome, setOutcome] = useState<BuildOutcome | null>(null);
   const [error, setError] = useState<string | null>(null);
   const startedSetup = useRef(false);
+  const [builtBefore, setBuiltBefore] = useState(false);
+  useEffect(() => {
+    invoke<boolean>("firmware_ready", { repoPath: repoRoot }).then(setBuiltBefore).catch(() => setBuiltBefore(false));
+  }, [repoRoot, outcome]);
   const lastStage = useRef("");
 
   const refresh = useCallback(() => {
@@ -166,9 +171,8 @@ export function BuildPanel({ repoRoot, autoSetup }: { repoRoot: string; autoSetu
           <details><summary>Details</summary><code className="raw">{error}</code></details>
         </div>
       )}
-      {outcome && outcome.results.every((r) => r.uf2) && (
-        <p className="note">All firmware files are ready in <code>{outcome.firmware_dir}</code>. Flashing them onto the keyboard comes next.</p>
-      )}
+      {outcome && outcome.results.every((r) => r.uf2) && <p className="note">All firmware files are ready.</p>}
+      {!building && (builtBefore || outcome?.results.every((r) => r.uf2)) && <FlashWizard repoRoot={repoRoot} />}
       {log.length > 0 && (
         <details>
           <summary>Build log ({log.length} lines)</summary>

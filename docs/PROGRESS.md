@@ -3,6 +3,36 @@
 Newest first. Each session: what was done, what's next, open questions, and anything
 that needs testing on real hardware.
 
+## Session 3 (cont.) — 2026-11-23 — Phase 4
+
+### Done
+- `crates/flash`: UF2 parsing (moved from toolchain), drive/firmware verification,
+  resilient copy, guided state machine; 8 tests incl. a full reset+flash run against
+  temp-dir "drives" found by the real scanner.
+- App: "Install on the keyboard" wizard under Firmware — works for firmware built
+  earlier too; optional "Reset settings first"; step list, half illustration with a
+  pulsing reset button, copy progress, refusal/failed states with Try again, Skip, Stop.
+- Verified in the real app (Xvfb) with simulated drives at `/run/media/<user>/NICENANO`:
+  wrong device refused (nothing written), left/right got byte-identical firmware,
+  restart detection, "All done!".
+
+### Manual hardware test checklist — flashing (needs the real keyboard)
+1. Build in the app, then Install → Start. Left half: plug in, double-tap reset.
+   Expect: copy progress, "restarting…", then the right-half step. Note how long the
+   drive takes to disappear and whether the OS shows an "eject"/"not ejected properly"
+   warning (macOS does — we may want to tell users that's expected).
+2. Right half, same. Then unplug/replug both: do they connect to each other?
+3. With "Reset settings first": four steps; after flashing, re-pair Bluetooth hosts.
+4. Plug in some other USB stick during the flow: must be ignored (no INFO_UF2.TXT).
+5. Record the real `INFO_UF2.TXT` (copy it off the drive) → fixtures.
+6. Windows: drive letter detection; macOS: `/Volumes/NICENANO`; NixOS: needs an
+   automounter (udisks2) or the drive is never mounted.
+
+### Next
+1. Firmware CI on macOS/Windows (scheduled check running).
+2. Phase 5: keymap editor UI (visual binding editor, layer management, undo, file
+   watcher), including the acceptance test: add `&out OUT_TOG` on the System layer.
+
 ## Session 3 — 2026-11-23 — Phase 3
 
 ### Done

@@ -3,6 +3,7 @@
 
 pub mod building;
 pub mod detection;
+pub mod flashing;
 pub mod profiles;
 pub mod summary;
 
@@ -159,6 +160,40 @@ fn start_build(
     }))
 }
 
+/// Start the guided flashing flow for the built firmware (`flash-event`s follow).
+#[tauri::command]
+fn start_flash(
+    app: AppHandle,
+    flashing: tauri::State<'_, flashing::Flashing>,
+    repo_path: String,
+    reset: bool,
+) -> Result<mxkeys_flash::session::View, String> {
+    let data = data_dir(&app)?;
+    let repo = PathBuf::from(&repo_path);
+    let profile = profiles::load(&data, &repo).ok_or("Confirm your keyboard's hardware first.")?;
+    let session = flashing::new_session(&flashing::firmware_for(&data, &repo), &profile, reset)?;
+    let handle = app.clone();
+    flashing.start(session, mxkeys_probe::FsDriveScanner::system(), move |e| {
+        let _ = handle.emit("flash-event", e);
+    })
+}
+
+/// Whether firmware for this config has been built (so it can be installed).
+#[tauri::command]
+fn firmware_ready(app: AppHandle, repo_path: String) -> Result<bool, String> {
+    let fw = flashing::firmware_for(&data_dir(&app)?, &PathBuf::from(repo_path));
+    Ok(fw.left.is_file() && fw.right.is_file())
+}
+
+/// `retry`, `skip` or `cancel` the current flashing step.
+#[tauri::command]
+fn flash_control(
+    flashing: tauri::State<'_, flashing::Flashing>,
+    command: String,
+) -> Result<Option<mxkeys_flash::session::View>, String> {
+    flashing.control(&command)
+}
+
 /// Replace one key's binding and write the keymap file back (minimal, lossless edit).
 #[tauri::command]
 fn set_binding(
@@ -188,6 +223,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .manage(building::Jobs::default())
+        .manage(flashing::Flashing::default())
         .invoke_handler(tauri::generate_handler![
             open_config_repo,
             startup_path,
@@ -202,6 +238,9 @@ pub fn run() {
             toolchain_info,
             start_toolchain_setup,
             start_build,
+            start_flash,
+            flash_control,
+            firmware_ready,
             set_binding
         ])
         .run(tauri::generate_context!())

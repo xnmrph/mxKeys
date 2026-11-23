@@ -97,6 +97,11 @@ impl Outcome {
     }
 }
 
+/// Where the finished `.uf2` files for a config repo are kept.
+pub fn firmware_dir(data: &Path, repo: &Path) -> PathBuf {
+    data.join("firmware").join(repo_key(repo))
+}
+
 fn repo_key(repo: &Path) -> String {
     let canon = fs::canonicalize(repo).unwrap_or_else(|_| repo.to_path_buf());
     hex::encode(Sha256::digest(canon.display().to_string().as_bytes()))[..12].to_string()
@@ -191,7 +196,7 @@ fn build_targets(
 ) -> Result<Outcome, PipelineError> {
     let key = repo_key(&opts.repo);
     let builds = opts.data.join("builds").join(&key);
-    let firmware_dir = opts.data.join("firmware").join(&key);
+    let firmware_dir = firmware_dir(&opts.data, &opts.repo);
     fs::create_dir_all(&firmware_dir).map_err(|source| PipelineError::Io {
         path: firmware_dir.clone(),
         source,

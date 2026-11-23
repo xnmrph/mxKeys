@@ -310,14 +310,23 @@ uses); 0.17.x does not compile Zephyr 4.1. Board ids need the `//zmk` variant.
 
 ## 8. Flashing (Phase 4)
 
-State machine (pure, in `flash`): `ChooseHalf → WaitForBootloader (poll DriveWatcher) →
-VerifyDrive (INFO_UF2.TXT Board-ID ∈ profile.controller.uf2.board_ids, UF2 family id
-matches) → Copy (write .uf2, fsync) → WaitForReboot (drive disappears) → Done`.
-Sequence: left → right, optional "settings reset" step first (explained: "only needed if
-the halves stop talking to each other"; it is flashed to *both* halves, then the real
-firmware again). Mismatched firmware is refused with an explanation; disappearing drive
-mid-copy is expected on some OSes (the bootloader resets after the last block) and
-handled as success if all bytes were written.
+Implemented in `crates/flash` (pure logic) and `src-tauri/src/flashing.rs` (background
+loop):
+
+- `session::plan`: optional settings reset (left, right — ZMK's documented procedure),
+  then left firmware, then right firmware.
+- `Session` state machine: `WaitingForDrive → (Refused | TooManyDrives) → Copying →
+  Restarting → next step … → Finished`, plus `Failed` with retry and a per-step skip.
+  The app polls the drive scanner every 0.5 s and feeds it the drive list.
+- Two checks before any byte is written: the drive's `INFO_UF2.TXT` must identify the
+  profile's controller (Board-ID, falling back to Model because our Board-ID table is
+  unverified), and each `.uf2` must carry the controller's UF2 family id
+  (0xADA52840). Firmware files are checked when the session is created.
+- Copy writes `mxkeys.uf2` in block-aligned chunks; an I/O error *after* all bytes were
+  handed to the OS counts as success (the bootloader resets as soon as the last block
+  lands).
+- Both halves present identical drives, so the flow relies on the user plugging in the
+  half it asks for and on the drive disappearing between steps.
 
 ## 9. Live editing and sync-back (Phase 10)
 

@@ -70,11 +70,15 @@ Phases are done in order, one at a time. Tick boxes as work lands (keep this fil
 - [ ] Cancel button for running builds/downloads; disk-usage view + "remove old toolchains"
 
 ## Phase 4 — Flash
-- [ ] UF2 file reader (family id, block count) + verification against profile
-- [ ] Flash state machine (pure) + tests with mock drives
-- [ ] Guided UI: left → right, optional settings_reset step, friendly copy
-- [ ] Refuse mismatched firmware (Board-ID / family id)
-- [ ] Manual hardware test on Linux/macOS/Windows
+- [x] UF2 file reader (magic, family id, blocks) + verification against the profile (`crates/flash`)
+- [x] Flash state machine (pure) + tests with temp-dir and mock drives
+- [x] Guided UI: optional settings reset (both halves) → left → right, illustrations, plain-language steps, retry/skip/stop
+- [x] Refuse mismatched firmware (drive Board-ID/Model, UF2 family id) — nothing is written
+- [x] Copy tolerates the bootloader resetting while the file closes
+- [x] Flash existing firmware without rebuilding
+- [ ] Manual hardware test on Linux/macOS/Windows (checklist in PROGRESS.md)
+- [ ] Detect a fast replug during "restarting" (fresh mount lacks our file) instead of the "still there" hint
+- [ ] After flashing: offer to check the keyboard over USB (ZMK device appears with the new name)
 
 ## Phase 5 — Keymap editor UI
 - [ ] Visual Corne layout from physical layout data

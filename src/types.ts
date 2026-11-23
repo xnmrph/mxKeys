@@ -170,3 +170,17 @@ export interface BuildOutcome { profile: HardwareProfile; results: TargetResult[
 export type BuildEvent =
   | { type: "event"; data: PipelineEvent }
   | { type: "finished"; data: { outcome: BuildOutcome | null; error: string | null } };
+
+// ----- flashing (crates/flash session.rs, src-tauri flashing.rs) -----
+export type FlashPhase =
+  | { phase: "waiting_for_drive" }
+  | { phase: "too_many_drives" }
+  | { phase: "refused"; reason: string; drive: string }
+  | { phase: "copying"; drive: string }
+  | { phase: "restarting"; drive: string; polls: number }
+  | { phase: "failed"; reason: string }
+  | { phase: "finished" };
+
+export interface FlashStepView { title: string; state: "pending" | "current" | "done" | "skipped" }
+export interface FlashView { steps: FlashStepView[]; current: number | null; phase: FlashPhase; instruction: string; detail: string | null }
+export interface FlashEvent { view: FlashView; progress: [number, number] | null; ended: boolean }

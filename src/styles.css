@@ -85,3 +85,14 @@ button.primary { background: var(--accent); color: #fff; border-color: var(--acc
 .targets-status li .icon { color: var(--muted); }
 .targets-status li.done .icon { color: #16a34a; }
 .targets-status li.failed .icon { color: var(--err); }
+.flash-start, .flash-wizard { margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--border); }
+.flash-start .check { display: block; margin: 8px 0 12px; }
+.flash-steps { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.flash-steps li.current { font-weight: 600; }
+.flash-steps li.done .icon { color: #16a34a; }
+.flash-steps li.pending, .flash-steps li.skipped { color: var(--muted); }
+.flash-now { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; background: var(--key-muted); border-radius: 10px; padding: 12px 16px; }
+.flash-now .instruction { font-size: 17px; font-weight: 600; margin: 4px 0; }
+.flash-now.refused, .flash-now.failed { border-left: 4px solid var(--err); }
+.flash-now.finished { border-left: 4px solid #16a34a; }
+.flash-now .row { display: flex; gap: 8px; margin-top: 8px; }
