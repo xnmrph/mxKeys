@@ -143,7 +143,7 @@ pub fn schema(t: DefType) -> Schema {
             binding_cells: Some(2),
             props: vec![
                 required(prop("bindings", "Hold / tap", "What holding and tapping do (behaviors without parameters; the key sets them).", Bindings { count: Some(2), bare: true }, None)),
-                term("none — must be set"),
+                required(term("none")),
                 prop("flavor", "When does it count as a hold?", "How a press of another key while this one is down is decided.", Choice { options: FLAVORS.to_vec() }, Some("hold-preferred")),
                 prop("quick-tap-ms", "Quick tap", "Tapping again within this time and holding repeats the tap instead of holding (e.g. hold-to-repeat a letter).", Ms, Some("off")),
                 prop("require-prior-idle-ms", "Typing streak guard", "If another key was pressed within this time, it's always a tap — prevents accidental mods while typing fast.", Ms, Some("off")),
@@ -801,14 +801,16 @@ fn is_valid_name(s: &str) -> bool {
         && s.len() <= 31
 }
 
-fn find_body<'a>(doc: &'a Document, id: &str) -> Result<(Body<'a>, DefType), DefError> {
+/// The body, its type, and whether it tunes a built-in (then nothing is required:
+/// the built-in already sets everything).
+fn find_body<'a>(doc: &'a Document, id: &str) -> Result<(Body<'a>, DefType, bool), DefError> {
     for f in collect(doc) {
         match f {
             Found::Node { parent, node, ty } if format!("{parent}/{}", node.name) == id => {
-                return Ok((Body::of_node(node), ty))
+                return Ok((Body::of_node(node), ty, false))
             }
             Found::Override { node, ty } if format!("&{}", node.target) == id => {
-                return Ok((Body::of_ref(node), ty))
+                return Ok((Body::of_ref(node), ty, true))
             }
             Found::Helper { index, call, .. } if format!("helper:{index}") == id => {
                 return Err(DefError::ReadOnly(call.name.clone()))
@@ -984,7 +986,7 @@ pub fn set_prop(
     name: &str,
     value: &NewProp,
 ) -> Result<Vec<Patch>, DefError> {
-    let (body, ty) = find_body(doc, id)?;
+    let (body, ty, is_override) = find_body(doc, id)?;
     let schema = schema(ty);
     let s = schema
         .props
@@ -994,7 +996,7 @@ pub fn set_prop(
     let existing = body.property(name);
     let remove = matches!(value, NewProp::Remove) || matches!(value, NewProp::Flag(false));
     if remove {
-        if s.required {
+        if s.required && !is_override {
             return Err(bad(s.label, "is required"));
         }
         return Ok(existing
@@ -1290,7 +1292,7 @@ pub fn tune_builtin(doc: &Document, target: &str) -> Result<(String, Option<Patc
 
 /// Remove a definition. Refused while keys (or other definitions) still use it.
 pub fn remove(doc: &Document, id: &str) -> Result<Patch, DefError> {
-    let (body, _) = find_body(doc, id)?;
+    let (body, _, _) = find_body(doc, id)?;
     if let Some(label) = id.strip_prefix('&') {
         return Ok(remove_line_block(doc, body.span, label));
     }
@@ -1704,5 +1706,17 @@ mod tests {
             Some(&PropValue::Int(250))
         );
         assert!(tune_builtin(&doc, "kp").is_err());
+        // Required for your own hold-taps, optional when tuning a built-in.
+        let km = Keymap::from_document(&out).ok();
+        assert!(set_prop(
+            &out,
+            km.as_ref(),
+            "behaviors/homerow_mods",
+            "tapping-term-ms",
+            &NewProp::Remove
+        )
+        .is_err());
+        let p = set_prop(&out, km.as_ref(), "&mt", "tapping-term-ms", &NewProp::Remove).unwrap();
+        assert!(out.apply(&p).unwrap().source().ends_with("&mt {\n};\n"));
     }
 }
