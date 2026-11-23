@@ -202,3 +202,25 @@ button.link { border: none; background: none; padding: 0; cursor: pointer; }
 .recent ul { list-style: none; padding: 0; }
 .recent li { margin: 4px 0; }
 .recent button.link { color: var(--accent); font-weight: 600; padding: 0 6px 0 0; }
+.pictures-panel { margin-top: 24px; }
+.picture-halves { display: grid; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); gap: 14px; align-items: start; }
+.picture-half { border: 1px solid var(--border); border-radius: 10px; padding: 4px 16px 12px; background: var(--card); }
+.picture-half h3 { font-size: 15px; margin: 10px 0 6px; }
+.mode-choice { display: flex; gap: 14px; flex-wrap: wrap; font-size: 14px; }
+.picture-body { display: flex; gap: 16px; margin-top: 10px; align-items: flex-start; }
+.screen-mock { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 6px; border-radius: 10px; background: #1f2937; }
+.screen-mock .screen { background: #000; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+.screen-mock img { image-rendering: pixelated; display: block; }
+.screen-mock img.actual { width: 68px; height: auto; outline: 1px solid #4b5563; }
+.status-strip { background: #000; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; color: #fff; box-sizing: border-box; }
+.status-strip .batt { display: inline-block; width: 36px; height: 16px; border: 3px solid #fff; border-radius: 2px; background: linear-gradient(90deg, #fff 60%, transparent 60%); }
+.screen .empty { margin: auto; color: #9ca3af; }
+.picture-controls { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 200px; }
+.picture-controls .field { display: flex; flex-direction: column; gap: 2px; }
+.picture-controls select, .pictures-panel select { font: inherit; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--card); color: var(--fg); }
+.slider { display: grid; grid-template-columns: 96px minmax(0, 1fr) 34px; align-items: center; gap: 6px; }
+.slider input { min-width: 0; width: 100%; }
+.warning-text { color: var(--warn-fg); }
+.pictures-panel .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
+.pictures-panel button.link { color: var(--accent); padding: 2px 4px; font-size: 13px; }
+.pictures-panel button.link.danger { color: var(--err); }

@@ -9,6 +9,7 @@ import type { HardwareProfile } from "./types";
 import { KeymapEditor } from "./KeymapEditor";
 import { SettingsPanel } from "./SettingsPanel";
 import { HistoryPanel } from "./HistoryPanel";
+import { PicturesPanel } from "./PicturesPanel";
 
 export default function App() {
   const [repo, setRepo] = useState<RepoSummary | null>(null);
@@ -116,6 +117,7 @@ function RepoView({ repo, onKeymapChanged, onReload }: {
       {keymap && <KeymapEditor keymap={keymap} onChanged={(k) => { onKeymapChanged(k); bump(); }} onReload={onReload} />}
       {repo.firmware && <Firmware firmware={repo.firmware} />}
       {repo.confFiles.map((c) => <SettingsPanel key={c.path} confPath={c.path} onChanged={bump} />)}
+      {profile?.display === "nice_view" && <PicturesPanel repoRoot={repo.root} onChanged={bump} />}
       {repo.build && <BuildTargets targets={repo.build.targets} />}
     </>
   );
