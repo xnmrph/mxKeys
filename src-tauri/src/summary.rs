@@ -74,7 +74,7 @@ pub struct ConfSummary {
     pub duplicates: Vec<String>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SettingSummary {
     pub name: String,

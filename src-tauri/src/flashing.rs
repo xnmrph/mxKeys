@@ -34,6 +34,33 @@ pub fn firmware_for(data: &Path, repo: &Path) -> Firmware {
     Firmware::in_dir(&mxkeys_toolchain::pipeline::firmware_dir(data, repo))
 }
 
+/// Whether built firmware exists and is newer than every file in the config repo's
+/// `config/` folder and `build.yaml` (otherwise the UI suggests rebuilding).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum FirmwareState {
+    NotBuilt,
+    UpToDate,
+    Outdated,
+}
+
+pub fn firmware_state(fw: &Firmware, repo: &Path) -> FirmwareState {
+    let mtime = |p: &Path| std::fs::metadata(p).and_then(|m| m.modified()).ok();
+    let (Some(l), Some(r)) = (mtime(&fw.left), mtime(&fw.right)) else {
+        return FirmwareState::NotBuilt;
+    };
+    let built = l.min(r);
+    let mut sources: Vec<std::path::PathBuf> = vec![repo.join("build.yaml")];
+    if let Ok(dir) = std::fs::read_dir(repo.join("config")) {
+        sources.extend(dir.flatten().map(|e| e.path()).filter(|p| p.is_file()));
+    }
+    if sources.iter().filter_map(|p| mtime(p)).any(|t| t > built) {
+        FirmwareState::Outdated
+    } else {
+        FirmwareState::UpToDate
+    }
+}
+
 /// Prepare a session; error in plain language if the firmware isn't built or is wrong.
 pub fn new_session(fw: &Firmware, profile: &HardwareProfile, reset: bool) -> Result<Session, String> {
     for f in [&fw.left, &fw.right] {
@@ -147,6 +174,36 @@ mod tests {
     use mxkeys_flash::uf2::block;
     use mxkeys_probe::FsDriveScanner;
     use std::sync::mpsc;
+
+    #[test]
+    fn firmware_state_compares_file_times() {
+        use std::time::{Duration, SystemTime};
+        let base = std::env::temp_dir().join(format!("mxkeys-fwstate-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&base);
+        let (repo, fwdir) = (base.join("repo"), base.join("fw"));
+        std::fs::create_dir_all(repo.join("config")).unwrap();
+        std::fs::create_dir_all(&fwdir).unwrap();
+        let fw = Firmware::in_dir(&fwdir);
+        assert_eq!(firmware_state(&fw, &repo), FirmwareState::NotBuilt);
+        let set_time = |p: &Path, t: SystemTime| {
+            std::fs::File::options()
+                .write(true)
+                .create(true)
+                .truncate(false)
+                .open(p)
+                .unwrap()
+                .set_modified(t)
+                .unwrap();
+        };
+        let now = SystemTime::now();
+        set_time(&repo.join("config/corne.conf"), now - Duration::from_secs(60));
+        set_time(&fw.left, now - Duration::from_secs(30));
+        set_time(&fw.right, now - Duration::from_secs(30));
+        assert_eq!(firmware_state(&fw, &repo), FirmwareState::UpToDate);
+        set_time(&repo.join("config/corne.conf"), now);
+        assert_eq!(firmware_state(&fw, &repo), FirmwareState::Outdated);
+        std::fs::remove_dir_all(&base).unwrap();
+    }
 
     #[test]
     fn background_session_flashes_both_halves() {

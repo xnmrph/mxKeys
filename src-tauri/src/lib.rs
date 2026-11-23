@@ -2,6 +2,7 @@
 //! errors to plain-language strings for the UI.
 
 pub mod building;
+pub mod conf_settings;
 pub mod detection;
 pub mod editor;
 pub mod flashing;
@@ -237,6 +238,51 @@ fn forget_history(editor: tauri::State<'_, editor::Editor>, keymap_path: String)
     editor.forget(&PathBuf::from(keymap_path));
 }
 
+/// Whether the built firmware is missing, current, or older than the config files.
+#[tauri::command]
+fn firmware_state(app: AppHandle, repo_path: String) -> Result<flashing::FirmwareState, String> {
+    let repo = PathBuf::from(repo_path);
+    Ok(flashing::firmware_state(
+        &flashing::firmware_for(&data_dir(&app)?, &repo),
+        &repo,
+    ))
+}
+
+/// The settings page for one `.conf` file.
+#[tauri::command]
+fn settings_page(
+    editor: tauri::State<'_, editor::Editor>,
+    conf_path: String,
+) -> Result<conf_settings::SettingsPage, String> {
+    conf_settings::load(&PathBuf::from(conf_path), &editor)
+}
+
+/// Change one setting (or a raw Kconfig option) in the `.conf` file.
+#[tauri::command]
+fn edit_settings(
+    editor: tauri::State<'_, editor::Editor>,
+    conf_path: String,
+    op: conf_settings::SettingsOp,
+) -> Result<conf_settings::SettingsPage, String> {
+    conf_settings::edit(&PathBuf::from(conf_path), &op, &editor)
+}
+
+#[tauri::command]
+fn undo_settings(
+    editor: tauri::State<'_, editor::Editor>,
+    conf_path: String,
+) -> Result<conf_settings::SettingsPage, String> {
+    conf_settings::step(&PathBuf::from(conf_path), true, &editor)
+}
+
+#[tauri::command]
+fn redo_settings(
+    editor: tauri::State<'_, editor::Editor>,
+    conf_path: String,
+) -> Result<conf_settings::SettingsPage, String> {
+    conf_settings::step(&PathBuf::from(conf_path), false, &editor)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -266,7 +312,12 @@ pub fn run() {
             undo_keymap,
             redo_keymap,
             file_version,
-            forget_history
+            forget_history,
+            firmware_state,
+            settings_page,
+            edit_settings,
+            undo_settings,
+            redo_settings
         ])
         .run(tauri::generate_context!())
         .expect("error while running mxKeys");

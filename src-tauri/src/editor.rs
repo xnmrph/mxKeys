@@ -122,7 +122,7 @@ fn patches_for(doc: &Document, km: &Keymap, op: &EditOp) -> Result<Vec<Patch>, S
     })
 }
 
-fn write(path: &Path, text: &str) -> Result<(), String> {
+pub fn write(path: &Path, text: &str) -> Result<(), String> {
     std::fs::write(path, text).map_err(|e| format!("couldn't save {}: {e}", path.display()))
 }
 
@@ -157,14 +157,9 @@ impl Editor {
         }
         let text = after.source().to_string();
         write(path, &text)?;
-        let mut all = self.history.lock().unwrap();
-        let h = all.entry(path.to_path_buf()).or_default();
-        h.undo.push(before);
-        if h.undo.len() > MAX_HISTORY {
-            h.undo.remove(0);
-        }
-        h.redo.clear();
-        result(path, text, h)
+        self.record(path, before);
+        let all = self.history.lock().unwrap();
+        result(path, text, &all[path])
     }
 
     pub fn undo(&self, path: &Path) -> Result<EditResult, String> {
@@ -176,6 +171,32 @@ impl Editor {
     }
 
     fn step(&self, path: &Path, undo: bool) -> Result<EditResult, String> {
+        let text = self.step_text(path, undo)?;
+        let all = self.history.lock().unwrap();
+        result(path, text, &all[path])
+    }
+
+    /// Remember `before` as an undo step for `path` (after the new text was written).
+    pub fn record(&self, path: &Path, before: String) {
+        let mut all = self.history.lock().unwrap();
+        let h = all.entry(path.to_path_buf()).or_default();
+        h.undo.push(before);
+        if h.undo.len() > MAX_HISTORY {
+            h.undo.remove(0);
+        }
+        h.redo.clear();
+    }
+
+    /// `(can_undo, can_redo)` for `path`.
+    pub fn flags(&self, path: &Path) -> (bool, bool) {
+        let all = self.history.lock().unwrap();
+        all.get(path)
+            .map(|h| (!h.undo.is_empty(), !h.redo.is_empty()))
+            .unwrap_or((false, false))
+    }
+
+    /// Undo/redo one step of any text file in the history; returns the text written.
+    pub fn step_text(&self, path: &Path, undo: bool) -> Result<String, String> {
         let current = repo::read(path).map_err(|e| e.to_string())?;
         let mut all = self.history.lock().unwrap();
         let h = all.entry(path.to_path_buf()).or_default();
@@ -191,7 +212,7 @@ impl Editor {
         })?;
         to.push(current);
         write(path, &text)?;
-        result(path, text, h)
+        Ok(text)
     }
 
     /// Forget history (e.g. after the file changed outside the app).
