@@ -1,4 +1,5 @@
 import { useMemo, useState, type ReactElement } from "react";
+import { confirmAction, tell } from "./dialogs";
 import type { DefSchema, DefType, Definition, EditOp, KeyGeom, NewProp, PropSchema, PropValue } from "./types";
 import { Catalog, describe, type KeyLabel } from "./bindings";
 import { KeyPicker } from "./KeyPicker";
@@ -137,7 +138,7 @@ export function BehaviorsPanel({ definitions, cat, geometry, baseLabels, edit }:
     const props: [string, NewProp][] = [];
     if (tab === "conditional_layer") {
       const n = cat.data.layers.length;
-      if (n < 3) return void alert("A conditional layer needs at least three layers.");
+      if (n < 3) return void tell("A conditional layer needs at least three layers.");
       props.push(["if-layers", { type: "layers", value: [n - 3 + 1, n - 3 + 2].filter((x) => x < n) }], ["then-layer", { type: "layers", value: [n - 1] }]);
     }
     if (await edit({ op: "add_def", def_type: tab, name, props })) {
@@ -221,7 +222,7 @@ function DefinitionEditor({ d, conflict, schema, cat, geometry, baseLabels, edit
         </div>
         {!readOnly && d.source === "node" && (
           <button className="danger" disabled={d.uses > 0} title={d.uses > 0 ? "Remove it from your keys first" : undefined}
-            onClick={async () => { if (window.confirm(`Delete “${d.title}”? (You can undo this.)`) && await edit({ op: "remove_def", id: d.id })) onRemoved(); }}>
+            onClick={async () => { if (await confirmAction(`Delete “${d.title}”? (You can undo this.)`, "Delete") && await edit({ op: "remove_def", id: d.id })) onRemoved(); }}>
             Delete
           </button>
         )}

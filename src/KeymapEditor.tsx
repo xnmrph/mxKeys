@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { confirmAction } from "./dialogs";
 import { invoke } from "@tauri-apps/api/core";
 import type { EditOp, EditResult, EditorCatalog, KeyGeom, KeymapSummary } from "./types";
 import { Catalog, describe } from "./bindings";
@@ -139,7 +140,7 @@ export function KeymapEditor({ keymap, onChanged, onReload }: {
             <button disabled={layer.index === 0} onClick={async () => { if (await edit({ op: "move_layer", from: layer.index, to: layer.index - 1 })) setLayerIndex(layer.index - 1); }} title="Move this layer one place left">◀ Move</button>
             <button disabled={layer.index === last} onClick={async () => { if (await edit({ op: "move_layer", from: layer.index, to: layer.index + 1 })) setLayerIndex(layer.index + 1); }} title="Move this layer one place right">Move ▶</button>
             <button className="danger" disabled={keymap.layers.length === 1} onClick={async () => {
-              if (window.confirm(`Delete the layer “${layer.title}”? (You can undo this.)`)) {
+              if (await confirmAction(`Delete the layer “${layer.title}”? (You can undo this.)`, "Delete")) {
                 if (await edit({ op: "remove_layer", layer: layer.index })) setLayerIndex(Math.max(0, layer.index - 1));
               }
             }}>Delete layer</button>
