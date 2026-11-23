@@ -11,6 +11,7 @@ rust-version.workspace = true
 flate2 = "1"
 hex = "0.4"
 liblzma = { version = "0.4", features = ["static"] }
+mxkeys-flash = { path = "../flash" }
 mxkeys-hardware = { path = "../hardware" }
 reqwest = { version = "0.13", features = ["blocking"] }
 serde.workspace = true

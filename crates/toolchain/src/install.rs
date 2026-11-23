@@ -412,7 +412,11 @@ mod tests {
         };
         let env = i.env();
         // Built from the same path functions so it holds with `\` separators on Windows too.
-        assert!(env["PATH"].starts_with(&format!("{}:", i.layout.venv_bin().display())), "{}", env["PATH"]);
+        assert!(
+            env["PATH"].starts_with(&format!("{}:", i.layout.venv_bin().display())),
+            "{}",
+            env["PATH"]
+        );
         assert!(i.layout.venv_bin().ends_with(Path::new("venv").join("bin")));
         assert!(env["ZEPHYR_SDK_INSTALL_DIR"].ends_with("zephyr-sdk"));
     }

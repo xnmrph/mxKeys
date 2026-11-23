@@ -1,5 +1,5 @@
 //! Minimal UF2 inspection: is a file a well-formed UF2, and for which chip family?
-//! (Phase 4's flashing uses this to refuse mismatched firmware.)
+//! Used to refuse firmware for the wrong chip before flashing.
 
 use serde::Serialize;
 
@@ -62,8 +62,9 @@ pub fn inspect(data: &[u8]) -> Result<Uf2Summary, Uf2Error> {
     })
 }
 
-#[cfg(test)]
-pub(crate) fn block(addr: u32, family: u32) -> Vec<u8> {
+/// One valid UF2 block (for tests and examples).
+#[doc(hidden)]
+pub fn block(addr: u32, family: u32) -> Vec<u8> {
     let mut b = vec![0u8; 512];
     for (i, w) in [
         MAGIC_START0,

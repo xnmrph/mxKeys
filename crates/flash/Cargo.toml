@@ -1,0 +1,14 @@
+[package]
+name = "mxkeys-flash"
+version = "0.1.0"
+description = "Guided UF2 flashing for mxKeys: verification, copying, and the step-by-step flow"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+mxkeys-hardware = { path = "../hardware" }
+mxkeys-probe = { path = "../probe" }
+serde.workspace = true
+thiserror.workspace = true

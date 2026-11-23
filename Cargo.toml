@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/zmk-config", "crates/git", "crates/hardware", "crates/probe", "crates/toolchain", "src-tauri"]
+members = ["crates/zmk-config", "crates/git", "crates/hardware", "crates/probe", "crates/toolchain", "crates/flash", "src-tauri"]
 
 [workspace.package]
 edition = "2021"

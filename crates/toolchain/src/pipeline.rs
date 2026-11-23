@@ -248,7 +248,7 @@ fn build_targets(
                 let expected = mxkeys_hardware::catalog::controller(profile.controller).uf2_family;
                 let check = fs::read(&path)
                     .map_err(|e| e.to_string())
-                    .and_then(|b| crate::uf2::inspect(&b).map_err(|e| e.to_string()));
+                    .and_then(|b| mxkeys_flash::uf2::inspect(&b).map_err(|e| e.to_string()));
                 match check {
                     Ok(s) if s.family == Some(expected) => {
                         let dest = firmware_dir.join(format!("{}.uf2", target_name(id)));

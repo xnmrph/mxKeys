@@ -14,5 +14,4 @@ pub mod manifest;
 pub mod pipeline;
 pub mod runner;
 pub mod trim;
-pub mod uf2;
 pub mod workspace;

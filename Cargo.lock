@@ -2335,6 +2335,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "mxkeys-flash"
+version = "0.1.0"
+dependencies = [
+ "mxkeys-hardware",
+ "mxkeys-probe",
+ "serde",
+ "thiserror 2.0.21",
+]
+
+[[package]]
 name = "mxkeys-git"
 version = "0.1.0"
 dependencies = [
@@ -2369,6 +2379,7 @@ dependencies = [
  "flate2",
  "hex",
  "liblzma",
+ "mxkeys-flash",
  "mxkeys-hardware",
  "reqwest",
  "serde",
