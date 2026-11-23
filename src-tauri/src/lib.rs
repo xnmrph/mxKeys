@@ -15,6 +15,16 @@ fn open_config_repo(path: String) -> Result<summary::RepoSummary, String> {
     summary::load_repo(&PathBuf::from(path)).map_err(|e| e.to_string())
 }
 
+/// A config folder passed on the command line (`mxkeys ~/zmk-config`), opened at startup.
+#[tauri::command]
+fn startup_path() -> Option<String> {
+    std::env::args_os()
+        .skip(1)
+        .map(PathBuf::from)
+        .find(|p| p.is_dir())
+        .map(|p| p.display().to_string())
+}
+
 /// Which git the app will use (shown in the "Advanced" part of the clone screen).
 #[tauri::command]
 fn git_backend() -> mxkeys_git::Backend {
@@ -84,6 +94,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             open_config_repo,
+            startup_path,
             git_backend,
             check_repo_url,
             clone_config_repo,

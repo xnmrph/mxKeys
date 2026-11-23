@@ -40,7 +40,10 @@ export function bindingLabel(raw: string): KeyLabel {
     case "&mt": return { tap: keyName(params[1] ?? ""), hold: keyName(params[0] ?? "") };
     case "&bt":
       if (params[0] === "BT_SEL") return { tap: `BT ${Number(params[1]) + 1}` };
-      if (params[0] === "BT_CLR") return { tap: "BT clear" };
+      if (params[0] === "BT_CLR") return { tap: "BT forget" };
+      if (params[0] === "BT_CLR_ALL") return { tap: "BT forget all" };
+      if (params[0] === "BT_NXT") return { tap: "BT next" };
+      if (params[0] === "BT_PRV") return { tap: "BT prev" };
       return { tap: params.join(" ") };
     case "&out": return { tap: params[0] === "OUT_USB" ? "USB" : params[0] === "OUT_BLE" ? "Bluetooth" : params.join(" ") };
     case "&caps_word": return { tap: "Caps word" };

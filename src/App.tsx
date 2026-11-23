@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import type { ConfSummary, FirmwareSummary, KeymapSummary, RepoSummary, TargetSummary } from "./types";
@@ -13,11 +13,16 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  async function openFolder() {
-    setError(null);
-    const dir = await open({ directory: true, title: "Choose your zmk-config folder" });
-    if (typeof dir !== "string") return;
+  // `mxkeys <folder>` opens that config folder straight away.
+  useEffect(() => {
+    invoke<string | null>("startup_path")
+      .then((p) => { if (p) void loadFolder(p); })
+      .catch(() => {});
+  }, []);
+
+  async function loadFolder(dir: string) {
     setBusy(true);
+    setError(null);
     try {
       setRepo(await invoke<RepoSummary>("open_config_repo", { path: dir }));
     } catch (e) {
@@ -25,6 +30,12 @@ export default function App() {
     } finally {
       setBusy(false);
     }
+  }
+
+  async function openFolder() {
+    setError(null);
+    const dir = await open({ directory: true, title: "Choose your zmk-config folder" });
+    if (typeof dir === "string") await loadFolder(dir);
   }
 
   return (
