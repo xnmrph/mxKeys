@@ -42,6 +42,8 @@ pub struct Binding {
     pub behavior: String,
     /// Raw parameter texts, e.g. `["LSHIFT", "A"]`.
     pub params: Vec<String>,
+    /// Where each parameter is in the source (same order as `params`).
+    pub param_spans: Vec<Span>,
     /// The exact source text (with original spacing).
     pub raw: String,
     /// Set when the binding came from an object-like `#define` (e.g. `XXX` → `&none`).
@@ -269,6 +271,9 @@ impl Keymap {
 }
 
 /// Edit helper: apply `patch` to `doc` and rebuild both document and keymap.
+mod edit;
+pub use edit::{EditError, LayerNameError};
+
 pub fn apply(doc: &Document, patch: &Patch) -> Result<(Document, Keymap), KeymapError> {
     let new_doc = doc.apply(std::slice::from_ref(patch))?;
     let km = Keymap::from_document(&new_doc)?;
@@ -381,6 +386,7 @@ fn binding_list(doc: &Document, defines: &DefineTable, p: &Property) -> BindingL
         end: Span,
         behavior: String,
         params: Vec<String>,
+        param_spans: Vec<Span>,
         via_define: Option<String>,
     }
     let mut cur: Option<Cur> = None;
@@ -390,6 +396,7 @@ fn binding_list(doc: &Document, defines: &DefineTable, p: &Property) -> BindingL
             span,
             behavior: c.behavior,
             params: c.params,
+            param_spans: c.param_spans,
             raw: doc.text(span).to_string(),
             via_define: c.via_define,
         });
@@ -422,6 +429,7 @@ fn binding_list(doc: &Document, defines: &DefineTable, p: &Property) -> BindingL
                     end: cell.span,
                     behavior,
                     params: Vec::new(),
+                    param_spans: Vec::new(),
                     via_define,
                 });
             }
@@ -429,6 +437,7 @@ fn binding_list(doc: &Document, defines: &DefineTable, p: &Property) -> BindingL
                 Some(c) => {
                     c.end = cell.span;
                     c.params.push(text);
+                    c.param_spans.push(cell.span);
                 }
                 None => {
                     let hint = match &cell.kind {
