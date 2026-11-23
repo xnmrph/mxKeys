@@ -3,6 +3,33 @@
 Newest first. Each session: what was done, what's next, open questions, and anything
 that needs testing on real hardware.
 
+## Session 3 (cont.) — 2026-11-23 — Phase 7
+
+### Done
+- `zmk-config::behaviors`: schema-driven typed view of every definition (types, labels,
+  defaults and help per property; checked against ZMK's `dts/bindings` YAML at 4de3133 —
+  e.g. hold-tap `tapping-term-ms` is required, flavor defaults to hold-preferred, combo
+  timeout 50 ms, macro wait/tap 15/30 ms). Reads layer `#define`s, numeric defines,
+  `<&a &b>` groups in macros, `(MOD_LSFT|MOD_RSFT)`, and how often each `&label` is used.
+- Edits are property-level patches; adding creates the node (and the `combos` /
+  `behaviors` / `macros` container if needed) in the file's own indentation; removing
+  is refused while keys use the behavior.
+- zmk-helpers macros (`ZMK_HOLD_TAP(…)`, `ZMK_COMBO(…)`, …) are parsed and shown
+  read-only.
+- App: “Combos, macros and special keys” panel under the keymap; macro steps in the key
+  picker only when editing a macro; same-keys combo warning (layer-aware).
+- Keypad keys now show as “Num 0”, “Num −” (generator rule; only labels changed).
+- **Acceptance test** in the real app on a copy of `xnmrph/corne`: created combo
+  “Undo” (Z + X → Ctrl+Z) with the mini keyboard and key picker → 5-line diff → built
+  in the app; `zephyr.dts` contains `key-positions = <0x19 0x1a>` and `&kp 0x107001d`.
+- Owner's keymap read correctly: 19 combos, 13 macros, the hold-tap `&hm` (currently
+  unused by any key), 2 mod-morphs, tap dance, caps word, conditional layer.
+- 141 tests.
+
+### Next
+1. Phase 8: git (status, diff, commit, push) — also how the owner's pending edits
+   (OUT_TOG key, screen on) reach their real repo.
+
 ## Session 3 (cont.) — 2026-11-23 — Phase 6
 
 ### Done

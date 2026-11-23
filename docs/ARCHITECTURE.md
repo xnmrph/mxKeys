@@ -352,6 +352,25 @@ loop):
 - Settings are written to the `.conf` the repo already has (`config/corne.conf` applies
   to both halves). Per-half files (`corne_left.conf`) are shown as separate pages.
 
+### 8.2 Behaviors, macros, combos (Phase 7)
+
+- `zmk-config::behaviors` describes each definition type with a schema (property name,
+  plain label/help, type: time, flag, choice, bindings (bare or with parameters, fixed
+  or variable count), modifiers, key positions, layers, one layer, keycode list),
+  taken from ZMK's devicetree bindings. The UI renders forms from it.
+- Definitions are found by walking the CST: nodes with a `zmk,behavior-*` compatible,
+  children of `zmk,combos` / `zmk,conditional-layers`, `&mt { … }` overrides of
+  built-ins, and top-level zmk-helpers macro calls (parsed by turning the arguments back
+  into a node body; read-only).
+- Ids are stable across edits: `container/node-name`, `&label`, `helper:<n>`.
+- Writes keep diffs minimal: one property's value span is replaced; a binding list with
+  the same number of entries patches only changed entries (so `<&kp A &kp B>` groups
+  survive); new properties go before the closing brace with the body's indentation;
+  removed properties take their line (and a trailing comment) with them. New nodes use
+  the indentation unit the file already uses (spaces or tabs).
+- Layers are written with the file's `#define` names when they exist (as the key picker
+  does); moving/removing layers already renumbers combo/conditional-layer references.
+
 ## 9. Live editing and sync-back (Phase 10)
 
 ### 9.1 Protocol (from ZMK docs, read respecting the clean-room policy)

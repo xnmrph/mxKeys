@@ -109,9 +109,15 @@ Phases are done in order, one at a time. Tick boxes as work lands (keep this fil
 - [ ] Per-half settings (`corne_left.conf` vs `corne_right.conf`) explained in the UI
 
 ## Phase 7 — Advanced behaviors
-- [ ] Macros, combos, hold-taps, mod-morphs, conditional layers, tap-dance, sticky keys
-- [ ] Custom behavior nodes editing (typed CST edits)
-- [ ] Helper-macro (e.g. `ZMK_HOLD_TAP(...)`) read support
+- [x] Typed model (`zmk-config::behaviors`): hold-taps, mod-morphs, tap-dances, sticky keys, caps word, macros (incl. one/two-param), combos, conditional layers; property schemas from ZMK's devicetree bindings
+- [x] Typed CST edits: set/insert/remove one property (minimal patch; same-count binding lists patch only changed entries; file's indent and multi-line style kept), add a definition (container created if missing), remove (refused while used)
+- [x] Tune built-ins (`&mt`, `&lt`, `&sk`, `&sl`, `&caps_word`) via `&mt { … };`
+- [x] Helper-macro read support (`ZMK_HOLD_TAP`, `ZMK_COMBO`, `ZMK_CONDITIONAL_LAYER`, …) — shown read-only
+- [x] UI: tabs per type, forms from the schema, combo keys picked on a mini keyboard, macro steps list (press/tap/release modes, waits), same-keys combo warning, usage counts
+- [x] Acceptance: new combo Z + X → Ctrl+Z created in the app on (a copy of) `xnmrph/corne` → 5-line diff → firmware builds, combo present in the compiled devicetree
+- [ ] Editing helper-macro definitions (rewrite macro arguments)
+- [ ] Renaming a behavior (label + every `&label` use)
+- [ ] Leader keys, adaptive keys and other module behaviors (shown under "Other" with raw properties)
 
 ## Phase 8 — Git
 - [ ] Status, diff view, commit
