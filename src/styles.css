@@ -119,3 +119,24 @@ form.inline input, .key-picker input, .key-picker select { font: inherit; paddin
 .keychoice.chosen { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
 .command-field { display: inline-flex; gap: 6px; }
 button.link { border: none; background: none; padding: 0; cursor: pointer; }
+.setting-groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); gap: 14px; }
+.setting-group { border: 1px solid var(--border); border-radius: 10px; padding: 4px 16px 10px; background: var(--card); }
+.setting-group h3 { font-size: 15px; margin: 10px 0 4px; }
+.setting { padding: 8px 0; border-top: 1px solid var(--border); }
+.setting-group h3 + .setting { border-top: none; }
+.setting.inactive .setting-label, .setting.inactive .setting-control { opacity: .5; }
+.setting-main { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.setting-label { font-weight: 600; }
+.setting-control { display: flex; align-items: center; gap: 8px; }
+.setting-control input:not([type=checkbox]), .setting-control select, .raw-options input { font: inherit; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--card); color: var(--fg); }
+.setting-control .number input { width: 80px; margin-right: 4px; }
+.setting-control .text input { width: 160px; margin-right: 4px; }
+.setting-control select { max-width: 260px; }
+.setting-help { font-size: 13px; margin-top: 2px; }
+.setting-raw { font-size: 12px; margin-top: 4px; display: flex; gap: 6px; flex-wrap: wrap; }
+.switch { display: inline-flex; align-items: center; gap: 6px; min-width: 52px; }
+.check { display: inline-flex; align-items: center; gap: 4px; font-size: 14px; }
+.settings-panel button.link { color: var(--accent); padding: 2px 4px; font-size: 13px; }
+.raw-options { margin-top: 14px; }
+.raw-options form { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.settings-panel .warning { font-size: 13px; }

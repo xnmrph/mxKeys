@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
-import type { ConfSummary, FirmwareSummary, KeymapSummary, RepoSummary, TargetSummary } from "./types";
+import type { FirmwareSummary, KeymapSummary, RepoSummary, TargetSummary } from "./types";
 import { CloneForm } from "./CloneForm";
 import { HardwareSetup } from "./HardwareSetup";
 import { BuildPanel } from "./BuildPanel";
 import type { HardwareProfile } from "./types";
 import { KeymapEditor } from "./KeymapEditor";
+import { SettingsPanel } from "./SettingsPanel";
 
 export default function App() {
   const [repo, setRepo] = useState<RepoSummary | null>(null);
@@ -87,17 +88,20 @@ function RepoView({ repo, onKeymapChanged, onReload }: {
   const keymap = repo.keymaps[0];
   const [profile, setProfile] = useState<HardwareProfile | null>(null);
   const onProfile = useCallback((p: HardwareProfile | null) => setProfile(p), []);
+  // Bumped on every edit so the Firmware panel can say a rebuild is needed.
+  const [changes, setChanges] = useState(0);
+  const bump = useCallback(() => setChanges((n) => n + 1), []);
   return (
     <>
       <p className="muted path">{repo.root}</p>
       <HardwareSetup repoRoot={repo.root} onProfile={onProfile} />
-      {profile && <BuildPanel repoRoot={repo.root} autoSetup />}
+      {profile && <BuildPanel repoRoot={repo.root} autoSetup changes={changes} />}
       {repo.warnings.map((w) => (
         <p key={w} className="warning">{w}</p>
       ))}
-      {keymap && <KeymapEditor keymap={keymap} onChanged={onKeymapChanged} onReload={onReload} />}
+      {keymap && <KeymapEditor keymap={keymap} onChanged={(k) => { onKeymapChanged(k); bump(); }} onReload={onReload} />}
       {repo.firmware && <Firmware firmware={repo.firmware} />}
-      {repo.confFiles.map((c) => <Settings key={c.path} conf={c} />)}
+      {repo.confFiles.map((c) => <SettingsPanel key={c.path} confPath={c.path} onChanged={bump} />)}
       {repo.build && <BuildTargets targets={repo.build.targets} />}
     </>
   );
@@ -165,58 +169,6 @@ function Firmware({ firmware }: { firmware: FirmwareSummary }) {
             ))}
           </tbody>
         </table>
-      </details>
-    </section>
-  );
-}
-
-const FRIENDLY_SETTINGS: Record<string, string> = {
-  CONFIG_ZMK_KEYBOARD_NAME: "Keyboard name (shown in Bluetooth)",
-  CONFIG_ZMK_SLEEP: "Deep sleep when idle",
-  CONFIG_ZMK_IDLE_TIMEOUT: "Idle after (ms)",
-  CONFIG_ZMK_IDLE_SLEEP_TIMEOUT: "Deep sleep after (ms)",
-  CONFIG_ZMK_STUDIO: "Live editing (ZMK Studio)",
-  CONFIG_ZMK_DISPLAY: "Screen",
-  CONFIG_ZMK_POINTING: "Mouse keys",
-  CONFIG_ZMK_RGB_UNDERGLOW: "RGB underglow",
-  CONFIG_BT_CTLR_TX_PWR_PLUS_8: "Stronger Bluetooth signal (+8 dBm)",
-};
-
-function friendlyValue(v: string): string {
-  if (v === "y") return "on";
-  if (v === "n") return "off";
-  return v.replace(/^"(.*)"$/, "$1");
-}
-
-function Settings({ conf }: { conf: ConfSummary }) {
-  const active = conf.settings.filter((s) => s.state !== "commented_out");
-  const off = conf.settings.filter((s) => s.state === "commented_out");
-  return (
-    <section>
-      <h2>Settings <span className="muted">· {conf.fileName}</span></h2>
-      {active.length === 0 ? <p className="muted">No settings changed from ZMK's defaults.</p> : (
-        <ul className="settings">
-          {active.map((s) => (
-            <li key={`${s.name}-${s.line}`}>
-              {FRIENDLY_SETTINGS[s.name] ?? s.name}: <strong>{friendlyValue(s.value)}</strong>
-            </li>
-          ))}
-        </ul>
-      )}
-      <details>
-        <summary>Advanced</summary>
-        <table>
-          <thead><tr><th>line</th><th>option</th><th>value</th><th></th></tr></thead>
-          <tbody>
-            {conf.settings.map((s) => (
-              <tr key={`${s.name}-${s.line}`}>
-                <td>{s.line}</td><td><code>{s.name}</code></td><td><code>{s.value}</code></td>
-                <td className="muted">{s.state === "commented_out" ? "commented out" : s.state === "not_set" ? "is not set" : ""}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {off.length > 0 && <p className="muted">{off.length} option(s) are commented out and have no effect.</p>}
       </details>
     </section>
   );

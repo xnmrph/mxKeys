@@ -220,3 +220,33 @@ export type EditOp =
   | { op: "add_layer"; name: string }
   | { op: "remove_layer"; layer: number }
   | { op: "move_layer"; from: number; to: number };
+
+// ---- Settings page (Phase 6) ----
+export type SettingGroup = "power" | "bluetooth" | "screen" | "lights" | "typing" | "live_editing";
+export type Unit = "seconds" | "minutes" | "milliseconds" | "percent";
+export interface ChoiceOption { option: string | null; value: number | null; label: string }
+export type SettingKind =
+  | { type: "toggle"; option: string; default: boolean; also: string[] }
+  | { type: "number"; option: string; default: number; min: number; max: number; unit: Unit }
+  | { type: "text"; option: string; default: string; max_bytes: number }
+  | { type: "choice"; options: ChoiceOption[]; default: number }
+  | { type: "pick"; option: string; options: ChoiceOption[]; default: number };
+export interface SettingDef { id: string; group: SettingGroup; label: string; help: string; kind: SettingKind; requires: string | null }
+export type SettingValue =
+  | { type: "bool"; value: boolean }
+  | { type: "int"; value: number }
+  | { type: "text"; value: string }
+  | { type: "choice"; value: number };
+export type NewValue = SettingValue | { type: "default" };
+export interface SettingView { def: SettingDef; value: SettingValue; isDefault: boolean; lines: number[]; applies: boolean; problem: string | null }
+export interface SettingsPage {
+  path: string; fileName: string;
+  groups: { id: SettingGroup; title: string; settings: SettingView[] }[];
+  other: SettingSummary[]; all: SettingSummary[]; duplicates: string[];
+  version: string; canUndo: boolean; canRedo: boolean;
+}
+export type SettingsOp =
+  | { op: "set"; id: string; value: NewValue }
+  | { op: "set_raw"; name: string; value: string }
+  | { op: "remove_raw"; name: string };
+export type FirmwareState = "not_built" | "up_to_date" | "outdated";

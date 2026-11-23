@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { FlashWizard } from "./FlashWizard";
-import type {
+import type { FirmwareState,
   BuildEvent, BuildOutcome, InstallProgress, Problem, TargetId, ToolchainEvent, ToolchainInfo,
 } from "./types";
 
@@ -46,7 +46,7 @@ function ProblemView({ p }: { p: Problem }) {
   );
 }
 
-export function BuildPanel({ repoRoot, autoSetup }: { repoRoot: string; autoSetup: boolean }) {
+export function BuildPanel({ repoRoot, autoSetup, changes = 0 }: { repoRoot: string; autoSetup: boolean; changes?: number }) {
   const [tc, setTc] = useState<ToolchainInfo | null>(null);
   const [tcProgress, setTcProgress] = useState<InstallProgress | null>(null);
   const [tcError, setTcError] = useState<string | null>(null);
@@ -61,6 +61,14 @@ export function BuildPanel({ repoRoot, autoSetup }: { repoRoot: string; autoSetu
   useEffect(() => {
     invoke<boolean>("firmware_ready", { repoPath: repoRoot }).then(setBuiltBefore).catch(() => setBuiltBefore(false));
   }, [repoRoot, outcome]);
+  const [fwState, setFwState] = useState<FirmwareState>("not_built");
+  useEffect(() => {
+    // Small delay so the file's new modification time is on disk.
+    const t = setTimeout(() => {
+      invoke<FirmwareState>("firmware_state", { repoPath: repoRoot }).then(setFwState).catch(() => {});
+    }, 300);
+    return () => clearTimeout(t);
+  }, [repoRoot, outcome, changes]);
   const lastStage = useRef("");
 
   const refresh = useCallback(() => {
@@ -138,6 +146,9 @@ export function BuildPanel({ repoRoot, autoSetup }: { repoRoot: string; autoSetu
     <section className="build-panel">
       <h2>Firmware</h2>
       <p className="muted">{toolsLine}</p>
+      {fwState === "outdated" && !building && (
+        <p className="warning">You changed your keymap or settings since the last build. Build and install the firmware again to put the changes on the keyboard.</p>
+      )}
       {pct !== null && <div className="progress"><div className="bar"><div style={{ width: `${pct}%` }} /></div></div>}
       {tcError && <p className="error">{tcError}</p>}
       <div className="row">
