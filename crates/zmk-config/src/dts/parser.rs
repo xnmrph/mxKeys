@@ -244,6 +244,25 @@ impl<'a> Parser<'a> {
                 }
                 None
             }
+            // Node names may start with a digit (`0 { … };`, e.g. a keymap layer whose
+            // name was a `#define` in the build's preprocessed zephyr.dts).
+            TokenKind::Number if self.is_punct(self.peek_at(1), "{") => {
+                let name_tok = self.bump();
+                let full = self.text(name_tok).to_string();
+                let open = self.bump();
+                let (name, unit) = match full.split_once('@') {
+                    Some((n, u)) => (n.to_string(), Some(u.to_string())),
+                    None => (full, None),
+                };
+                Some(Item::Node(self.node_rest(
+                    name_tok.span.start,
+                    Vec::new(),
+                    name,
+                    unit,
+                    name_tok.span,
+                    open,
+                )))
+            }
             _ => None,
         }
     }

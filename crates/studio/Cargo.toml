@@ -11,6 +11,7 @@ rust-version.workspace = true
 prost = "0.13"
 serde.workspace = true
 thiserror.workspace = true
+zmk-config = { path = "../zmk-config" }
 serialport = "4.10"
 btleplug = "0.13"
 tokio = { version = "1", features = ["rt", "time", "sync", "macros"] }

@@ -9,6 +9,7 @@
 pub mod ble;
 pub mod client;
 pub mod framing;
+pub mod mapping;
 pub mod proto;
 pub mod serial;
 pub mod sim;

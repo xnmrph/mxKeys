@@ -457,3 +457,26 @@ pub(crate) fn unescape_string(raw: &str) -> String {
     }
     out
 }
+
+#[cfg(test)]
+mod numeric_node_tests {
+    use super::*;
+
+    #[test]
+    fn node_names_may_start_with_a_digit() {
+        let d = Document::parse("/ { keymap { 0 { bindings = <&kp 0x4>; }; NOR { }; }; };");
+        assert!(d.diagnostics.is_empty(), "{:?}", d.diagnostics);
+        let names: Vec<_> = d
+            .walk()
+            .filter_map(|i| match i {
+                Item::Node(n) => Some(n.name.as_str()),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(names, ["/", "keymap", "0", "NOR"]);
+        assert_eq!(
+            d.to_source(),
+            "/ { keymap { 0 { bindings = <&kp 0x4>; }; NOR { }; }; };"
+        );
+    }
+}

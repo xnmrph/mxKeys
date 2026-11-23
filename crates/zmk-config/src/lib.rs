@@ -14,6 +14,7 @@ pub mod behaviors;
 pub mod build_yaml;
 pub mod catalog;
 pub mod changes;
+pub mod cpp;
 pub mod dts;
 pub mod kconfig;
 pub mod keymap;
