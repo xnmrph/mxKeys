@@ -6,6 +6,7 @@ pub mod conf_settings;
 pub mod detection;
 pub mod editor;
 pub mod flashing;
+pub mod history;
 pub mod profiles;
 pub mod summary;
 
@@ -17,8 +18,46 @@ use tauri::{AppHandle, Emitter, Manager};
 
 /// Open a zmk-config folder and summarise it.
 #[tauri::command]
-fn open_config_repo(path: String) -> Result<summary::RepoSummary, String> {
-    summary::load_repo(&PathBuf::from(path)).map_err(|e| e.to_string())
+fn open_config_repo(app: AppHandle, path: String) -> Result<summary::RepoSummary, String> {
+    let dir = PathBuf::from(path);
+    let s = summary::load_repo(&dir).map_err(|e| e.to_string())?;
+    if let Ok(data) = data_dir(&app) {
+        history::remember(&data, &dir);
+    }
+    Ok(s)
+}
+
+/// Config folders opened before (newest first; missing folders are left out).
+#[tauri::command]
+fn recent_folders(app: AppHandle) -> Result<Vec<String>, String> {
+    Ok(history::recent(&data_dir(&app)?))
+}
+
+/// Git status of the config folder with plain-language summaries per changed file.
+#[tauri::command]
+async fn git_history(repo_path: String) -> Result<history::History, String> {
+    tauri::async_runtime::spawn_blocking(move || history::history(&PathBuf::from(repo_path)))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
+/// Line-by-line changes since the last saved version (optionally one file).
+#[tauri::command]
+async fn git_diff(
+    repo_path: String,
+    file: Option<String>,
+) -> Result<Vec<mxkeys_git::repo::FileDiff>, String> {
+    tauri::async_runtime::spawn_blocking(move || history::diff(&PathBuf::from(repo_path), file.as_deref()))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
+/// Save a version, upload, get latest, … (may use the network and credential helpers).
+#[tauri::command]
+async fn git_run(repo_path: String, op: history::GitOp) -> Result<history::GitOpResult, String> {
+    tauri::async_runtime::spawn_blocking(move || history::run(&PathBuf::from(repo_path), &op))
+        .await
+        .map_err(|e| e.to_string())?
 }
 
 /// A config folder passed on the command line (`mxkeys ~/zmk-config`), opened at startup.
@@ -59,6 +98,9 @@ async fn clone_config_repo(
             let _ = app.emit("clone-progress", p);
         })
         .map_err(|e| e.to_string())?;
+        if let Ok(data) = data_dir(&app) {
+            history::remember(&data, &dest);
+        }
         summary::load_repo(&dest).map_err(|e| {
             format!(
                 "Downloaded to {}, but it doesn't look like a ZMK config: {e}",
@@ -317,7 +359,11 @@ pub fn run() {
             settings_page,
             edit_settings,
             undo_settings,
-            redo_settings
+            redo_settings,
+            recent_folders,
+            git_history,
+            git_diff,
+            git_run
         ])
         .run(tauri::generate_context!())
         .expect("error while running mxKeys");
