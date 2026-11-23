@@ -3,6 +3,38 @@
 Newest first. Each session: what was done, what's next, open questions, and anything
 that needs testing on real hardware.
 
+## Session 3 (cont.) — 2026-11-23 — Phase 6
+
+### Done
+- `zmk-config::settings`: catalog of 21 settings in six groups (battery and sleep,
+  Bluetooth, screen, lights, typing, live editing). Defaults and ranges from ZMK `main`
+  4de3133 Kconfig files and a real build's `.config` (e.g. sleep is off by default,
+  idle 30 s, deep sleep 15 min, TX power 0 dBm, HKRO, nice!view screen on).
+- Edit semantics: replace / uncomment / append; "Use default" comments out; choices
+  comment out the other options; RGB also switches on the LED-strip driver.
+- App: settings page replaces the read-only list — toggles, numbers in seconds/minutes,
+  name with a 16-byte counter, dropdowns, greyed-out dependent settings, undo/redo,
+  outside-change reload, Advanced (raw names, other options, set any option).
+- Firmware panel says "rebuild needed" when `config/*` or `build.yaml` is newer than the
+  built firmware.
+- **Acceptance test** in the real app (Xvfb) on a copy of `xnmrph/corne`: Screen → On
+  gives a one-line diff (`CONFIG_ZMK_DISPLAY=n` → `=y`); building from the app gives
+  `CONFIG_ZMK_DISPLAY=y`, `CONFIG_LVGL=y`, `CONFIG_NICE_VIEW_WIDGET_STATUS=y` on both
+  halves (left UF2 550 KB → 880 KB). Toggling another option afterwards shows the
+  rebuild notice.
+- 133 tests.
+
+### Notes
+- Appending to a file that ends in a blank line puts the new option after that blank
+  line (harmless; kept simple).
+- The hardware panel's "your settings switch the screen off" hint only refreshes when
+  the folder is reopened.
+
+### Next
+1. Phase 7: advanced behaviors (macros, combos, hold-taps, …).
+2. Still open with the owner: apply the OUT_TOG and screen edits to the real repo
+   (needs push access or Phase 8), and fix `build.yaml`'s board id.
+
 ## Session 3 (cont.) — 2026-11-23 — Phase 5
 
 ### Done

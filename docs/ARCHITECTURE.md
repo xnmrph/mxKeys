@@ -328,6 +328,30 @@ loop):
 - Both halves present identical drives, so the flow relies on the user plugging in the
   half it asks for and on the drive disappearing between steps.
 
+### 8.1 Settings page (Phase 6)
+
+- `zmk-config::kconfig` is the lossless `.conf` model (Phase 1); `zmk-config::settings`
+  adds a **catalog**: id, group, plain label/help, kind (toggle, number with unit and
+  range, text with a byte limit, Kconfig `choice`, int with named values), default, and
+  an optional "only matters when X is on" dependency. Defaults and ranges were checked
+  against ZMK `main` 4de3133 / Zephyr 4.1 and a real build's `.config`.
+- Hardware-dependent defaults (the screen is on by default *because* the nice!view
+  shield turns it on) are the ones for the v1 profile. When more profiles exist the
+  catalog takes the profile as input.
+- Write rules: set = replace the effective line, else uncomment the user's old line,
+  else append. **Use default = comment out** every line setting the option (the old
+  value stays visible). Choices write the chosen option and comment out the others.
+  Some toggles switch companions on with them (RGB underglow → `WS2812_STRIP`;
+  peripheral battery fetching → proxy); switching off leaves companions alone.
+- Advanced: raw option names/line numbers per setting, the file's other options, and a
+  free-form "set any option" (unvalidated — typos show up at build time).
+- Undo/redo shares the keymap editor's per-file text history (`Editor::record` /
+  `step_text`); the same 2 s content-hash poll reloads after outside edits.
+- `firmware_state` compares the built `.uf2` times with `build.yaml` and `config/*`, so
+  the Firmware panel says when a rebuild is needed after any edit.
+- Settings are written to the `.conf` the repo already has (`config/corne.conf` applies
+  to both halves). Per-half files (`corne_left.conf`) are shown as separate pages.
+
 ## 9. Live editing and sync-back (Phase 10)
 
 ### 9.1 Protocol (from ZMK docs, read respecting the clean-room policy)

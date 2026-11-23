@@ -97,10 +97,16 @@ Phases are done in order, one at a time. Tick boxes as work lands (keep this fil
 - [ ] Re-align a whole bindings block on request ("tidy up")
 
 ## Phase 6 — Settings page
-- [ ] Lossless `.conf` editor model
-- [ ] Forms: `CONFIG_ZMK_IDLE_TIMEOUT`, `CONFIG_ZMK_SLEEP`, `CONFIG_ZMK_IDLE_SLEEP_TIMEOUT`
-- [ ] BLE power (`CONFIG_BT_CTLR_TX_PWR_*`), RGB, display options
-- [ ] "Advanced" raw Kconfig names
+- [x] Lossless `.conf` editor model (Phase 1) + settings catalog with plain names, units, ranges, defaults (`zmk-config::settings`)
+- [x] Forms: `CONFIG_ZMK_IDLE_TIMEOUT`, `CONFIG_ZMK_SLEEP`, `CONFIG_ZMK_IDLE_SLEEP_TIMEOUT`
+- [x] BLE power (`CONFIG_BT_CTLR_TX_PWR_*` choice), keyboard name, RGB, display options, typing (HKRO/NKRO, mouse keys, debounce), Studio
+- [x] "Use default" (comments the line out), choices, companion options (RGB → LED driver)
+- [x] "Advanced" raw Kconfig names, other options in the file, set any option
+- [x] Undo/redo + outside-change reload; "rebuild needed" notice when config files are newer than the firmware
+- [x] Acceptance: screen switched on in (a copy of) `xnmrph/corne` → one-line diff → build has `CONFIG_ZMK_DISPLAY=y` + LVGL + nice!view widget
+- [ ] Refresh the hardware panel's hints (e.g. "screen switched off") after a settings edit
+- [ ] Profile-dependent catalog (defaults/options per board and shield) once more hardware is supported
+- [ ] Per-half settings (`corne_left.conf` vs `corne_right.conf`) explained in the UI
 
 ## Phase 7 — Advanced behaviors
 - [ ] Macros, combos, hold-taps, mod-morphs, conditional layers, tap-dance, sticky keys
