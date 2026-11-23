@@ -2574,6 +2574,7 @@ dependencies = [
  "mxkeys-hardware",
  "mxkeys-niceview",
  "mxkeys-probe",
+ "mxkeys-studio",
  "mxkeys-toolchain",
  "serde",
  "serde_json",

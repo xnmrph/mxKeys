@@ -26,6 +26,7 @@ mxkeys-hardware = { path = "../crates/hardware" }
 mxkeys-probe = { path = "../crates/probe" }
 mxkeys-toolchain = { path = "../crates/toolchain" }
 mxkeys-niceview = { path = "../crates/niceview" }
+mxkeys-studio = { path = "../crates/studio" }
 base64 = "0.22"
 
 [dev-dependencies]

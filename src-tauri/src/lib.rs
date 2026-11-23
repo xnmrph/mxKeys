@@ -7,6 +7,7 @@ pub mod detection;
 pub mod editor;
 pub mod flashing;
 pub mod history;
+pub mod live;
 pub mod pictures;
 pub mod profiles;
 pub mod summary;
@@ -217,6 +218,10 @@ fn start_flash(
     let session = flashing::new_session(&flashing::firmware_for(&data, &repo), &profile, reset)?;
     let handle = app.clone();
     flashing.start(session, mxkeys_probe::FsDriveScanner::system(), move |e| {
+        if e.ended && e.view.phase == mxkeys_flash::session::Phase::Finished {
+            // New firmware installed: saved live changes may now hide file edits.
+            live::record_install(&data, &repo);
+        }
         let _ = handle.emit("flash-event", e);
     })
 }
@@ -370,6 +375,111 @@ fn pictures_remove(repo_path: String) -> Result<(), String> {
     pictures::remove(&PathBuf::from(repo_path))
 }
 
+/// Keyboards connected by USB that speak ZMK Studio.
+#[tauri::command]
+fn live_devices() -> live::Devices {
+    live::devices()
+}
+
+/// Look for keyboards over Bluetooth (takes a few seconds).
+#[tauri::command]
+async fn live_scan_ble(seconds: u64) -> Result<Vec<mxkeys_studio::ble::BleCandidate>, String> {
+    tauri::async_runtime::spawn_blocking(move || live::scan_ble(seconds))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+async fn live_connect(
+    app: AppHandle,
+    repo_path: String,
+    keymap_path: String,
+    via: live::Via,
+) -> Result<live::LiveView, String> {
+    let data = data_dir(&app)?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let state = app.state::<live::LiveState>();
+        live::connect(
+            &state,
+            &data,
+            &PathBuf::from(repo_path),
+            &PathBuf::from(keymap_path),
+            &via,
+        )
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+fn live_disconnect(state: tauri::State<'_, live::LiveState>) {
+    live::disconnect(&state);
+}
+
+/// Connection status (also picks up the unlock key being pressed).
+#[tauri::command]
+fn live_view(
+    app: AppHandle,
+    state: tauri::State<'_, live::LiveState>,
+    repo_path: String,
+) -> Result<live::LiveView, String> {
+    live::view(&state, &data_dir(&app)?, &PathBuf::from(repo_path))
+}
+
+#[tauri::command]
+fn live_compare(state: tauri::State<'_, live::LiveState>) -> Result<mxkeys_studio::sync::Comparison, String> {
+    live::compare(&state)
+}
+
+#[tauri::command]
+fn live_set_key(
+    state: tauri::State<'_, live::LiveState>,
+    editor: tauri::State<'_, editor::Editor>,
+    layer: usize,
+    position: usize,
+    binding: String,
+) -> Result<editor::EditResult, String> {
+    live::set_key(&state, &editor, layer, position, &binding)
+}
+
+#[tauri::command]
+fn live_rename_layer(
+    state: tauri::State<'_, live::LiveState>,
+    editor: tauri::State<'_, editor::Editor>,
+    layer: usize,
+    name: String,
+) -> Result<editor::EditResult, String> {
+    live::rename_layer(&state, &editor, layer, &name)
+}
+
+#[tauri::command]
+fn live_save(app: AppHandle, state: tauri::State<'_, live::LiveState>) -> Result<(), String> {
+    live::save(&state, &data_dir(&app)?)
+}
+
+#[tauri::command]
+fn live_discard(
+    state: tauri::State<'_, live::LiveState>,
+    editor: tauri::State<'_, editor::Editor>,
+) -> Result<(), String> {
+    live::discard(&state, &editor)
+}
+
+#[tauri::command]
+fn live_clear_saved(app: AppHandle, state: tauri::State<'_, live::LiveState>) -> Result<(), String> {
+    live::clear_saved(&state, &data_dir(&app)?)
+}
+
+#[tauri::command]
+fn live_resolve(
+    state: tauri::State<'_, live::LiveState>,
+    editor: tauri::State<'_, editor::Editor>,
+    keys: Vec<live::KeyRef>,
+    keep_keyboard: bool,
+) -> Result<(), String> {
+    live::resolve(&state, &editor, &keys, keep_keyboard)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -378,6 +488,7 @@ pub fn run() {
         .manage(flashing::Flashing::default())
         .manage(editor::Editor::default())
         .manage(pictures::Pictures::default())
+        .manage(live::LiveState::default())
         .invoke_handler(tauri::generate_handler![
             open_config_repo,
             startup_path,
@@ -413,7 +524,19 @@ pub fn run() {
             pictures_state,
             pictures_preview,
             pictures_save,
-            pictures_remove
+            pictures_remove,
+            live_devices,
+            live_scan_ble,
+            live_connect,
+            live_disconnect,
+            live_view,
+            live_compare,
+            live_set_key,
+            live_rename_layer,
+            live_save,
+            live_discard,
+            live_clear_saved,
+            live_resolve
         ])
         .run(tauri::generate_context!())
         .expect("error while running mxKeys");

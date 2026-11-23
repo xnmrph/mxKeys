@@ -311,3 +311,18 @@ pub fn plain_target(t: TargetId) -> &'static str {
         TargetId::SettingsReset => "settings reset",
     }
 }
+
+/// The ready build workspace (ZMK + modules) for a config repo, if it has been built
+/// before — with the module allow-list or the full manifest, whichever exists.
+pub fn workspace_for(data: &Path, repo_dir: &Path) -> Option<crate::workspace::Workspace> {
+    use crate::workspace::{self, Workspace};
+    let files = RepoFiles::discover(repo_dir).ok()?;
+    let west_text = repo::read(files.west_yml.as_ref()?).ok()?;
+    let manifest = crate::manifest::Manifest::embedded();
+    let candidates: Vec<Workspace> = [Some(manifest.workspace.allowlist.as_slice()), None]
+        .into_iter()
+        .filter_map(|allow| workspace::generate_manifest(&west_text, allow).ok())
+        .map(|m| Workspace::for_manifest(data, &m))
+        .collect();
+    candidates.into_iter().find(Workspace::is_ready)
+}
