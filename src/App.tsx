@@ -114,7 +114,7 @@ function RepoView({ repo, onKeymapChanged, onReload }: {
       {repo.warnings.map((w) => (
         <p key={w} className="warning">{w}</p>
       ))}
-      {keymap && <KeymapEditor keymap={keymap} onChanged={(k) => { onKeymapChanged(k); bump(); }} onReload={onReload} />}
+      {keymap && <KeymapEditor keymap={keymap} repoRoot={repo.root} onChanged={(k) => { onKeymapChanged(k); bump(); }} onReload={onReload} />}
       {repo.firmware && <Firmware firmware={repo.firmware} />}
       {repo.confFiles.map((c) => <SettingsPanel key={c.path} confPath={c.path} onChanged={bump} />)}
       {profile?.display === "nice_view" && <PicturesPanel repoRoot={repo.root} onChanged={bump} />}

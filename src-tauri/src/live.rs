@@ -38,14 +38,23 @@ struct Connected {
 #[derive(Debug, Clone, Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum Via {
-    Usb { path: String },
-    Ble { id: String },
+    Usb {
+        path: String,
+    },
+    Ble {
+        id: String,
+    },
+    /// Developer/demo mode (`MXKEYS_SIM_KEYBOARD=1`): a simulated keyboard built from
+    /// the keymap file itself.
+    Sim,
 }
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Devices {
     pub usb: Vec<SerialCandidate>,
+    /// Offer the simulated keyboard (developer mode).
+    pub sim: bool,
 }
 
 #[derive(Debug, Serialize)]
@@ -188,10 +197,52 @@ impl LiveState {
     }
 }
 
+pub fn sim_enabled() -> bool {
+    std::env::var("MXKEYS_SIM_KEYBOARD").is_ok_and(|v| v == "1")
+}
+
 pub fn devices() -> Devices {
     Devices {
         usb: serial::find_keyboards(),
+        sim: sim_enabled(),
     }
+}
+
+/// A simulated keyboard whose firmware matches the keymap file: behaviors from the
+/// mapper's names (ids assigned like a fresh settings table), layers from the file.
+fn simulated(base: &Mapper, keymap_path: &Path) -> Result<mxkeys_studio::sim::SimKeyboard, String> {
+    use mxkeys_studio::sim::{ParamKind, SimBehavior, SimKeyboard, SimLayer};
+    let (_, km, _) = load_keymap(keymap_path)?;
+    let mut names: Vec<String> = base.names.values().cloned().collect();
+    names.sort();
+    names.dedup();
+    let behaviors: Vec<SimBehavior> = names
+        .iter()
+        .enumerate()
+        .map(|(i, n)| SimBehavior {
+            id: i as u32 + 1,
+            name: n.clone(),
+            param1: ParamKind::HidUsage,
+            param2: ParamKind::Nil,
+        })
+        .collect();
+    let mut m = base.clone();
+    m.device = DeviceBehaviors::new(behaviors.iter().map(|b| (b.id, b.name.clone())));
+    let layers = sync::expected(&km, &m)
+        .into_iter()
+        .map(|l| SimLayer {
+            id: l.index as u32,
+            name: l.device_name,
+            bindings: l
+                .keys
+                .into_iter()
+                .map(|k| k.binding.unwrap_or_default())
+                .collect(),
+        })
+        .collect();
+    let mut kb = SimKeyboard::new("Simulated keyboard", behaviors, layers);
+    kb.auto_unlock_after = Some(3);
+    Ok(kb)
 }
 
 pub fn scan_ble(seconds: u64) -> Result<Vec<BleCandidate>, String> {
@@ -215,6 +266,8 @@ pub fn connect(
             Box::new(ble::BleTransport::connect(id).map_err(|e| e.to_string())?),
             "Bluetooth".to_string(),
         ),
+        Via::Sim if sim_enabled() => (Box::new(simulated(&base, keymap_path)?), "simulation".to_string()),
+        Via::Sim => return Err("The simulated keyboard is only available in developer mode.".into()),
     };
     let live = Live::connect(transport, base).map_err(|e| e.to_string())?;
     let file_at_save = repo::read(keymap_path).map_err(|e| e.to_string())?;

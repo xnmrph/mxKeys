@@ -57,6 +57,8 @@ pub struct SimKeyboard {
     pub live: Vec<SimLayer>,
     /// Bytes written to the settings storage so far (to see how often we save).
     pub storage_writes: usize,
+    /// For demos: unlock by itself after this many lock-state queries.
+    pub auto_unlock_after: Option<u32>,
     decoder: Decoder,
     outbox: VecDeque<u8>,
 }
@@ -82,6 +84,7 @@ impl SimKeyboard {
             saved_bindings: BTreeMap::new(),
             saved_names: BTreeMap::new(),
             storage_writes: 0,
+            auto_unlock_after: None,
             decoder: Decoder::default(),
             outbox: VecDeque::new(),
         };
@@ -102,6 +105,18 @@ impl SimKeyboard {
                 }
             }
         }
+    }
+
+    fn tick_unlock(&mut self) -> bool {
+        if let Some(n) = self.auto_unlock_after.as_mut() {
+            if *n == 0 {
+                self.auto_unlock_after = None;
+                self.unlocked = true;
+            } else {
+                *n -= 1;
+            }
+        }
+        self.unlocked
     }
 
     /// Press the `&studio_unlock` key.
@@ -185,7 +200,7 @@ impl SimKeyboard {
                         name: self.name.clone(),
                         serial_number: self.serial.clone(),
                     }),
-                    Some(Q::GetLockState(_)) => A::GetLockState(if self.unlocked {
+                    Some(Q::GetLockState(_)) => A::GetLockState(if self.tick_unlock() {
                         core::LockState::Unlocked as i32
                     } else {
                         core::LockState::Locked as i32

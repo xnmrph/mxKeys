@@ -5,11 +5,13 @@ import type { EditOp, EditResult, EditorCatalog, KeyGeom, KeymapSummary } from "
 import { Catalog, describe } from "./bindings";
 import { KeyPicker } from "./KeyPicker";
 import { BehaviorsPanel } from "./BehaviorsPanel";
+import { LivePanel } from "./LivePanel";
 
 const UNIT = 54; // px per key unit
 
-export function KeymapEditor({ keymap, onChanged, onReload }: {
+export function KeymapEditor({ keymap, repoRoot, onChanged, onReload }: {
   keymap: KeymapSummary;
+  repoRoot: string;
   onChanged: (k: KeymapSummary) => void;
   /** Re-read everything from disk (after an outside change). */
   onReload: () => Promise<void>;
@@ -25,6 +27,8 @@ export function KeymapEditor({ keymap, onChanged, onReload }: {
   const [renaming, setRenaming] = useState<string | null>(null);
   const [adding, setAdding] = useState<string | null>(null);
   const version = useRef<string | null>(null);
+  // Connected to the keyboard and unlocked: key changes and renames go live.
+  const [live, setLive] = useState(false);
 
   const loadCatalog = useCallback(() => {
     invoke<EditorCatalog>("editor_catalog", { keymapPath: keymap.path }).then((c) => setCatalog(new Catalog(c))).catch(() => setCatalog(null));
@@ -66,7 +70,17 @@ export function KeymapEditor({ keymap, onChanged, onReload }: {
 
   const edit = useCallback(async (op: EditOp) => {
     try {
-      apply(await invoke<EditResult>("edit_keymap", { keymapPath: keymap.path, op }));
+      if (live && op.op === "set_binding") {
+        apply(await invoke<EditResult>("live_set_key", { layer: op.layer, position: op.position, binding: op.binding }));
+      } else if (live && op.op === "rename_layer") {
+        apply(await invoke<EditResult>("live_rename_layer", { layer: op.layer, name: op.name }));
+      } else {
+        apply(await invoke<EditResult>("edit_keymap", { keymapPath: keymap.path, op }));
+        if (live && op.op !== "set_binding" && op.op !== "rename_layer") {
+          setNotice("Saved in your files. Layer and behavior changes reach the keyboard when you build and install the firmware.");
+          return true;
+        }
+      }
       setNotice(null);
       if (op.op !== "set_binding" && op.op !== "rename_layer") setSelected(null);
       return true;
@@ -74,7 +88,7 @@ export function KeymapEditor({ keymap, onChanged, onReload }: {
       setError(String(e));
       return false;
     }
-  }, [apply, keymap.path]);
+  }, [apply, keymap.path, live]);
 
   const step = useCallback(async (which: "undo_keymap" | "redo_keymap") => {
     try {
@@ -113,6 +127,14 @@ export function KeymapEditor({ keymap, onChanged, onReload }: {
           <button onClick={() => step("redo_keymap")} disabled={!canRedo} title="Redo (Ctrl/⌘+Shift+Z)">↷ Redo</button>
         </div>
       </div>
+      <LivePanel repoRoot={repoRoot} keymapPath={keymap.path} revision={keymap} onLive={setLive} onFileChanged={async () => {
+        // Our own change (discard / keep keyboard's): adopt it without the
+        // "changed outside" reset — both record an undo step.
+        try { version.current = await invoke<string>("file_version", { path: keymap.path }); } catch { /* reload below still runs */ }
+        setCanUndo(true);
+        setCanRedo(false);
+        await onReload();
+      }} />
       {notice && <p className="note">{notice}</p>}
       <nav className="tabs">
         {keymap.layers.map((l) => (

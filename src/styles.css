@@ -224,3 +224,16 @@ button.link { border: none; background: none; padding: 0; cursor: pointer; }
 .pictures-panel .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
 .pictures-panel button.link { color: var(--accent); padding: 2px 4px; font-size: 13px; }
 .pictures-panel button.link.danger { color: var(--err); }
+.live-panel { border: 1px dashed var(--border); border-radius: 10px; padding: 8px 14px; margin: 8px 0 12px; background: var(--card); }
+.live-panel.connected { border-style: solid; }
+.live-panel.ready { border-color: #16a34a; }
+.live-head { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.live-head .spacer { flex: 1; }
+.live-panel .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.live-panel .dot.on { background: #16a34a; }
+.live-panel .dot.wait { background: #f59e0b; }
+.live-connect ul { list-style: none; padding: 0; margin: 6px 0; }
+.live-connect li { display: flex; gap: 8px; align-items: center; margin: 4px 0; }
+.live-panel button.link { color: var(--accent); padding: 2px 4px; font-size: 13px; }
+.live-panel .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 6px 0; }
+.live-diffs table { margin: 6px 0; }
