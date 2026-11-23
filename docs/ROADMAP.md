@@ -81,13 +81,20 @@ Phases are done in order, one at a time. Tick boxes as work lands (keep this fil
 - [ ] After flashing: offer to check the keyboard over USB (ZMK device appears with the new name)
 
 ## Phase 5 — Keymap editor UI
-- [ ] Visual Corne layout from physical layout data
-- [ ] Layer tabs, add/remove/rename/reorder layers (file patches)
-- [ ] Key binding editor with behavior picker + keycode search (plain names)
-- [ ] Binding-grid re-alignment after edits (keep columns tidy)
-- [ ] Undo/redo, file watcher reload
-- [ ] Read-only display for opaque/macro-generated bindings
-- [ ] Acceptance test: owner adds `&out OUT_TOG` next to the BT keys on the *System* layer of `xnmrph/corne` using only the app (deliberately not done by hand)
+- [x] Visual Corne layout from physical layout data (served by the Rust hardware catalog)
+- [x] Layer tabs: add, delete (refused while referenced), rename, move — all minimal file patches
+- [x] Moving/removing layers renumbers every layer reference (numbers, `#define`s, combos, conditional layers)
+- [x] Key picker: behavior by plain name → typed parameters (searchable keycodes with categories and modifier toggles, layer names, command choices), Advanced raw text
+- [x] Keycode catalog generated from ZMK `keys.h` (`tools/gen_keycodes.py`), keycap labels using layer names
+- [x] Custom behaviors from the keymap in the picker (hold-tap sides typed from their bindings)
+- [x] Aligned edits: the gap after a key absorbs length changes (only the edited line changes)
+- [x] Undo/redo (buttons + Ctrl/⌘+Z), file-change detection with automatic reload
+- [x] Read-only display for opaque/macro-generated bindings
+- [x] Acceptance test: `&out OUT_TOG` added next to the BT keys on the *System* layer of (a copy of) `xnmrph/corne` using only the app — `git diff` shows one changed line
+- [ ] Apply the same edit to the owner's real repo once they're happy (needs push access / Phase 8)
+- [ ] Drag & drop keys between positions; copy/paste keys
+- [ ] Sensor bindings (encoders) editing; non-Corne layouts
+- [ ] Re-align a whole bindings block on request ("tidy up")
 
 ## Phase 6 — Settings page
 - [ ] Lossless `.conf` editor model

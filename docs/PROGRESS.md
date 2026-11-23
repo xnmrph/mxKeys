@@ -3,6 +3,32 @@
 Newest first. Each session: what was done, what's next, open questions, and anything
 that needs testing on real hardware.
 
+## Session 3 (cont.) — 2026-11-23 — Phase 5
+
+### Done
+- Keycode catalog generated from ZMK `keys.h` @ 4de3133 (373 keys, 583 names incl.
+  aliases; shifted symbols; deprecated names accepted but not offered). Generator:
+  `tools/gen_keycodes.py`. Every key name in the owner's keymaps resolves.
+- Behavior catalog: built-ins with typed parameters (keys, hold-tap, layers, Bluetooth,
+  USB/BT output, RGB, external power, mouse, system) + the keymap's own behaviors.
+- Edit ops in `zmk-config`: aligned key edits; add/remove/move/rename layers; layer
+  references renumbered on move/remove (numbers and `#define`s incl. combos and
+  conditional layers; refs inside the moved layer too). Invariant test on the owner's
+  keymap: after five different moves, every reference still points at the same layer.
+- App: key picker, layer tools, undo/redo, outside-change reload (2 s polling of a content
+  hash), keycaps show layer names and short Bluetooth/output labels.
+- **Acceptance test passed** in the real app on a copy of `xnmrph/corne`: `&out OUT_TOG`
+  (“Toggle USB ↔ Bluetooth”) above “BT forget” on the System layer; one-line diff.
+  Also verified: undo/redo restore the file exactly; an outside `sed` edit is noticed
+  and reloaded; adding a “Gaming” layer copies the grid.
+- Found a WebKitGTK quirk: `&` in `<optgroup>` labels renders wrongly in the native
+  select popup — avoid `&` in option/group labels.
+
+### Next
+1. Phase 6: settings page (Kconfig forms: idle/sleep timers first; screen on/off —
+   the owner's `CONFIG_ZMK_DISPLAY=n` is the first real use).
+2. Ask the owner whether to apply the OUT_TOG edit to the real repo now.
+
 ## Session 3 (cont.) — 2026-11-23 — Phase 4
 
 ### Done

@@ -96,3 +96,26 @@ button.primary { background: var(--accent); color: #fff; border-color: var(--acc
 .flash-now.refused, .flash-now.failed { border-left: 4px solid var(--err); }
 .flash-now.finished { border-left: 4px solid #16a34a; }
 .flash-now .row { display: flex; gap: 8px; margin-top: 8px; }
+.editor-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.editor-head .row, .layer-tools, .key-picker .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.layer-tools { margin: 4px 0 10px; }
+button.danger { color: var(--err); }
+.tabs .add { border-style: dashed; }
+form.inline { display: inline-flex; gap: 6px; align-items: center; }
+form.inline input, .key-picker input, .key-picker select { font: inherit; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--card); color: var(--fg); }
+.key-picker { border: 1px solid var(--accent); border-radius: 10px; padding: 12px 16px; margin: 10px 0; background: var(--card); display: flex; flex-direction: column; gap: 10px; }
+.picker-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.key-picker .field { display: flex; flex-direction: column; gap: 4px; }
+.param-name { font-weight: 600; font-size: 14px; }
+.keycode-field { display: flex; flex-direction: column; gap: 6px; }
+.keycode-field .current { display: flex; gap: 10px; align-items: center; }
+.keycap { display: inline-flex; min-width: 40px; height: 34px; padding: 0 8px; align-items: center; justify-content: center; border: 1px solid var(--border); border-radius: 6px; background: var(--key); font-weight: 600; }
+.mods { display: flex; gap: 12px; flex-wrap: wrap; font-size: 14px; }
+.chips { display: flex; gap: 4px; flex-wrap: wrap; }
+.chip { font-size: 12px; padding: 2px 8px; border-radius: 12px; text-transform: capitalize; }
+.chip.active { border-color: var(--accent); color: var(--accent); }
+.key-grid { display: flex; flex-wrap: wrap; gap: 4px; max-height: 170px; overflow: auto; }
+.keychoice { min-width: 40px; height: 32px; padding: 0 6px; font-size: 13px; }
+.keychoice.chosen { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.command-field { display: inline-flex; gap: 6px; }
+button.link { border: none; background: none; padding: 0; cursor: pointer; }

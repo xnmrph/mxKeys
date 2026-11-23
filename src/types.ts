@@ -184,3 +184,39 @@ export type FlashPhase =
 export interface FlashStepView { title: string; state: "pending" | "current" | "done" | "skipped" }
 export interface FlashView { steps: FlashStepView[]; current: number | null; phase: FlashPhase; instruction: string; detail: string | null }
 export interface FlashEvent { view: FlashView; progress: [number, number] | null; ended: boolean }
+
+// ----- keymap editor (zmk-config catalog, src-tauri editor.rs) -----
+export interface KeycodeInfo {
+  names: string[];
+  deprecated: string[];
+  description: string;
+  page: string;
+  usage: string;
+  shifted: boolean;
+  category: string;
+  label: string;
+}
+
+export interface CommandOption { value: string; label: string; number: [number, number, string] | null }
+
+export type ParamKind =
+  | { type: "keycode" }
+  | { type: "modifier" }
+  | { type: "layer" }
+  | { type: "command"; options: CommandOption[] }
+  | { type: "free" };
+
+export interface BehaviorParam { name: string; kind: ParamKind }
+export interface BehaviorInfo { reference: string; name: string; description: string; category: string; params: BehaviorParam[] }
+export interface LayerRef { index: number; title: string; define: string | null }
+
+export interface EditorCatalog { keycodes: KeycodeInfo[]; keycodesSource: string; behaviors: BehaviorInfo[]; layers: LayerRef[] }
+
+export interface EditResult { keymap: KeymapSummary; version: string; canUndo: boolean; canRedo: boolean }
+
+export type EditOp =
+  | { op: "set_binding"; layer: number; position: number; binding: string }
+  | { op: "rename_layer"; layer: number; name: string }
+  | { op: "add_layer"; name: string }
+  | { op: "remove_layer"; layer: number }
+  | { op: "move_layer"; from: number; to: number };

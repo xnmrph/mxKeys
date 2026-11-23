@@ -5,10 +5,8 @@ import type { ConfSummary, FirmwareSummary, KeymapSummary, RepoSummary, TargetSu
 import { CloneForm } from "./CloneForm";
 import { HardwareSetup } from "./HardwareSetup";
 import { BuildPanel } from "./BuildPanel";
-import type { HardwareProfile, KeyGeom } from "./types";
-import { bindingLabel } from "./bindingLabel";
-
-const UNIT = 54; // px per key unit
+import type { HardwareProfile } from "./types";
+import { KeymapEditor } from "./KeymapEditor";
 
 export default function App() {
   const [repo, setRepo] = useState<RepoSummary | null>(null);
@@ -49,7 +47,15 @@ export default function App() {
         </button>
       </header>
       {error && <p className="error" role="alert">{error}</p>}
-      {!repo ? <Welcome onCloned={setRepo} /> : <RepoView repo={repo} onKeymapChanged={(k) => setRepo(replaceKeymap(repo, k))} />}
+      {!repo ? <Welcome onCloned={setRepo} /> : (
+        <RepoView
+          repo={repo}
+          onKeymapChanged={(k) => setRepo((r) => (r ? replaceKeymap(r, k) : r))}
+          onReload={async () => {
+            try { setRepo(await invoke<RepoSummary>("open_config_repo", { path: repo.root })); } catch (e) { setError(String(e)); }
+          }}
+        />
+      )}
     </main>
   );
 }
@@ -73,7 +79,11 @@ function Welcome({ onCloned }: { onCloned: (r: RepoSummary) => void }) {
   );
 }
 
-function RepoView({ repo, onKeymapChanged }: { repo: RepoSummary; onKeymapChanged: (k: KeymapSummary) => void }) {
+function RepoView({ repo, onKeymapChanged, onReload }: {
+  repo: RepoSummary;
+  onKeymapChanged: (k: KeymapSummary) => void;
+  onReload: () => Promise<void>;
+}) {
   const keymap = repo.keymaps[0];
   const [profile, setProfile] = useState<HardwareProfile | null>(null);
   const onProfile = useCallback((p: HardwareProfile | null) => setProfile(p), []);
@@ -85,114 +95,11 @@ function RepoView({ repo, onKeymapChanged }: { repo: RepoSummary; onKeymapChange
       {repo.warnings.map((w) => (
         <p key={w} className="warning">{w}</p>
       ))}
-      {keymap && <KeymapView keymap={keymap} onChanged={onKeymapChanged} />}
+      {keymap && <KeymapEditor keymap={keymap} onChanged={onKeymapChanged} onReload={onReload} />}
       {repo.firmware && <Firmware firmware={repo.firmware} />}
       {repo.confFiles.map((c) => <Settings key={c.path} conf={c} />)}
       {repo.build && <BuildTargets targets={repo.build.targets} />}
     </>
-  );
-}
-
-function KeymapView({ keymap, onChanged }: { keymap: KeymapSummary; onChanged: (k: KeymapSummary) => void }) {
-  const [layerIndex, setLayerIndex] = useState(0);
-  const [selected, setSelected] = useState<number | null>(null);
-  const [draft, setDraft] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [geometry, setGeometry] = useState<KeyGeom[]>([]);
-  useEffect(() => {
-    invoke<KeyGeom[]>("physical_layout").then(setGeometry).catch(() => setGeometry([]));
-  }, []);
-  const layer = keymap.layers[Math.min(layerIndex, keymap.layers.length - 1)];
-  if (!layer) return <p className="warning">This keymap has no layers yet.</p>;
-
-  const fitsCorne = geometry.length > 0 && layer.bindings.length === geometry.length;
-  const width = Math.max(0, ...geometry.map((g) => g.x + g.w)) / 100;
-  const height = Math.max(0, ...geometry.map((g) => g.y + g.h)) / 100 + 0.4;
-
-  function select(i: number) {
-    setSelected(i);
-    setDraft(layer.bindings[i]);
-    setError(null);
-  }
-
-  async function save() {
-    if (selected === null) return;
-    try {
-      const updated = await invoke<KeymapSummary>("set_binding", {
-        keymapPath: keymap.path,
-        layer: layer.index,
-        position: selected,
-        binding: draft,
-      });
-      onChanged(updated);
-      setError(null);
-    } catch (e) {
-      setError(String(e));
-    }
-  }
-
-  return (
-    <section>
-      <h2>Keymap <span className="muted">· {keymap.fileName}</span></h2>
-      <nav className="tabs">
-        {keymap.layers.map((l) => (
-          <button key={l.index} className={l.index === layer.index ? "active" : ""} onClick={() => { setLayerIndex(l.index); setSelected(null); }}>
-            {l.title}
-          </button>
-        ))}
-      </nav>
-      {layer.readOnlyReason && (
-        <p className="warning">This layer is written by hand in a way the app can't edit yet ({layer.readOnlyReason}). You can still edit it in a text editor.</p>
-      )}
-      {fitsCorne ? (
-        <div className="board" style={{ width: width * UNIT, height: height * UNIT }}>
-          {geometry.map((g, i) => {
-            const label = bindingLabel(layer.bindings[i] ?? "");
-            return (
-              <button
-                key={i}
-                className={`key${label.muted ? " muted" : ""}${selected === i ? " selected" : ""}`}
-                title={layer.bindings[i]}
-                disabled={!!layer.readOnlyReason}
-                onClick={() => select(i)}
-                style={{
-                  left: (g.x / 100) * UNIT,
-                  top: (g.y / 100) * UNIT,
-                  width: (g.w / 100) * UNIT - 4,
-                  height: (g.h / 100) * UNIT - 4,
-                  transform: g.r ? `rotate(${g.r / 100}deg)` : undefined,
-                  transformOrigin: g.r ? `${((g.rx - g.x) / 100) * UNIT}px ${((g.ry - g.y) / 100) * UNIT}px` : undefined,
-                }}
-              >
-                <span className="tap">{label.tap}</span>
-                {label.hold && <span className="hold">{label.hold}</span>}
-              </button>
-            );
-          })}
-        </div>
-      ) : (
-        <ol className="binding-list">{layer.bindings.map((b, i) => <li key={i}><code>{b}</code></li>)}</ol>
-      )}
-      {selected !== null && (
-        <div className="editor">
-          <label>
-            Key {selected + 1} <span className="muted">(advanced: ZMK binding)</span>
-            <input value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => e.key === "Enter" && save()} spellCheck={false} />
-          </label>
-          <button onClick={save}>Save</button>
-          {error && <p className="error">{error}</p>}
-        </div>
-      )}
-      <p className="muted">
-        {keymap.behaviors} custom behaviors · {keymap.macros} macros · {keymap.combos} combos · {keymap.conditionalLayers} conditional layers
-      </p>
-      {keymap.parseProblems.length > 0 && (
-        <details>
-          <summary>Parts of this file the app didn't understand (kept unchanged)</summary>
-          <ul>{keymap.parseProblems.map((p) => <li key={p}>{p}</li>)}</ul>
-        </details>
-      )}
-    </section>
   );
 }
 

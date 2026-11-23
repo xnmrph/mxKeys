@@ -3,6 +3,7 @@
 
 pub mod building;
 pub mod detection;
+pub mod editor;
 pub mod flashing;
 pub mod profiles;
 pub mod summary;
@@ -12,8 +13,6 @@ use std::path::PathBuf;
 use mxkeys_hardware::detect::quiz::{self, QuizAnswers};
 use mxkeys_hardware::HardwareProfile;
 use tauri::{AppHandle, Emitter, Manager};
-use zmk_config::keymap;
-use zmk_config::repo::KeymapFile;
 
 /// Open a zmk-config folder and summarise it.
 #[tauri::command]
@@ -194,28 +193,48 @@ fn flash_control(
     flashing.control(&command)
 }
 
-/// Replace one key's binding and write the keymap file back (minimal, lossless edit).
+/// Keycodes, behaviors (incl. the keymap's own) and layers for the key editor.
 #[tauri::command]
-fn set_binding(
+fn editor_catalog(keymap_path: String) -> Result<editor::EditorCatalog, String> {
+    editor::catalog_for(&PathBuf::from(keymap_path))
+}
+
+/// Apply one edit (set a key, rename/add/remove/move a layer) to the keymap file.
+#[tauri::command]
+fn edit_keymap(
+    editor: tauri::State<'_, editor::Editor>,
     keymap_path: String,
-    layer: usize,
-    position: usize,
-    binding: String,
-) -> Result<summary::KeymapSummary, String> {
-    let path = PathBuf::from(keymap_path);
-    let file = KeymapFile::load(&path).map_err(|e| e.to_string())?;
-    let patch = file
-        .keymap
-        .set_binding(layer, position, &binding)
-        .map_err(|e| e.to_string())?;
-    let (document, keymap) = keymap::apply(&file.document, &patch).map_err(|e| e.to_string())?;
-    std::fs::write(&path, document.source())
-        .map_err(|e| format!("could not save {}: {e}", path.display()))?;
-    Ok(summary::keymap_summary(&KeymapFile {
-        path,
-        document,
-        keymap,
-    }))
+    op: editor::EditOp,
+) -> Result<editor::EditResult, String> {
+    editor.edit(&PathBuf::from(keymap_path), &op)
+}
+
+#[tauri::command]
+fn undo_keymap(
+    editor: tauri::State<'_, editor::Editor>,
+    keymap_path: String,
+) -> Result<editor::EditResult, String> {
+    editor.undo(&PathBuf::from(keymap_path))
+}
+
+#[tauri::command]
+fn redo_keymap(
+    editor: tauri::State<'_, editor::Editor>,
+    keymap_path: String,
+) -> Result<editor::EditResult, String> {
+    editor.redo(&PathBuf::from(keymap_path))
+}
+
+/// Content version of a file, to notice changes made outside the app.
+#[tauri::command]
+fn file_version(path: String) -> Result<String, String> {
+    editor::version(&PathBuf::from(path))
+}
+
+/// The file changed outside the app: drop its undo history.
+#[tauri::command]
+fn forget_history(editor: tauri::State<'_, editor::Editor>, keymap_path: String) {
+    editor.forget(&PathBuf::from(keymap_path));
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -224,6 +243,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .manage(building::Jobs::default())
         .manage(flashing::Flashing::default())
+        .manage(editor::Editor::default())
         .invoke_handler(tauri::generate_handler![
             open_config_repo,
             startup_path,
@@ -241,7 +261,12 @@ pub fn run() {
             start_flash,
             flash_control,
             firmware_ready,
-            set_binding
+            editor_catalog,
+            edit_keymap,
+            undo_keymap,
+            redo_keymap,
+            file_version,
+            forget_history
         ])
         .run(tauri::generate_context!())
         .expect("error while running mxKeys");
