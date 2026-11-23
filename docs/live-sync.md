@@ -1,7 +1,6 @@
 # Live editing (ZMK Studio RPC) — design
 
-Status: **draft for review** (Phase 10, step 1). Nothing here is implemented yet; the
-open decisions are listed at the end.
+Status: **reviewed** — the owner's decisions (2026-11-23) are recorded in §8.
 
 Goal: change keys on the connected keyboard *instantly* (no rebuild, no flashing) while
 the config repo stays the single source of truth — every live change is also written
@@ -21,9 +20,9 @@ Studio RPC runs on the **central half** (the owner's left half, built with the
 
 | Subsystem | Requests used by mxKeys | Notes |
 |---|---|---|
-| core | `get_device_info` (name, serial number), `get_lock_state`, `reset_settings` | `reset_settings` needs unlock |
+| core | `get_device_info` (name, serial number), `get_lock_state`, `reset_settings` | `reset_settings` needs unlock; `lock` exists in the proto but has no handler (`RPC_NOT_FOUND`) |
 | behaviors | `list_all_behaviors`, `get_behavior_details(id)` | display name + parameter metadata |
-| keymap | `get_keymap`, `set_layer_binding`, `check_unsaved_changes`, `save_changes`, `discard_changes`, `get_physical_layouts`, `set_layer_props` | all except reads need unlock |
+| keymap | `get_keymap`, `set_layer_binding`, `check_unsaved_changes`, `save_changes`, `discard_changes`, `get_physical_layouts`, `set_layer_props` | **all** need unlock — even reading the keymap |
 
 Notifications: `lock_state_changed`, `unsaved_changes_status_changed`.
 
@@ -52,8 +51,10 @@ Notifications: `lock_state_changed`, `unsaved_changes_status_changed`.
    top byte (`&kp LS(A)` = `0x02070004`), layers are layer **ids** (the devicetree index,
    stable when layers are reordered on the device), commands are their `#define` values.
 7. **Unlocking is physical**: a key bound to `&studio_unlock` (the owner has one on the
-   System layer). Locked requests fail with `UNLOCK_REQUIRED`; `lock` re-locks;
-   the keyboard locks itself after an idle timeout.
+   System layer). Only `get_device_info`, `get_lock_state` and `list_all_behaviors`
+   work while locked; everything else (even `get_keymap` and behavior details) fails with
+   `UNLOCK_REQUIRED`. The keyboard locks itself after 10 idle minutes and on disconnect.
+   So connecting always starts with "press the unlock key".
 
 ## 2. Architecture
 
@@ -73,6 +74,13 @@ crates/studio/                 (new)
 
 The app talks to it through a `StudioSession` trait, so a BLE transport (later) or the
 third-party `zmk-studio-api` crate could slot in without touching the UI.
+
+**Bluetooth** (decision E): `btleplug` (BlueZ on Linux via D-Bus, CoreBluetooth on
+macOS, WinRT on Windows). The Studio service `00000000-0196-6107-c967-c5cfb1c2482a` /
+characteristic `00000001-…` requires an encrypted link, i.e. the keyboard must already
+be paired with this computer (it is, when it's in use). Requests are written to the
+characteristic; responses arrive as indications and are fed to the same frame decoder.
+Only the central half advertises the service. Linux build dependency: `libdbus-1-dev`.
 
 **Serial port**: find the ZMK device by USB VID/PID (`0x1D50:0x615E`) via the existing
 `probe` crate, then open its CDC-ACM port with the `serialport` crate (without libudev).
@@ -128,7 +136,10 @@ In live mode, changing a key does all of this as one step:
    so `discard_changes` is the fallback).
 4. Undo/redo work as today and also update the keyboard.
 
-**Saving on the keyboard** (so the change survives a restart): see decision A.
+**Saving on the keyboard** (so the change survives a restart): a **Save on keyboard**
+button, like ZMK Studio (decision A). Until then the change is live in the keyboard's
+memory and already in the files; the UI shows "not saved on the keyboard yet" and
+**Discard** (`discard_changes`, plus reverting the file edits made since the last save).
 
 Layer renames: `set_layer_props` + the existing rename patch. Adding, removing and moving
 layers, combos, macros, hold-tap timing, settings and pictures are **file edits that
@@ -173,7 +184,12 @@ physical layouts (key count and geometry identify the Corne 6-column layout). Sh
   effect without flashing, survives a restart after saving, reset clears overrides, BT
   pairings intact).
 
-## 8. Decisions for review
+## 8. Decisions (reviewed)
+
+Owner's answers: **A — Save button. B — own client. C — yes, offer to clear.
+D — layers stay file edits (v1). E — Bluetooth in v1 too** (USB and BLE).
+
+Original options:
 
 **A. Saving on the keyboard.** ZMK Studio keeps changes in RAM until you press "Save".
   - *Recommended:* save automatically ~2 s after the last live edit. Then the keyboard
