@@ -3,6 +3,41 @@
 Newest first. Each session: what was done, what's next, open questions, and anything
 that needs testing on real hardware.
 
+## Session 3 (cont.) — 2026-11-23 — Phase 9
+
+### Done
+- `crates/niceview`: decode (PNG, GIF with frame delays, JPEG, BMP, WebP), fit, adjust,
+  dither (Atkinson, Floyd–Steinberg, Bayer 4/8, threshold), frame limits (minimum
+  frame time, identical-frame merging, even sampling to the flash budget with the
+  total time kept), LVGL `I1` encoding, generated module, save/remove in a repo.
+- Orientation established from ZMK's own art: the stored image turned 90°
+  counter-clockwise is what you see on the Corne, so frames are stored turned
+  clockwise; a fixture of ZMK's `balloon` round-trips byte-for-byte.
+- Design: no fork of ZMK's nice!view code. A tiny module (`nice_view_art/src/art.c`)
+  waits until ZMK's display is initialised, then adds an LVGL image on top of the
+  stock screen from the display work queue (same thread as ZMK's widgets). Right half:
+  over the stock 140×68 art (battery strip stays); either half: whole screen.
+  Animations use an LVGL timer, paused on `zmk_activity_state_changed` idle.
+- Flash: program area 792 KiB; Corne halves with the screen use ~430 KiB (left) /
+  ~315 KiB (right) at ZMK 4de3133, so the default 64 KiB per half (≈47 full frames)
+  is safe; up to 192 KiB allowed.
+- The owner's repo already has `zephyr/module.yml` (`board_root: .`); mxKeys adds two
+  lines (`cmake`, `kconfig`) and removes them again on “Remove pictures”.
+- App: “Screen pictures” panel (shown for nice!view profiles).
+- **Acceptance test** on a copy of `xnmrph/corne` (screen on): picked a gradient logo
+  (left, whole screen) and a 12-frame bouncing-ball GIF (right, under the battery) in
+  the app; saved; built in the app. The ELF has `mxk_left_0_map` (1,368 bytes) and
+  `mxk_right_0…5_map` (1,232 bytes each); decoding them from `zmk.elf` gives exactly
+  the app's previews.
+
+### Hardware checklist (needs the real keyboard)
+- [ ] Right half: picture under the battery strip, upright, animation runs; battery
+      and connection icons still update.
+- [ ] Left half whole screen: picture upright, covers the status.
+- [ ] Animation stops after the idle timeout and resumes on a key press.
+- [ ] `CONFIG_NICE_VIEW_WIDGET_INVERTED=y` inverts the pictures too.
+- [ ] Remove pictures → rebuild → stock screens again.
+
 ## Session 3 (cont.) — 2026-11-23 — Phase 8
 
 ### Done

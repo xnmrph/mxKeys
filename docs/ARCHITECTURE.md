@@ -442,23 +442,41 @@ ids), the repo speaks *source* (`&kp LCTRL`, `&mo 1`, `#define`s).
 
 ## 10. nice!view images (Phase 9)
 
-From ZMK's `nice_view` shield: 160×68 Sharp LS0xx memory-in-pixel display, LVGL with
-1-bit colour (`LV_COLOR_DEPTH_1`); the custom widget (`NICE_VIEW_WIDGET_STATUS`) draws a
-68×68 status canvas (rotated via `lv_draw_sw_rotate`) and, on the peripheral half, an art
-image (`balloon`/`mountain`, `lv_img_dsc_t` with `LV_COLOR_FORMAT_I1`, 140×68, palette of
-two colours + packed 1-bit rows, picked at random at boot) placed top-left under the
-canvas. The central half shows status (battery, output, layer, WPM) and no art.
-`CONFIG_NICE_VIEW_WIDGET_INVERTED` flips the palette.
+From ZMK's `nice_view` shield: 160×68 Sharp memory display, LVGL with 1-bit colour.
+On the Corne it is mounted turned: what LVGL draws at (x, y) in its 160×68 landscape
+space is seen as a 68×160 portrait screen. ZMK's stock art (`balloon`, `mountain`,
+140×68 `LV_COLOR_FORMAT_I1`, 8-byte palette + 18-byte rows) turned 90°
+counter-clockwise is the upright picture — so mxKeys works upright and stores frames
+turned 90° clockwise (`crates/niceview/src/lvgl.rs`, tested byte-for-byte against
+`balloon`). On the right (peripheral) half, ZMK shows a 20-pixel status strip at the
+top (battery, connection) and the art below; the left (central) half shows layer,
+battery, output and WPM.
 
-Plan: import PNG/GIF → fit to target area (stock: the peripheral art area; custom
-layout: full 160×68) → dithering (threshold / Floyd–Steinberg / Atkinson / ordered) →
-live preview at real pixel size → generate LVGL 9 `I1` C arrays + a custom widget
-(shield/module in the config repo overriding the stock status screen, e.g. via
-`CONFIG_ZMK_DISPLAY_STATUS_SCREEN_CUSTOM` + our own `custom_status_screen.c`) →
-rebuild. Limits: each 160×68 1-bit frame is 1,360 bytes (+8 palette); we cap frames by
-a flash budget (default 32 KiB ⇒ ~24 full frames) and enforce min frame time (the display
-refresh + LVGL timer; ~100 ms default). Exact flash headroom measured from the build's
-`zephyr.map` in Phase 9.
+Pipeline (`crates/niceview`): decode → fit (fill/fit/stretch, transparent and bars
+filled with the background) → brightness/contrast → dither (Atkinson,
+Floyd–Steinberg, Bayer 4/8, threshold) → invert → frame limits (minimum frame time,
+merge identical neighbours, sample evenly to the flash budget keeping the total
+time) → `I1` encoding.
+
+Generated module (config repo, see `module.rs`): `nice_view_art/` with
+`CMakeLists.txt` (`target_sources(app …)` when `CONFIG_MXKEYS_NICE_VIEW_ART`), `Kconfig`
+(default y with `ZMK_DISPLAY`), `src/art.c` (fixed code), `src/frames.c` (generated
+frames for both halves, chosen by `ZMK_SPLIT_ROLE_CENTRAL`), the original pictures in
+`source/` and settings in `mxkeys.json`. `zephyr/module.yml` gets `cmake:`/`kconfig:`
+under `build:` (lossless edit; refused with instructions if the repo's module already
+builds its own code). The app's builds — like ZMK's GitHub workflow — pass the repo
+as an extra module when it has `zephyr/module.yml`.
+
+Runtime: rather than forking ZMK's widget code (which tracks LVGL/ZMK changes), the
+module waits until `zmk_display_is_initialized()` and then queues its work on
+`zmk_display_work_q()` — behind ZMK's own `initialize_display` — to add an
+`lv_image` on top of the active screen (top-left; 140×68 over the stock art or 160×68
+over everything). Animations: an `lv_timer` steps frames with their delays and is
+paused/resumed from `zmk_activity_state_changed` (via the same work queue). Palette
+follows `CONFIG_NICE_VIEW_WIDGET_INVERTED`.
+
+Budget: program area 0xC6000 (792 KiB); measured Corne halves with screen ≈430 KiB /
+≈315 KiB. Default 64 KiB per half (frame 1,368 B full / 1,232 B art + ~32 B overhead).
 
 ## 11. Git
 
