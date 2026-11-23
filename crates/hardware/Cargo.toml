@@ -1,0 +1,14 @@
+[package]
+name = "mxkeys-hardware"
+version = "0.1.0"
+description = "Hardware profiles (keyboard, controller, display) and pure detection logic for mxKeys"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+zmk-config = { path = "../zmk-config" }
+

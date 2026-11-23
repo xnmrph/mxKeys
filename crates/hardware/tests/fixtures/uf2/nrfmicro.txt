@@ -1,0 +1,4 @@
+UF2 Bootloader 0.2.13 lib/nrfx (v1.1.0-1-g096e770) lib/tinyusb (legacy-525-ga1c59649) s140 6.1.1
+Model: nRFMicro
+Board-ID: nRF52840-nRFMicro
+Date: Jan  1 2020
