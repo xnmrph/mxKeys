@@ -91,7 +91,7 @@ Phases are done in order, one at a time. Tick boxes as work lands (keep this fil
 - [x] Undo/redo (buttons + Ctrl/⌘+Z), file-change detection with automatic reload
 - [x] Read-only display for opaque/macro-generated bindings
 - [x] Acceptance test: `&out OUT_TOG` added next to the BT keys on the *System* layer of (a copy of) `xnmrph/corne` using only the app — `git diff` shows one changed line
-- [ ] Apply the same edit to the owner's real repo once they're happy (needs push access / Phase 8)
+- [ ] Apply the same edit to the owner's real repo once they're happy (Phase 8 makes it a click; needs the owner's credentials)
 - [ ] Drag & drop keys between positions; copy/paste keys
 - [ ] Sensor bindings (encoders) editing; non-Corne layouts
 - [ ] Re-align a whole bindings block on request ("tidy up")
@@ -120,9 +120,17 @@ Phases are done in order, one at a time. Tick boxes as work lands (keep this fil
 - [ ] Leader keys, adaptive keys and other module behaviors (shown under "Other" with raw properties)
 
 ## Phase 8 — Git
-- [ ] Status, diff view, commit
-- [ ] Push to any remote via system git (credential helper) with libgit2 fallback
-- [ ] Clone/open flow polish
+- [x] Status (branch, ahead/behind, changed files), diff view with line numbers, commit (all or selected files)
+- [x] Push / fetch / pull to any remote via system git (credential helpers, SSH agent, signing, hooks) with libgit2 fallback (HTTPS)
+- [x] Pull: fast-forward, or rebase local versions on top (aborted cleanly on conflict); rejected pushes explained
+- [x] Plain-language summary of each changed keymap/.conf + suggested commit message
+- [x] Commit identity asked once, stored in the repo's `.git/config`; credentials never stored, URLs redacted
+- [x] Undo uncommitted changes per file (native confirmation); start a history (`git init`) for plain folders
+- [x] Clone/open polish: recently opened folders on the welcome screen
+- [x] Acceptance: in the real app, on a clone of `xnmrph/corne` with a local test server — OUT_TOG key + screen on → save & upload (commit by the entered identity with the generated description) → server-side edit → “Get latest” fast-forwards and the files update
+- [ ] Apply the owner's pending edits to the real `xnmrph/corne` (owner opens their clone in mxKeys and clicks Upload — needs their credentials)
+- [ ] Branches (switch/create) and resolving conflicts in the app
+- [ ] Commit history view with per-version diffs; revert a version
 
 ## Phase 9 — nice!view images/GIFs
 - [ ] Import PNG/GIF, crop/resize to stock art area or full 160×68

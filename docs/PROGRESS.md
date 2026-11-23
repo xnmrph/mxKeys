@@ -3,6 +3,40 @@
 Newest first. Each session: what was done, what's next, open questions, and anything
 that needs testing on real hardware.
 
+## Session 3 (cont.) — 2026-11-23 — Phase 8
+
+### Done
+- `crates/git/src/repo.rs`: status, diff, file-at-HEAD, log, commit (all/selected),
+  fetch, pull (fast-forward / rebase with clean abort), push (sets upstream on first
+  push), discard, init, identity. Tested against local bare “servers” with **both**
+  backends (libgit2 and system git): rejected push → pull → push, fast-forward, blocked
+  pull with local edits, first push of a new repo.
+- `zmk-config::changes`: plain-language change lists for keymaps (keys per layer, layer
+  add/remove/rename/reorder, combos/macros/behaviors added/removed/changed) and `.conf`
+  (settings by their plain names, other options raw).
+- App: “Changes and upload” panel, background server checks, recent folders on the
+  welcome screen.
+- Found and fixed: `window.confirm` doesn't block in the Tauri webview (it returned at
+  once, so “Undo changes” ran without asking). All confirmations now use the native
+  dialog (`dialogs.ts`); verified Cancel keeps the change and confirming discards it.
+- **Acceptance test** in the real app with a clone of `xnmrph/corne` and a local bare
+  repository as the server: set `&out OUT_TOG` above “BT forget” and turned the screen
+  on → the panel listed “System: key 17 &trans → &out OUT_TOG” and “Screen: off → on”
+  → asked for a name/email (empty HOME, as on a fresh machine) → “Save version and
+  upload” → the server has the commit “Update keymap and settings” with both bullets.
+  Then a commit pushed from another clone (“Rename keyboard on the website”) was found
+  by “Check the server” and applied with “Get latest”.
+- 151 tests.
+
+### For the owner
+- To apply the pending edits to the real repo: open your local clone of `xnmrph/corne`
+  in mxKeys, make the edits (or keep the ones already made), and click **Save version
+  and upload**. Pushing uses your normal git login (credential helper / SSH key); mxKeys
+  never sees a token.
+
+### Next
+1. Phase 9: nice!view images.
+
 ## Session 3 (cont.) — 2026-11-23 — Phase 7
 
 ### Done

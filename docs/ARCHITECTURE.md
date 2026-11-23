@@ -462,9 +462,33 @@ refresh + LVGL timer; ~100 ms default). Exact flash headroom measured from the b
 
 ## 11. Git
 
-`git2` (libgit2) for status/diff/commit; **push via the system `git` binary** when
-present so the user's credential helper/SSH agent work for any remote (GitHub, Gitea,
-…); fall back to libgit2 with credential-helper callback. No tokens stored by the app.
+Implemented in `crates/git/src/repo.rs` (Phase 8):
+
+- **Reading** — status (branch, upstream, ahead/behind, changed files, identity, last
+  commit), diff (HEAD → working tree incl. new files, renames), file-at-HEAD, log —
+  always via libgit2: structured, no output parsing, works without git installed.
+- **Writing** — commit, fetch, pull, push via **system git** when installed, so commit
+  hooks/signing, credential helpers and SSH agents behave as in a terminal
+  (`GIT_TERMINAL_PROMPT=0`: never hangs on a prompt). libgit2 fallback for HTTPS remotes
+  (credential-helper callback); SSH remotes need system git.
+- **Pull** = fetch, then fast-forward; if local commits exist, rebase on top with system
+  git and `rebase --abort` on conflict (the folder is never left mid-rebase). libgit2:
+  fast-forward only. Uncommitted edits to tracked files block pulling (plain message).
+- **Commit a subset**: `git add -A -- paths` + `git commit -- paths` (renames include the
+  old path); libgit2 updates only those index entries.
+- **Identity**: if `user.name`/`user.email` are missing, the UI asks once and stores
+  them in the repository's own `.git/config` (never the global config, never a
+  committed file).
+- Remote URLs are shown with embedded credentials removed (`redact_url`). The app
+  never asks for or stores tokens.
+- Errors are classified into plain-language messages (rejected push → “get latest
+  first”, diverged, conflict, no permission (403), nothing to commit, no identity …).
+- `zmk-config::changes` turns the difference between HEAD and the working copy of a
+  keymap/`.conf` into plain sentences (“System: key 17 &trans → &out OUT_TOG”,
+  “Screen: off → on”), shown per file and used for the suggested commit message.
+- UI: “Changes and upload” panel (save version = commit, upload = push, get latest =
+  pull, undo changes = discard with a native confirmation). Background fetch on open,
+  every 3 minutes and on window focus. Recently opened folders are kept in app data.
 
 ## 12. Open questions (answered/recommended)
 
