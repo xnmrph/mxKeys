@@ -66,6 +66,7 @@ fn main() -> ExitCode {
         update_workspace: update,
         full_workspace: full,
         pristine,
+        layout_only: false,
     };
     let manifest = Manifest::embedded();
     let mut last_pct: Option<(String, u64)> = None;

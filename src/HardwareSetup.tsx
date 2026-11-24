@@ -31,6 +31,13 @@ const NAMES: Record<string, string> = {
   right: "Right half",
 };
 
+/** "lily58" → "Lily58", "kyria_rev3" → "Kyria rev3" (like the backend). */
+function keyboardName(id: string): string {
+  if (NAMES[id]) return NAMES[id];
+  const spaced = id.replace(/[_-]/g, " ");
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
+}
+
 function knownName<T extends string>(k: Known<T> | null): string | null {
   if (!k) return null;
   return k.type === "known" ? NAMES[k.id] ?? k.id : `“${k.id}” (not recognised)`;
@@ -108,7 +115,7 @@ export function HardwareSetup({ repoRoot, onProfile }: { repoRoot: string; onPro
   if (saved) {
     return (
       <section className="hw-chip">
-        <span className="hw-line"><Icon name="keyboard" /> <strong>{NAMES[saved.keyboard]} · {NAMES[saved.controller]} · {NAMES[saved.display]}</strong></span>
+        <span className="hw-line"><Icon name="keyboard" /> <strong>{keyboardName(saved.keyboard)} · {NAMES[saved.controller]} · {NAMES[saved.display]}</strong></span>
         <button onClick={() => { setSaved(null); onProfile?.(null); }}>Change</button>
       </section>
     );
@@ -123,7 +130,7 @@ export function HardwareSetup({ repoRoot, onProfile }: { repoRoot: string; onPro
         <>
           <p className="summary">{d.summary}</p>
           <div className="fields">
-            <Field label="Keyboard" field={d.keyboard} show={(v) => knownName(v)} />
+            <Field label="Keyboard" field={d.keyboard} show={(v) => (v && v.type === "known" ? keyboardName(v.id) : knownName(v))} />
             <Field label="Controller" field={d.controller} show={(v) => knownName(v)} />
             <Field label="Screen" field={d.display} show={(v) => NAMES[v]} />
             <Field label="Talks to the computer" field={d.central} show={(v) => NAMES[v]} />

@@ -8,10 +8,11 @@ import { BehaviorsPanel } from "./BehaviorsPanel";
 import type { LiveInfo } from "./LivePanel";
 import { Icon } from "./icons";
 
-const UNIT = 54; // px per key unit
+const MAX_UNIT = 54; // px per key unit (smaller when a wide keyboard needs to fit)
 
-export function KeymapEditor({ keymap, liveInfo, flash, onBlocked, onConnect, registerFileChanged, onChanged, onReload }: {
+export function KeymapEditor({ keymap, repoRoot, liveInfo, flash, onBlocked, onConnect, registerFileChanged, onChanged, onReload }: {
   keymap: KeymapSummary;
+  repoRoot: string;
   liveInfo: LiveInfo;
   /** Bumped when an edit was refused because the keyboard is locked. */
   flash: number;
@@ -46,6 +47,17 @@ export function KeymapEditor({ keymap, liveInfo, flash, onBlocked, onConnect, re
     return true;
   }, [locked, onBlocked]);
   const [flashing, setFlashing] = useState(false);
+  // Fit wide keyboards into the pane.
+  const boxRef = useRef<HTMLDivElement>(null);
+  const [boxWidth, setBoxWidth] = useState(0);
+  useEffect(() => {
+    const el = boxRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setBoxWidth(el.clientWidth));
+    ro.observe(el);
+    setBoxWidth(el.clientWidth);
+    return () => ro.disconnect();
+  }, []);
   // Keys of the combo under the mouse in the list below.
   const [highlight, setHighlight] = useState<number[] | null>(null);
   // Bring the key picker into view when a key is chosen; Escape closes it.
@@ -82,8 +94,19 @@ export function KeymapEditor({ keymap, liveInfo, flash, onBlocked, onConnect, re
   }, [keymap.path]);
 
   useEffect(() => {
-    invoke<KeyGeom[]>("physical_layout").then(setGeometry).catch(() => setGeometry([]));
-  }, []);
+    invoke<KeyGeom[]>("physical_layout", { repoPath: repoRoot }).then(setGeometry).catch(() => setGeometry([]));
+  }, [repoRoot]);
+  // No layout yet (a keyboard mxKeys hasn't built): read it from ZMK on request.
+  const [readingLayout, setReadingLayout] = useState<string | null>(null);
+  async function readLayout() {
+    setReadingLayout("Reading your keyboard's layout from ZMK… (the first time this also downloads the build tools)");
+    try {
+      setGeometry(await invoke<KeyGeom[]>("read_layout", { repoPath: repoRoot }));
+      setReadingLayout(null);
+    } catch (e) {
+      setReadingLayout(`Couldn't read the layout: ${String(e)}`);
+    }
+  }
   useEffect(loadCatalog, [loadCatalog, keymap]);
 
   // Notice edits made outside the app (text editor, git pull) and reload.
@@ -166,9 +189,10 @@ export function KeymapEditor({ keymap, liveInfo, flash, onBlocked, onConnect, re
   const width = Math.max(0, ...geometry.map((g) => g.x + g.w)) / 100;
   const height = Math.max(0, ...geometry.map((g) => g.y + g.h)) / 100 + 0.4;
   const last = keymap.layers.length - 1;
+  const UNIT = boxWidth > 0 && width > 0 ? Math.min(MAX_UNIT, Math.floor(boxWidth / width)) : MAX_UNIT;
 
   return (
-    <section className="keymap-editor">
+    <section className="keymap-editor" ref={boxRef}>
       <div className="editor-head">
         <span className="mono muted file-name">{keymap.fileName}</span>
         <div className="row">
@@ -261,7 +285,16 @@ export function KeymapEditor({ keymap, liveInfo, flash, onBlocked, onConnect, re
           })}
         </div>
       ) : (
+        <>
+        <div className="layout-missing">
+          <span className="muted">{geometry.length > 0
+            ? `The layout ZMK reports has ${geometry.length} keys, this layer has ${layer.bindings.length}, so the keys are listed instead.`
+            : "mxKeys hasn't seen this keyboard's layout yet, so the keys are listed instead of drawn."}</span>
+          <button onClick={readLayout} disabled={!!readingLayout && !readingLayout.startsWith("Couldn't")}>Draw my keyboard</button>
+          {readingLayout && <span className="muted small">{readingLayout}</span>}
+        </div>
         <ol className="binding-list">{layer.bindings.map((b, i) => <li key={i}><button className="link" onClick={() => { if (!blocked()) setSelected(i); }}><code>{b}</code></button></li>)}</ol>
+        </>
       )}
       {selected !== null && catalog && (
         <div ref={pickerRef}>

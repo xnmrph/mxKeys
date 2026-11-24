@@ -3,6 +3,26 @@
 Newest first. Each session: what was done, what's next, open questions, and anything
 that needs testing on real hardware.
 
+## Session 4 — 2026-11-24 — hardware test, polish, any ZMK keyboard
+
+### Done
+- First run on the owner's NixOS machine and Corne: firmware built and flashed, live
+  editing connected. Fixed what that found: inverted nice!view pictures (palette),
+  UF2 drive not mounted (udisks auto-mount), pip `user = true` breaking the venv,
+  build.yaml board without `//zmk` (GitHub builds failed; one-click fix), shell.nix
+  using nixpkgs `cargo-tauri`, picture previews blank in release builds (CSP).
+- UI: tabs in the MX Nexus design; Discord-style picture positioning; live editing
+  blocks edits while locked (flashing box); combos/macros as a card grid with popup
+  editor and key highlighting; install steps draw the real keyboard half.
+- Any ZMK keyboard: keyboards named by shield, split/one-piece, layout read from ZMK's
+  devicetree. Tested with ZMK's own Lily58 keymap: detected, layout drawn without a
+  build (configure-only), firmware built for both halves, install drawing correct.
+- 190 tests.
+
+### Next
+1. Owner: re-flash the right half with the palette fix; save + upload the build.yaml fix.
+2. Controllers outside the catalog; choosing between layouts.
+
 ## Session 3 (cont.) — 2026-11-23 — Phase 10 (live editing)
 
 ### Done

@@ -20,6 +20,8 @@ pub struct BuildPlan {
     pub build_dir: PathBuf,
     /// Start from scratch instead of an incremental build.
     pub pristine: bool,
+    /// Only run the configure step (enough for `zephyr.dts`, e.g. the key layout).
+    pub cmake_only: bool,
 }
 
 impl BuildPlan {
@@ -42,7 +44,13 @@ impl BuildPlan {
             extra_modules,
             target,
             pristine: false,
+            cmake_only: false,
         }
+    }
+
+    /// The resolved devicetree of this build (written by the configure step).
+    pub fn dts(&self) -> PathBuf {
+        self.build_dir.join("zephyr").join("zephyr.dts")
     }
 
     pub fn uf2(&self) -> PathBuf {
@@ -66,6 +74,9 @@ pub fn west_build_args(plan: &BuildPlan, ws: &Workspace) -> Vec<String> {
     for s in &plan.target.snippets {
         a.push("-S".into());
         a.push(s.clone());
+    }
+    if plan.cmake_only {
+        a.push("--cmake-only".into());
     }
     a.push("--".into());
     // Found via an explicit path instead of `west zephyr-export`, which would write to the
@@ -94,7 +105,8 @@ pub enum BuildError {
     NoOutput(PathBuf),
 }
 
-/// Run the build; every output line goes to `on_line`. Returns the `.uf2` path.
+/// Run the build; every output line goes to `on_line`. Returns the `.uf2` path (or the
+/// `zephyr.dts` path for a configure-only run).
 pub fn build(
     plan: &BuildPlan,
     ws: &Workspace,
@@ -110,6 +122,14 @@ pub fn build(
         .envs(&tools.env());
     on_line(&format!("$ {}", cmd.display()));
     runner.run(&cmd, on_line)?;
+    if plan.cmake_only {
+        let dts = plan.dts();
+        return if dts.is_file() {
+            Ok(dts)
+        } else {
+            Err(BuildError::NoOutput(dts))
+        };
+    }
     let uf2 = plan.uf2();
     if uf2.is_file() {
         Ok(uf2)

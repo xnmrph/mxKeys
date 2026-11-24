@@ -112,6 +112,7 @@ pub fn start_build(req: BuildRequest, jobs: &Jobs, emit: impl Fn(BuildEvent) + S
             update_workspace: req.update,
             full_workspace: false,
             pristine: req.pristine,
+            layout_only: false,
         };
         let res = pipeline::run(&opts, &m, &ProcessRunner, &mut |e| emit(BuildEvent::Event(e)));
         match res {
@@ -126,6 +127,32 @@ pub fn start_build(req: BuildRequest, jobs: &Jobs, emit: impl Fn(BuildEvent) + S
         }
     });
     true
+}
+
+/// Configure the main half only, to read the keyboard's layout from its `zephyr.dts`
+/// (gets the build tools and ZMK first if needed). Blocks; refuses while a build runs.
+pub fn read_layout(
+    data: std::path::PathBuf,
+    repo: std::path::PathBuf,
+    profile: mxkeys_hardware::HardwareProfile,
+    jobs: &Jobs,
+) -> Result<(), String> {
+    let Some(_guard) = claim(&jobs.build) else {
+        return Err("A build is running — the layout appears when it's done.".into());
+    };
+    let opts = Options {
+        data,
+        repo,
+        profile: Some(profile),
+        only: Vec::new(),
+        update_workspace: false,
+        full_workspace: false,
+        pristine: false,
+        layout_only: true,
+    };
+    pipeline::run(&opts, &Manifest::embedded(), &ProcessRunner, &mut |_| {})
+        .map(|_| ())
+        .map_err(|e| e.to_string())
 }
 
 #[cfg(test)]

@@ -157,3 +157,11 @@ Phases are done in order, one at a time. Tick boxes as work lands (keep this fil
 - [ ] Real-hardware checks (checklist in PROGRESS.md)
 - [ ] RPC-based hardware detection (device info + physical layouts → Phase 2 evidence); the client already reads both
 - [ ] Live layer add/remove/move (decision D: not in v1)
+
+## After v1 — polish and any ZMK keyboard
+- [x] Tabbed layout in the MX Nexus design (Keyboard / Keymap / Screen / Settings / Install & save), dark-first theme, mx keycap icon and blackletter wordmark
+- [x] Hardware test fixes: nice!view palette (pictures were inverted), udisks auto-mount of the UF2 drive, pip user config ignored, build.yaml `//zmk` repair, NixOS shell
+- [x] Any ZMK keyboard: keyboard = its shield name (any shield), split or one-piece from build.yaml, one-piece build + install flow
+- [x] Key layout from ZMK itself (`zmk,physical-layout` in the build's `zephyr.dts`; a configure-only run when nothing is built yet); board scales to fit
+- [ ] Controllers beyond the catalog (use build.yaml's board as-is)
+- [ ] Choosing between several physical layouts (e.g. Corne 5/6 columns)

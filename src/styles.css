@@ -516,3 +516,6 @@ select option { background: var(--surface-1); color: var(--ink); }
 .def-modal { width: min(820px, 100%); }
 .def-modal .def-card { border: none; padding: 0; margin: 0; background: none; }
 .key.hl { border-color: var(--signal); box-shadow: 0 0 0 2px var(--signal); background: var(--surface-2); }
+
+.layout-missing { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 14px; border: 1px dashed var(--line-strong); border-radius: var(--radius-md); margin: 0 0 var(--space-3); }
+.binding-list { columns: 4 160px; padding-left: 1.6em; margin: 0 0 var(--space-4); }

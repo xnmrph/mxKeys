@@ -6,6 +6,7 @@
 
 pub mod catalog;
 pub mod detect;
+pub mod layout;
 pub mod profile;
 
 pub use profile::HardwareProfile;

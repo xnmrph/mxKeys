@@ -166,8 +166,52 @@ fn quiz_questions() -> Vec<quiz::QuizQuestion> {
 
 /// Physical key positions for drawing the keyboard.
 #[tauri::command]
-fn physical_layout() -> Vec<mxkeys_hardware::catalog::KeyGeom> {
-    mxkeys_hardware::catalog::corne_layout()
+fn physical_layout(app: AppHandle, repo_path: String) -> Vec<mxkeys_hardware::catalog::KeyGeom> {
+    let repo = PathBuf::from(repo_path);
+    let Ok(data) = data_dir(&app) else {
+        return Vec::new();
+    };
+    // The exact layout ZMK uses, from the latest build (or layout read) of this config.
+    if let Some(keys) = mxkeys_toolchain::pipeline::layout_dts(&data, &repo)
+        .and_then(|p| std::fs::read_to_string(p).ok())
+        .and_then(|t| mxkeys_hardware::layout::layouts_from_dts(&t).into_iter().next())
+        .map(|l| l.keys)
+    {
+        return keys;
+    }
+    // Not built yet: the Corne's layout is known in advance (others: read it from ZMK).
+    let corne = mxkeys_hardware::catalog::KeyboardId::corne();
+    let keyboard = profiles::load(&data, &repo).map(|p| p.keyboard).or_else(|| {
+        detection::repo_inputs(&repo).build.as_ref().and_then(|b| {
+            b.targets.iter().flat_map(|t| t.keyboard_shields()).next().map(|s| mxkeys_hardware::catalog::keyboard_of_shield(s).0)
+        })
+    });
+    if keyboard.as_ref() == Some(&corne) {
+        mxkeys_hardware::catalog::corne_layout()
+    } else {
+        Vec::new()
+    }
+}
+
+/// Read the keyboard's key layout from ZMK (a quick configure-only run of the main
+/// half). Needs the hardware confirmed; downloads the build tools if needed.
+#[tauri::command]
+async fn read_layout(
+    app: AppHandle,
+    repo_path: String,
+) -> Result<Vec<mxkeys_hardware::catalog::KeyGeom>, String> {
+    let data = data_dir(&app)?;
+    let repo = PathBuf::from(&repo_path);
+    let profile = profiles::load(&data, &repo).ok_or("Confirm your keyboard's hardware first.")?;
+    let (d, r) = (data.clone(), repo.clone());
+    let handle = app.clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let jobs = handle.state::<building::Jobs>();
+        building::read_layout(d, r, profile, &jobs)
+    })
+    .await
+    .map_err(|e| e.to_string())??;
+    Ok(physical_layout(app, repo_path))
 }
 
 fn data_dir(app: &AppHandle) -> Result<PathBuf, String> {
@@ -566,6 +610,7 @@ pub fn run() {
             pictures_preview,
             pictures_source,
             build_yaml_variant_check,
+            read_layout,
             build_yaml_add_zmk_variant,
             pictures_save,
             pictures_remove,

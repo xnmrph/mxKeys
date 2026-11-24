@@ -6,7 +6,7 @@ import type { FirmwareState,
   BuildEvent, BuildOutcome, InstallProgress, Problem, TargetId, ToolchainEvent, ToolchainInfo,
 } from "./types";
 
-const TARGETS: { id: TargetId; label: string }[] = [
+const SPLIT_TARGETS: { id: TargetId; label: string }[] = [
   { id: "left", label: "Left half" },
   { id: "right", label: "Right half" },
   { id: "settings_reset", label: "Settings reset" },
@@ -46,7 +46,13 @@ function ProblemView({ p }: { p: Problem }) {
   );
 }
 
-export function BuildPanel({ repoRoot, autoSetup, changes = 0 }: { repoRoot: string; autoSetup: boolean; changes?: number }) {
+const WHOLE_TARGETS: { id: TargetId; label: string }[] = [
+  { id: "main", label: "Keyboard" },
+  { id: "settings_reset", label: "Settings reset" },
+];
+
+export function BuildPanel({ repoRoot, autoSetup, changes = 0, screen = false, split = true }: { repoRoot: string; autoSetup: boolean; changes?: number; screen?: boolean; split?: boolean }) {
+  const TARGETS = split ? SPLIT_TARGETS : WHOLE_TARGETS;
   const [tc, setTc] = useState<ToolchainInfo | null>(null);
   const [tcProgress, setTcProgress] = useState<InstallProgress | null>(null);
   const [tcError, setTcError] = useState<string | null>(null);
@@ -187,7 +193,7 @@ export function BuildPanel({ repoRoot, autoSetup, changes = 0 }: { repoRoot: str
         </div>
       )}
       {outcome && outcome.results.every((r) => r.uf2) && <p className="note">All firmware files are ready.</p>}
-      {!building && (builtBefore || outcome?.results.every((r) => r.uf2)) && <FlashWizard repoRoot={repoRoot} />}
+      {!building && (builtBefore || outcome?.results.every((r) => r.uf2)) && <FlashWizard repoRoot={repoRoot} screen={screen} />}
       {log.length > 0 && (
         <details>
           <summary>Build log ({log.length} lines)</summary>

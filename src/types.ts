@@ -76,7 +76,8 @@ export type CloneProgress =
   | { stage: "done" };
 
 // ----- hardware (mxkeys-hardware / src-tauri detection.rs) -----
-export type KeyboardId = "corne";
+/** The keyboard's ZMK shield name without _left/_right ("corne", "lily58", "planck"). */
+export type KeyboardId = string;
 export type ControllerId = "nice_nano_v2" | "nice_nano_v1" | "xiao_ble" | "nrf_micro";
 export type DisplayKind = "none" | "nice_view" | "oled128x32";
 export type Side = "left" | "right";
@@ -101,6 +102,8 @@ export interface FieldResult<T> {
 
 export interface HardwareProfile {
   keyboard: KeyboardId;
+  /** Two halves; false for a one-piece keyboard. */
+  split?: boolean;
   controller: ControllerId;
   display: DisplayKind;
   central: Side;
@@ -123,7 +126,7 @@ export interface Detection {
 
 export interface Uf2Info { bootloader: string | null; bootloader_version: string | null; model: string | null; board_id: string | null }
 export interface Uf2Drive { path: string; info: Uf2Info }
-export interface ProfileTarget { id: "left" | "right" | "settings_reset"; board: string; shields: string[]; snippets: string[] }
+export interface ProfileTarget { id: "left" | "right" | "main" | "settings_reset"; board: string; shields: string[]; snippets: string[] }
 
 export interface DetectionReport {
   detection: Detection;
@@ -153,7 +156,7 @@ export type ToolchainEvent =
   | { type: "progress"; data: InstallProgress }
   | { type: "finished"; data: { ok: boolean; error: string | null } };
 
-export type TargetId = "left" | "right" | "settings_reset";
+export type TargetId = "left" | "right" | "main" | "settings_reset";
 
 export interface ProblemLocation { file: string; line: number; layer: string | null; key: number | null; binding: string | null }
 export interface Problem { title: string; hint: string | null; location: ProblemLocation | null; raw: string }

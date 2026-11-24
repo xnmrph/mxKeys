@@ -36,6 +36,9 @@ pub struct Options {
     pub full_workspace: bool,
     /// Clean build directories first.
     pub pristine: bool,
+    /// Only configure the main half (left or whole keyboard) to get its `zephyr.dts`
+    /// (the key layout), without compiling firmware.
+    pub layout_only: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -95,6 +98,15 @@ impl Outcome {
     pub fn ok(&self) -> bool {
         self.results.iter().all(|r| r.uf2.is_some())
     }
+}
+
+/// The resolved devicetree of the main half's latest build (or configure-only run).
+pub fn layout_dts(data: &Path, repo: &Path) -> Option<PathBuf> {
+    let builds = data.join("builds").join(repo_key(repo));
+    ["left", "main"]
+        .iter()
+        .map(|t| builds.join(t).join("zephyr").join("zephyr.dts"))
+        .find(|p| p.is_file())
 }
 
 /// Where the finished `.uf2` files for a config repo are kept.
@@ -234,7 +246,33 @@ fn build_targets(
         .build_targets()
         .into_iter()
         .filter(|t| opts.only.is_empty() || opts.only.contains(&t.id))
+        .filter(|t| !opts.layout_only || matches!(t.id, TargetId::Left | TargetId::Main))
+        .take(if opts.layout_only { 1 } else { usize::MAX })
         .collect();
+    if opts.layout_only {
+        for t in targets {
+            emit(Event::Stage {
+                text: "Reading your keyboard's layout".into(),
+            });
+            let mut plan = BuildPlan::new(t, &opts.repo, &builds);
+            plan.cmake_only = true;
+            let id = plan.target.id;
+            build::build(&plan, ws, tools, runner, &mut |l: &str| {
+                emit(Event::Line {
+                    target: Some(id),
+                    text: l.to_string(),
+                })
+            })
+            .map_err(|e| PipelineError::Repo(format!("couldn't read the keyboard layout: {e}")))?;
+        }
+        let lock = fs::read_to_string(ws.lock_file()).unwrap_or_default();
+        return Ok(Outcome {
+            profile,
+            results: Vec::new(),
+            firmware_dir,
+            lock,
+        });
+    }
     let mut results = Vec::new();
     for t in targets {
         let id = t.id;

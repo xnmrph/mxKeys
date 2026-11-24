@@ -246,7 +246,7 @@ function RepoView({ repo, error, busy, onOpenAnother, onKeymapChanged, onReload 
 
         <div hidden={tab !== "keymap"} className="tab-body">
           {keymap ? (
-            <KeymapEditor keymap={keymap} liveInfo={live} flash={flash} onBlocked={onBlocked} onConnect={() => setTab("keyboard")}
+            <KeymapEditor keymap={keymap} repoRoot={repo.root} liveInfo={live} flash={flash} onBlocked={onBlocked} onConnect={() => setTab("keyboard")}
               registerFileChanged={registerFileChanged} onChanged={(k) => { onKeymapChanged(k); bump(); }} onReload={onReload} />
           ) : <p className="warning">No keymap file found in this config.</p>}
         </div>
@@ -262,7 +262,7 @@ function RepoView({ repo, error, busy, onOpenAnother, onKeymapChanged, onReload 
         </div>
 
         <div hidden={tab !== "install"} className="tab-body">
-          {profile ? <BuildPanel repoRoot={repo.root} autoSetup changes={changes} />
+          {profile ? <BuildPanel repoRoot={repo.root} autoSetup changes={changes} screen={profile.display !== "none"} split={profile.split !== false} />
             : <p className="warning">Confirm your hardware on the <button className="link" onClick={() => setTab("keyboard")}>Keyboard</button> tab first.</p>}
           <HistoryPanel repoRoot={repo.root} changes={changes} onFilesChanged={() => { void onReload(); bump(); }} />
           {repo.build && <BuildTargets targets={repo.build.targets} />}
