@@ -154,6 +154,13 @@ impl Installed {
         env.insert("PIP_DISABLE_PIP_VERSION_CHECK".into(), "1".into());
         env.insert("PYTHONUTF8".into(), "1".into());
         env.insert("PYTHONNOUSERSITE".into(), "1".into());
+        // Ignore the user's own pip settings (e.g. `user = true` in pip.conf or
+        // PIP_USER), which break installs into our venv.
+        env.insert("PIP_USER".into(), "0".into());
+        env.insert(
+            "PIP_CONFIG_FILE".into(),
+            if l.host.is_windows() { "nul" } else { "/dev/null" }.into(),
+        );
         env
     }
 }
@@ -416,11 +423,9 @@ mod tests {
         };
         let env = i.env();
         // Built from the same path functions so it holds with `\` separators on Windows too.
-        assert!(
-            env["PATH"].starts_with(&format!("{}:", i.layout.venv_bin().display())),
-            "{}",
-            env["PATH"]
-        );
+        assert!(env["PATH"].starts_with(&format!("{}:", i.layout.venv_bin().display())),);
+        assert_eq!(env["PIP_USER"], "0");
+        assert!(env.contains_key("PIP_CONFIG_FILE"), "{}", env["PATH"]);
         assert!(i.layout.venv_bin().ends_with(Path::new("venv").join("bin")));
         assert!(env["ZEPHYR_SDK_INSTALL_DIR"].ends_with("zephyr-sdk"));
     }
