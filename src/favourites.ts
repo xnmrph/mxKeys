@@ -321,4 +321,158 @@ export const FAVOURITES: Favourite[] = [
       };
     },
   },
+  {
+    id: "shifted_punct",
+    title: "Shift + , = ;   Shift + . = :",
+    summary: "Semicolon and colon on Shift, so comma and dot do double duty.",
+    details: "Hold Shift and press comma for a semicolon, or dot for a colon. Saves two keys, which matters on small boards. Every comma and dot key in your keymap gets it.",
+    credit: "urob's zmk-config (comma/dot mod-morphs), copied in many small-board configs",
+    category: "Typing",
+    params: [],
+    added: (c) => nameTaken(c, "comma_semi") || nameTaken(c, "dot_colon"),
+    build: (c) => {
+      const ops: EditOp[] = [], changes: string[] = [];
+      for (const [base, keys, normal, shifted, what] of [
+        ["comma_semi", ["COMMA", "COMMA"], "COMMA", "SEMI", ", → ;"],
+        ["dot_colon", ["DOT", "PERIOD"], "DOT", "COLON", ". → :"],
+      ] as [string, string[], string, string, string][]) {
+        const name = unique(c, base);
+        const at = c.layers.flatMap((l) => findKeys(c, l.index, keys).map((p) => [l, p] as const));
+        if (at.length === 0) { changes.push(`No ${normal === "DOT" ? "dot" : "comma"} key found — skipped`); continue; }
+        ops.push({
+          op: "add_def", def_type: "mod_morph", name,
+          props: [["bindings", { type: "bindings", value: [`&kp ${normal}`, `&kp ${shifted}`] }], ["mods", { type: "names", value: ["MOD_LSFT", "MOD_RSFT"] }]],
+        });
+        changes.push(`Adds “${name}” (Shift ${what})`);
+        for (const [l, p] of at) {
+          ops.push({ op: "set_binding", layer: l.index, position: p, binding: `&${name}` });
+          changes.push(`${l.title}, key ${p + 1}: ${what}`);
+        }
+      }
+      if (ops.length === 0) return "Couldn't find a comma or dot key.";
+      return { ops, changes };
+    },
+  },
+  {
+    id: "sentence_space",
+    title: "Shift + Space ends the sentence",
+    summary: "Shift + Space types “. ” and capitalises the next letter.",
+    details: "Finish a sentence without reaching for the dot: hold Shift and tap Space. You get a full stop, a space, and the next letter comes out capitalised. Every plain Space key gets it (not a Space that's also a layer key).",
+    credit: "urob's zmk-config (shifted space)",
+    category: "Typing",
+    params: [],
+    added: (c) => nameTaken(c, "end_sentence"),
+    build: (c) => {
+      const at = c.layers.flatMap((l) => findKeys(c, l.index, ["SPACE", "SPC"]).map((p) => [l, p] as const));
+      if (at.length === 0) return "No plain Space key found. (If Space is also a layer key, this one doesn't fit.)";
+      const macro = unique(c, "dot_space"), name = unique(c, "end_sentence");
+      const ops: EditOp[] = [
+        { op: "add_def", def_type: "macro", name: macro, props: [["bindings", { type: "bindings", value: ["&macro_tap", "&kp DOT", "&kp SPACE", "&sk LSHFT"] }]] },
+        { op: "add_def", def_type: "mod_morph", name, props: [["bindings", { type: "bindings", value: ["&kp SPACE", `&${macro}`] }], ["mods", { type: "names", value: ["MOD_LSFT", "MOD_RSFT"] }]] },
+      ];
+      const changes = [`Adds macro “${macro}” (. Space, then one-shot Shift)`, `Adds “${name}” (Space, or the macro with Shift)`];
+      for (const [l, p] of at) {
+        ops.push({ op: "set_binding", layer: l.index, position: p, binding: `&${name}` });
+        changes.push(`${l.title}, key ${p + 1}: Space → Space / end sentence`);
+      }
+      return { ops, changes };
+    },
+  },
+  {
+    id: "caps_word_combo",
+    title: "Caps word combo",
+    summary: "Press two keys together to TYPE ONE WORD IN CAPITALS.",
+    details: "Caps word stays on until the end of the word (space or punctuation), so it's great for CONSTANTS and SHOUTING. Both Shift keys together is the classic; pick any two keys.",
+    credit: "ZMK caps word docs; “both shifts” trick from QMK/ZMK community keymaps",
+    category: "Typing",
+    params: [{ kind: "keys", id: "keys", label: "The two keys", count: 2, suggest: (c) => {
+      const l = first(c, ["LSHFT", "LSHIFT", "LEFT_SHIFT"]), r = first(c, ["RSHFT", "RSHIFT", "RIGHT_SHIFT"]);
+      return l !== undefined && r !== undefined ? [l, r] : [];
+    } }],
+    added: (c) => nameTaken(c, "caps_combo"),
+    build: (c, v) => {
+      const keys = v.keys as number[];
+      if (keys.length !== 2) return "Pick two keys on the board.";
+      const n = unique(c, "caps_combo");
+      return {
+        ops: [{ op: "add_def", def_type: "combo", name: n, props: [["key-positions", { type: "numbers", value: keys }], ["bindings", { type: "bindings", value: ["&caps_word"] }]] }],
+        changes: [`Combo caps word: ${keysText(c, keys)}`],
+      };
+    },
+  },
+  {
+    id: "layer_lock",
+    title: "Hold for a layer, double-tap to lock it",
+    summary: "Your layer key also locks the layer on — handy for numbers or navigation.",
+    details: "Hold the key: the layer is on while you hold it, as now. Double-tap: the layer stays on until you double-tap again. Great for typing a run of numbers or browsing with arrow keys.",
+    credit: "Tap-dance pattern shared by Glove80 and Corne users",
+    category: "Layers",
+    params: [
+      { kind: "keys", id: "key", label: "The layer key", count: 1, suggest: (c) => {
+        const i = c.layers.find((l) => l.index === 0)?.bindings.findIndex((b) => /^&mo\s+\S+$/.test(b.trim())) ?? -1;
+        return i >= 0 ? [i] : [];
+      } },
+      { kind: "layer", id: "layer", label: "Layer", initial: (c) => {
+        const b = c.layers.find((l) => l.index === 0)?.bindings.find((x) => /^&mo\s+\S+$/.test(x.trim()));
+        const t = b?.trim().split(/\s+/)[1];
+        const hit = c.layers.find((l) => String(l.index) === t || l.nodeName.toLowerCase().startsWith((t ?? "").toLowerCase()));
+        return hit?.index ?? Math.min(1, c.layers.length - 1);
+      } },
+    ],
+    added: (c) => c.definitions.some((d) => d.node_name.startsWith("layer_lock")),
+    build: (c, v) => {
+      const key = (v.key as number[])[0];
+      const layer = v.layer as number;
+      if (key === undefined) return "Pick the key on the board.";
+      if (layer === 0) return "Pick a layer other than the base layer.";
+      const n = unique(c, `layer_lock_${layer}`);
+      const title = c.layers.find((l) => l.index === layer)?.title ?? `layer ${layer}`;
+      return {
+        ops: [
+          { op: "add_def", def_type: "tap_dance", name: n, props: [["bindings", { type: "bindings", value: [`&mo ${layer}`, `&tog ${layer}`] }], ["tapping-term-ms", { type: "int", value: 200 }]] },
+          { op: "set_binding", layer: 0, position: key, binding: `&${n}` },
+        ],
+        changes: [`Adds “${n}” (hold: ${title}, double-tap: lock ${title})`, `Base layer, key ${key + 1} → ${title} / lock`],
+      };
+    },
+  },
+  {
+    id: "hyper_key",
+    title: "Hyper key",
+    summary: "One key that holds Ctrl + Alt + Shift + Gui — your own shortcut space.",
+    details: "No app uses Hyper shortcuts, so Hyper + a letter is free for your own: launch apps, move windows (Raycast, AutoHotkey, your window manager). Meh is the same without Gui. Placed on the layer shown above.",
+    credit: "Popular since the “Hyper key” trick on macOS; common in ergo keymaps",
+    category: "Shortcuts",
+    params: [
+      { kind: "choice", id: "which", label: "Key", options: [["hyper", "Hyper (Ctrl Alt Shift Gui)"], ["meh", "Meh (Ctrl Alt Shift)"]], initial: "hyper" },
+      { kind: "keys", id: "key", label: "Which key", count: 1, suggest: () => [] },
+    ],
+    added: (c) => c.layers.some((l) => l.bindings.some((b) => b.replace(/\s/g, "").includes("LS(LC(LA("))),
+    build: (c, v) => {
+      const key = (v.key as number[])[0];
+      if (key === undefined) return "Pick the key on the board.";
+      const binding = v.which === "meh" ? "&kp LS(LC(LALT))" : "&kp LS(LC(LA(LGUI)))";
+      const title = c.layers.find((l) => l.index === c.layer)?.title ?? "";
+      return { ops: [{ op: "set_binding", layer: c.layer, position: key, binding }], changes: [`${title}, key ${key + 1} → ${v.which === "meh" ? "Meh" : "Hyper"}`] };
+    },
+  },
+  {
+    id: "lock_screen",
+    title: "Lock screen key",
+    summary: "One key locks your computer when you walk away.",
+    details: "Sends your system's lock shortcut. Often put on a system or function layer. Placed on the layer shown above.",
+    credit: "Common in community keymaps",
+    category: "Shortcuts",
+    params: [
+      { kind: "choice", id: "os", label: "Computer", options: [["win", "Windows / Linux (Super+L)"], ["mac", "macOS (Ctrl+Cmd+Q)"]], initial: "win" },
+      { kind: "keys", id: "key", label: "Which key", count: 1, suggest: () => [] },
+    ],
+    added: (c) => c.layers.some((l) => l.bindings.some((b) => ["&kp LG(L)", "&kp LC(LG(Q))"].includes(b.trim()))),
+    build: (c, v) => {
+      const key = (v.key as number[])[0];
+      if (key === undefined) return "Pick the key on the board.";
+      const title = c.layers.find((l) => l.index === c.layer)?.title ?? "";
+      return { ops: [{ op: "set_binding", layer: c.layer, position: key, binding: v.os === "mac" ? "&kp LC(LG(Q))" : "&kp LG(L)" }], changes: [`${title}, key ${key + 1} → Lock screen`] };
+    },
+  },
 ];
