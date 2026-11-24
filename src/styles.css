@@ -483,3 +483,15 @@ select option { background: var(--surface-1); color: var(--ink); }
 .fix-card { border: 1.5px solid var(--warn); }
 .fix-card h2 { display: flex; align-items: center; gap: 8px; color: var(--warn); }
 .fix-card p { margin: 0 0 var(--space-3); }
+
+/* Keyboard half in the install steps */
+.half-illustration { flex: none; overflow: visible; }
+.hi-case { fill: var(--surface-rail); }
+.hi-key { fill: var(--key); stroke: var(--line-strong); stroke-width: 3; }
+.hi-ctrl { fill: #1b1530; stroke: var(--line-strong); stroke-width: 3; }
+.hi-screen { fill: #c9c6bd; }
+.hi-usb { fill: var(--ink-faint); }
+.hi-reset { fill: var(--surface-2); stroke: var(--line-strong); stroke-width: 4; }
+.hi-reset.active { fill: var(--signal); stroke: var(--signal-deep); }
+.hi-label { font-family: var(--mono); font-size: 30px; fill: var(--ink-muted); letter-spacing: 0.06em; }
+.hi-label.strong { fill: var(--ink); font-weight: 500; }
