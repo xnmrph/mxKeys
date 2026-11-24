@@ -79,7 +79,9 @@ export function BuildPanel({ repoRoot, autoSetup, changes = 0 }: { repoRoot: str
     refresh();
     const un1 = listen<ToolchainEvent>("toolchain-event", (e) => {
       if (e.payload.type === "progress") {
-        if (e.payload.data.kind !== "line") setTcProgress(e.payload.data);
+        const d = e.payload.data;
+        if (d.kind === "line") { const t = d.text; setLog((l) => (l.length > 3000 ? [...l.slice(-2000), t] : [...l, t])); }
+        else setTcProgress(d);
       } else {
         setTcProgress(null);
         setTcError(e.payload.data.error);
@@ -101,7 +103,9 @@ export function BuildPanel({ repoRoot, autoSetup, changes = 0 }: { repoRoot: str
       const ev = p.data;
       switch (ev.event) {
         case "stage": setStage(ev.text); lastStage.current = ev.text; break;
-        case "install": if (ev.kind !== "line") setTcProgress(ev); break;
+        case "install":
+          if (ev.kind === "line") { const t = ev.text; setLog((l) => [...l, t]); } else setTcProgress(ev);
+          break;
         case "line": setLog((l) => (l.length > 3000 ? [...l.slice(-2000), ev.text] : [...l, ev.text])); break;
         case "target_started": setTargets((t) => ({ ...t, [ev.target]: { state: "building" } })); break;
         case "target_finished":
