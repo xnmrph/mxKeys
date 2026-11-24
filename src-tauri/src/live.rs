@@ -241,7 +241,13 @@ fn simulated(base: &Mapper, keymap_path: &Path) -> Result<mxkeys_studio::sim::Si
         })
         .collect();
     let mut kb = SimKeyboard::new("Simulated keyboard", behaviors, layers);
-    kb.auto_unlock_after = Some(3);
+    // "Presses" the unlock key after a few lock-state checks (~1.5 s each);
+    // MXKEYS_SIM_UNLOCK_AFTER sets how many (0 = never).
+    let after = std::env::var("MXKEYS_SIM_UNLOCK_AFTER")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(3);
+    kb.auto_unlock_after = (after > 0).then_some(after);
     Ok(kb)
 }
 

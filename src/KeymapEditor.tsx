@@ -29,6 +29,15 @@ export function KeymapEditor({ keymap, repoRoot, onChanged, onReload }: {
   const version = useRef<string | null>(null);
   // Connected to the keyboard and unlocked: key changes and renames go live.
   const [live, setLive] = useState(false);
+  // Connected but locked: no edits until the unlock key is pressed (they'd only reach
+  // the file and leave keyboard and file out of step). Trying flashes the live box.
+  const [locked, setLocked] = useState(false);
+  const [flash, setFlash] = useState(0);
+  const blocked = useCallback(() => {
+    if (!locked) return false;
+    setFlash((n) => n + 1);
+    return true;
+  }, [locked]);
 
   const loadCatalog = useCallback(() => {
     invoke<EditorCatalog>("editor_catalog", { keymapPath: keymap.path }).then((c) => setCatalog(new Catalog(c))).catch(() => setCatalog(null));
@@ -69,6 +78,7 @@ export function KeymapEditor({ keymap, repoRoot, onChanged, onReload }: {
   }, [onChanged]);
 
   const edit = useCallback(async (op: EditOp) => {
+    if (blocked()) return false;
     try {
       if (live && op.op === "set_binding") {
         apply(await invoke<EditResult>("live_set_key", { layer: op.layer, position: op.position, binding: op.binding }));
@@ -88,15 +98,16 @@ export function KeymapEditor({ keymap, repoRoot, onChanged, onReload }: {
       setError(String(e));
       return false;
     }
-  }, [apply, keymap.path, live]);
+  }, [apply, keymap.path, live, blocked]);
 
   const step = useCallback(async (which: "undo_keymap" | "redo_keymap") => {
+    if (blocked()) return;
     try {
       apply(await invoke<EditResult>(which, { keymapPath: keymap.path }));
     } catch (e) {
       setError(String(e));
     }
-  }, [apply, keymap.path]);
+  }, [apply, keymap.path, blocked]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -127,7 +138,7 @@ export function KeymapEditor({ keymap, repoRoot, onChanged, onReload }: {
           <button onClick={() => step("redo_keymap")} disabled={!canRedo} title="Redo (Ctrl/⌘+Shift+Z)">↷ Redo</button>
         </div>
       </div>
-      <LivePanel repoRoot={repoRoot} keymapPath={keymap.path} revision={keymap} onLive={setLive} onFileChanged={async () => {
+      <LivePanel repoRoot={repoRoot} keymapPath={keymap.path} revision={keymap} onLive={setLive} onLocked={setLocked} flash={flash} onFileChanged={async () => {
         // Our own change (discard / keep keyboard's): adopt it without the
         // "changed outside" reset — both record an undo step.
         try { version.current = await invoke<string>("file_version", { path: keymap.path }); } catch { /* reload below still runs */ }
@@ -193,7 +204,7 @@ export function KeymapEditor({ keymap, repoRoot, onChanged, onReload }: {
                 className={`key${label.muted ? " muted" : ""}${selected === i ? " selected" : ""}`}
                 title={layer.bindings[i]}
                 disabled={!!layer.readOnlyReason}
-                onClick={() => setSelected(i)}
+                onClick={() => { if (!blocked()) setSelected(i); }}
                 style={{
                   left: (g.x / 100) * UNIT,
                   top: (g.y / 100) * UNIT,
@@ -210,7 +221,7 @@ export function KeymapEditor({ keymap, repoRoot, onChanged, onReload }: {
           })}
         </div>
       ) : (
-        <ol className="binding-list">{layer.bindings.map((b, i) => <li key={i}><button className="link" onClick={() => setSelected(i)}><code>{b}</code></button></li>)}</ol>
+        <ol className="binding-list">{layer.bindings.map((b, i) => <li key={i}><button className="link" onClick={() => { if (!blocked()) setSelected(i); }}><code>{b}</code></button></li>)}</ol>
       )}
       {selected !== null && catalog && (
         <KeyPicker

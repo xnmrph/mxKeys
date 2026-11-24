@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { confirmAction } from "./dialogs";
 
@@ -11,11 +11,15 @@ interface Comparison { structure: string | null; diffs: KeyDiff[]; names: [numbe
 type Via = { kind: "usb"; path: string } | { kind: "ble"; id: string } | { kind: "sim" };
 
 /** Live editing over ZMK Studio. `onLive(true)` when key edits should go to the keyboard. */
-export function LivePanel({ repoRoot, keymapPath, revision, onLive, onFileChanged }: {
+export function LivePanel({ repoRoot, keymapPath, revision, onLive, onLocked, flash, onFileChanged }: {
   repoRoot: string; keymapPath: string;
   /** Changes whenever the keymap file was (re)loaded: compare again. */
   revision: unknown;
   onLive: (live: boolean) => void;
+  /** Connected but waiting for the unlock key. */
+  onLocked: (locked: boolean) => void;
+  /** Bumped when an edit was refused because the keyboard is locked: draw attention. */
+  flash: number;
   /** The keymap file changed (discard, resolving differences): reload it. */
   onFileChanged: () => Promise<void> | void;
 }) {
@@ -31,6 +35,18 @@ export function LivePanel({ repoRoot, keymapPath, revision, onLive, onFileChange
 
   const ready = !!view?.connected && !!view.status?.unlocked;
   useEffect(() => { onLive(ready); }, [ready, onLive]);
+  const locked = !!view?.connected && !view.status?.unlocked;
+  useEffect(() => { onLocked(locked); }, [locked, onLocked]);
+  const [flashing, setFlashing] = useState(false);
+  const boxRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!flash) return;
+    boxRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    setFlashing(false);
+    const start = requestAnimationFrame(() => setFlashing(true));
+    const t = setTimeout(() => setFlashing(false), 1600);
+    return () => { cancelAnimationFrame(start); clearTimeout(t); };
+  }, [flash]);
 
   const refresh = useCallback(async () => {
     try {
@@ -126,13 +142,13 @@ export function LivePanel({ repoRoot, keymapPath, revision, onLive, onFileChange
   const outOfSync = cmp && (cmp.structure || cmp.diffs.length > 0 || cmp.names.length > 0);
   const allKeys = cmp?.diffs.map((d) => ({ layer: d.layer, position: d.position })) ?? [];
   return (
-    <div className={`live-panel connected${ready ? " ready" : ""}`}>
+    <div ref={boxRef} className={`live-panel connected${ready ? " ready" : " locked"}${flashing ? " flash" : ""}`}>
       <div className="live-head">
         <span className={`dot ${ready ? "on" : "wait"}`} />
         <strong>{st?.name}</strong>
         <span className="muted small">via {view.via}</span>
         {ready ? <span className="small">Live — key changes go to the keyboard instantly.</span>
-          : <span className="small">Locked: press the keyboard's <strong>Studio unlock</strong> key{view.unlockKey && <> (layer “{view.unlockKey[0]}”, key {view.unlockKey[1]})</>}.</span>}
+          : <span className="locked-text">🔒 Locked — press the keyboard's <strong>Studio unlock</strong> key{view.unlockKey && <> (layer “{view.unlockKey[0]}”, key {view.unlockKey[1]})</>} to edit.</span>}
         <span className="spacer" />
         {ready && <>
           <button className="primary" disabled={!st?.unsaved || !!busy} onClick={() => run("Saving…", "live_save")} title="Keep the changes on the keyboard after it restarts">Save on keyboard</button>
