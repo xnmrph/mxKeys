@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { confirmAction } from "./dialogs";
+import { Icon } from "./icons";
 
 interface SerialCandidate { path: string; product: string | null; serial_number: string | null }
 interface BleCandidate { id: string; name: string; has_studio: boolean }
@@ -11,13 +12,23 @@ interface Comparison { structure: string | null; diffs: KeyDiff[]; names: [numbe
 type Via = { kind: "usb"; path: string } | { kind: "ble"; id: string } | { kind: "sim" };
 
 /** Live editing over ZMK Studio. `onLive(true)` when key edits should go to the keyboard. */
-export function LivePanel({ repoRoot, keymapPath, revision, onLive, onLocked, flash, onFileChanged }: {
+export interface LiveInfo {
+  connected: boolean;
+  /** Connected and unlocked: edits go to the keyboard. */
+  ready: boolean;
+  /** Connected, waiting for the unlock key. */
+  locked: boolean;
+  name: string | null;
+  /** "layer “System”, key 18" — where the unlock key is. */
+  unlockHint: string | null;
+  unsaved: boolean;
+}
+
+export function LivePanel({ repoRoot, keymapPath, revision, onStatus, flash, onFileChanged }: {
   repoRoot: string; keymapPath: string;
   /** Changes whenever the keymap file was (re)loaded: compare again. */
   revision: unknown;
-  onLive: (live: boolean) => void;
-  /** Connected but waiting for the unlock key. */
-  onLocked: (locked: boolean) => void;
+  onStatus: (s: LiveInfo) => void;
   /** Bumped when an edit was refused because the keyboard is locked: draw attention. */
   flash: number;
   /** The keymap file changed (discard, resolving differences): reload it. */
@@ -31,12 +42,15 @@ export function LivePanel({ repoRoot, keymapPath, revision, onLive, onLocked, fl
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [cmp, setCmp] = useState<Comparison | null>(null);
-  const [open, setOpen] = useState(false);
 
   const ready = !!view?.connected && !!view.status?.unlocked;
-  useEffect(() => { onLive(ready); }, [ready, onLive]);
   const locked = !!view?.connected && !view.status?.unlocked;
-  useEffect(() => { onLocked(locked); }, [locked, onLocked]);
+  const unlockHint = view?.unlockKey ? `layer “${view.unlockKey[0]}”, key ${view.unlockKey[1]}` : null;
+  const name = view?.status?.name ?? null;
+  const unsaved = !!view?.status?.unsaved;
+  useEffect(() => {
+    onStatus({ connected: !!view?.connected, ready, locked, name, unlockHint, unsaved });
+  }, [view?.connected, ready, locked, name, unlockHint, unsaved, onStatus]);
   const [flashing, setFlashing] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -108,17 +122,13 @@ export function LivePanel({ repoRoot, keymapPath, revision, onLive, onLocked, fl
   if (!view.connected) {
     return (
       <div className="live-panel">
-        <div className="live-head">
-          <strong>Live editing</strong>
-          <span className="muted small">Change keys on the keyboard instantly — no build or install. Your files are updated at the same time.</span>
-          <button className="link" onClick={() => setOpen(!open)}>{open ? "Hide" : "Connect…"}</button>
-        </div>
-        {open && (
+        <p className="muted">Change keys on the keyboard instantly — no build or install. Your files are updated at the same time.</p>
+        {(
           <div className="live-connect">
             <p className="small">Connect the <strong>left half</strong> (it runs ZMK Studio) by USB{ble === null ? ", or look for it over Bluetooth" : ""}.</p>
             {usb.length === 0 ? <p className="muted small">No keyboard found on USB yet.</p> : (
               <ul>{usb.map((u) => (
-                <li key={u.path}><button className="primary" disabled={!!busy} onClick={() => connect({ kind: "usb", path: u.path })}>Connect</button> {u.product ?? "ZMK keyboard"} <span className="muted small">{u.path}</span></li>
+                <li key={u.path}><Icon name="usb" /> <strong>{u.product ?? "ZMK keyboard"}</strong> <span className="mono muted">{u.path}</span><span className="spacer" /><button className="primary" disabled={!!busy} onClick={() => connect({ kind: "usb", path: u.path })}>Connect</button></li>
               ))}</ul>
             )}
             {sim && <div className="row"><button onClick={() => connect({ kind: "sim" })} disabled={!!busy}>Connect simulated keyboard</button><span className="muted small">developer mode</span></div>}
@@ -128,7 +138,7 @@ export function LivePanel({ repoRoot, keymapPath, revision, onLive, onLocked, fl
             </div>
             {ble && (ble.length === 0 ? <p className="muted small">Nothing found over Bluetooth.</p> : (
               <ul>{ble.map((b) => (
-                <li key={b.id}><button disabled={!!busy} onClick={() => connect({ kind: "ble", id: b.id })}>Connect</button> {b.name} {b.has_studio && <span className="badge strong">Studio</span>}</li>
+                <li key={b.id}><Icon name="bluetooth" /> <strong>{b.name}</strong> {b.has_studio && <span className="badge strong">Studio</span>}<span className="spacer" /><button disabled={!!busy} onClick={() => connect({ kind: "ble", id: b.id })}>Connect</button></li>
               ))}</ul>
             ))}
           </div>
@@ -148,7 +158,7 @@ export function LivePanel({ repoRoot, keymapPath, revision, onLive, onLocked, fl
         <strong>{st?.name}</strong>
         <span className="muted small">via {view.via}</span>
         {ready ? <span className="small">Live — key changes go to the keyboard instantly.</span>
-          : <span className="locked-text">🔒 Locked — press the keyboard's <strong>Studio unlock</strong> key{view.unlockKey && <> (layer “{view.unlockKey[0]}”, key {view.unlockKey[1]})</>} to edit.</span>}
+          : <span className="locked-text"><Icon name="lock" size={18} /> Locked — press the keyboard's <strong>Studio unlock</strong> key{view.unlockKey && <> (layer “{view.unlockKey[0]}”, key {view.unlockKey[1]})</>} to edit.</span>}
         <span className="spacer" />
         {ready && <>
           <button className="primary" disabled={!st?.unsaved || !!busy} onClick={() => run("Saving…", "live_save")} title="Keep the changes on the keyboard after it restarts">Save on keyboard</button>

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { Icon } from "./icons";
 import type {
   Confidence, DetectionReport, FieldResult, HardwareProfile, Known, QuizAnswers, QuizQuestion, Source,
 } from "./types";
@@ -106,7 +107,7 @@ export function HardwareSetup({ repoRoot, onProfile }: { repoRoot: string; onPro
   if (saved) {
     return (
       <section className="hw-chip">
-        <span>⌨ <strong>{NAMES[saved.keyboard]} · {NAMES[saved.controller]} · {NAMES[saved.display]}</strong></span>
+        <span className="hw-line"><Icon name="keyboard" /> <strong>{NAMES[saved.keyboard]} · {NAMES[saved.controller]} · {NAMES[saved.display]}</strong></span>
         <button onClick={() => { setSaved(null); onProfile?.(null); }}>Change</button>
       </section>
     );

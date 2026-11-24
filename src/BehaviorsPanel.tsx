@@ -1,4 +1,5 @@
 import { useMemo, useState, type ReactElement } from "react";
+import { Icon } from "./icons";
 import { confirmAction, tell } from "./dialogs";
 import type { DefSchema, DefType, Definition, EditOp, KeyGeom, NewProp, PropSchema, PropValue } from "./types";
 import { Catalog, describe, type KeyLabel } from "./bindings";
@@ -164,7 +165,7 @@ export function BehaviorsPanel({ definitions, cat, geometry, baseLabels, edit }:
           {shown.map((d) => (
             <li key={d.id}>
               <button className={d.id === selected ? "active" : ""} onClick={() => setSelected(d.id)}>
-                <span className="def-title">{sameKeys.has(d.id) && <span title="Another combo uses the same keys">⚠ </span>}{d.title}</span>
+                <span className="def-title">{sameKeys.has(d.id) && <span className="warn-mark" title="Another combo uses the same keys"><Icon name="warn" size={14} /> </span>}{d.title}</span>
                 <span className="muted def-summary">{summaryOf(d, cat, baseLabels)}</span>
               </button>
             </li>

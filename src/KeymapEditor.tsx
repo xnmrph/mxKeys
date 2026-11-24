@@ -5,13 +5,21 @@ import type { EditOp, EditResult, EditorCatalog, KeyGeom, KeymapSummary } from "
 import { Catalog, describe } from "./bindings";
 import { KeyPicker } from "./KeyPicker";
 import { BehaviorsPanel } from "./BehaviorsPanel";
-import { LivePanel } from "./LivePanel";
+import type { LiveInfo } from "./LivePanel";
+import { Icon } from "./icons";
 
 const UNIT = 54; // px per key unit
 
-export function KeymapEditor({ keymap, repoRoot, onChanged, onReload }: {
+export function KeymapEditor({ keymap, liveInfo, flash, onBlocked, onConnect, registerFileChanged, onChanged, onReload }: {
   keymap: KeymapSummary;
-  repoRoot: string;
+  liveInfo: LiveInfo;
+  /** Bumped when an edit was refused because the keyboard is locked. */
+  flash: number;
+  onBlocked: () => void;
+  /** Go to where the keyboard is connected. */
+  onConnect: () => void;
+  /** Live editing changed the file itself (discard, keep keyboard's): adopt it. */
+  registerFileChanged: (f: () => Promise<void>) => void;
   onChanged: (k: KeymapSummary) => void;
   /** Re-read everything from disk (after an outside change). */
   onReload: () => Promise<void>;
@@ -28,16 +36,35 @@ export function KeymapEditor({ keymap, repoRoot, onChanged, onReload }: {
   const [adding, setAdding] = useState<string | null>(null);
   const version = useRef<string | null>(null);
   // Connected to the keyboard and unlocked: key changes and renames go live.
-  const [live, setLive] = useState(false);
+  const live = liveInfo.ready;
   // Connected but locked: no edits until the unlock key is pressed (they'd only reach
-  // the file and leave keyboard and file out of step). Trying flashes the live box.
-  const [locked, setLocked] = useState(false);
-  const [flash, setFlash] = useState(0);
+  // the file and leave keyboard and file out of step). Trying flashes the status strip.
+  const locked = liveInfo.locked;
   const blocked = useCallback(() => {
     if (!locked) return false;
-    setFlash((n) => n + 1);
+    onBlocked();
     return true;
-  }, [locked]);
+  }, [locked, onBlocked]);
+  const [flashing, setFlashing] = useState(false);
+  const stripRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!flash) return;
+    stripRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    setFlashing(false);
+    const start = requestAnimationFrame(() => setFlashing(true));
+    const t = setTimeout(() => setFlashing(false), 1600);
+    return () => { cancelAnimationFrame(start); clearTimeout(t); };
+  }, [flash]);
+  useEffect(() => {
+    registerFileChanged(async () => {
+      // Our own change (discard / keep keyboard's): adopt it without the
+      // "changed outside" reset — both record an undo step.
+      try { version.current = await invoke<string>("file_version", { path: keymap.path }); } catch { /* reload below still runs */ }
+      setCanUndo(true);
+      setCanRedo(false);
+      await onReload();
+    });
+  }, [registerFileChanged, keymap.path, onReload]);
 
   const loadCatalog = useCallback(() => {
     invoke<EditorCatalog>("editor_catalog", { keymapPath: keymap.path }).then((c) => setCatalog(new Catalog(c))).catch(() => setCatalog(null));
@@ -132,20 +159,22 @@ export function KeymapEditor({ keymap, repoRoot, onChanged, onReload }: {
   return (
     <section className="keymap-editor">
       <div className="editor-head">
-        <h2>Keymap <span className="muted">· {keymap.fileName}</span></h2>
+        <span className="mono muted file-name">{keymap.fileName}</span>
         <div className="row">
           <button onClick={() => step("undo_keymap")} disabled={!canUndo} title="Undo (Ctrl/⌘+Z)">↶ Undo</button>
           <button onClick={() => step("redo_keymap")} disabled={!canRedo} title="Redo (Ctrl/⌘+Shift+Z)">↷ Redo</button>
         </div>
       </div>
-      <LivePanel repoRoot={repoRoot} keymapPath={keymap.path} revision={keymap} onLive={setLive} onLocked={setLocked} flash={flash} onFileChanged={async () => {
-        // Our own change (discard / keep keyboard's): adopt it without the
-        // "changed outside" reset — both record an undo step.
-        try { version.current = await invoke<string>("file_version", { path: keymap.path }); } catch { /* reload below still runs */ }
-        setCanUndo(true);
-        setCanRedo(false);
-        await onReload();
-      }} />
+      <div ref={stripRef} className={`live-strip ${liveInfo.ready ? "ready" : liveInfo.locked ? "locked" : "off"}${flashing ? " flash" : ""}`}>
+        {liveInfo.ready ? (
+          <><span className="dot ok" /><span><strong>Live</strong> — changes go to {liveInfo.name ?? "the keyboard"} instantly.</span></>
+        ) : liveInfo.locked ? (
+          <><Icon name="lock" /><span><strong>Keyboard locked.</strong> Press its Studio unlock key{liveInfo.unlockHint ? ` (${liveInfo.unlockHint})` : ""} to edit.</span></>
+        ) : (
+          <><span className="dot off" /><span className="muted">Changes are saved to your files; they reach the keyboard when you install the firmware.</span>
+            <button className="link" onClick={onConnect}>Edit live instead</button></>
+        )}
+      </div>
       {notice && <p className="note">{notice}</p>}
       <nav className="tabs">
         {keymap.layers.map((l) => (

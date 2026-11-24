@@ -65,7 +65,7 @@ export function SettingsPanel({ confPath, onChanged }: { confPath: string; onCha
   return (
     <section className="settings-panel">
       <div className="editor-head">
-        <h2>Settings <span className="muted">· {page.fileName}</span></h2>
+        <span className="mono muted file-name">{page.fileName}</span>
         <div className="row">
           <label className="check"><input type="checkbox" checked={advanced} onChange={(e) => setAdvanced(e.target.checked)} /> Advanced</label>
           <button onClick={() => run("undo_settings", {})} disabled={!page.canUndo}>↶ Undo</button>

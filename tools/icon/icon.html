@@ -1,0 +1,30 @@
+<html><style>
+@font-face{font-family:GG;src:url(../../node_modules/@fontsource/grenze-gotisch/files/grenze-gotisch-latin-900-normal.woff2)}
+html,body{margin:0;background:transparent}
+</style><body>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1B2430"/><stop offset="1" stop-color="#0B1217"/></linearGradient>
+ <linearGradient id="cap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E3A47"/><stop offset="1" stop-color="#18212B"/></linearGradient>
+ <linearGradient id="top" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A3541"/><stop offset="1" stop-color="#1F2934"/></linearGradient>
+ <linearGradient id="dim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1C252F"/><stop offset="1" stop-color="#121A21"/></linearGradient>
+ <clipPath id="r"><rect x="32" y="32" width="960" height="960" rx="210"/></clipPath>
+ <filter id="sh" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="22" stdDeviation="22" flood-color="#000" flood-opacity=".55"/></filter>
+</defs>
+<g clip-path="url(#r)">
+ <rect x="32" y="32" width="960" height="960" fill="url(#bg)"/>
+ <!-- neighbouring keys -->
+ <g fill="url(#dim)" stroke="#26313C" stroke-width="3">
+  <rect x="-40" y="-30" width="250" height="210" rx="34"/><rect x="330" y="-30" width="364" height="210" rx="34"/><rect x="814" y="-30" width="250" height="210" rx="34"/>
+  <rect x="-140" y="270" width="250" height="400" rx="34"/><rect x="914" y="270" width="250" height="400" rx="34"/>
+  <rect x="-40" y="780" width="250" height="260" rx="34"/><rect x="814" y="780" width="250" height="260" rx="34"/>
+ </g>
+</g>
+<!-- the MX key -->
+<g filter="url(#sh)">
+ <rect x="178" y="236" width="668" height="560" rx="78" fill="url(#cap)" stroke="#3A4754" stroke-width="3"/>
+ <rect x="230" y="262" width="564" height="456" rx="58" fill="url(#top)" stroke="#3E4B59" stroke-width="2"/>
+</g>
+<text x="512" y="560" text-anchor="middle" font-family="GG" font-size="330" fill="#EEE9E0">mx</text>
+<rect x="32" y="32" width="960" height="960" rx="210" fill="none" stroke="#2C3743" stroke-width="4"/>
+</svg></body></html>

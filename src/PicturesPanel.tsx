@@ -94,9 +94,6 @@ export function PicturesPanel({ repoRoot, onChanged }: { repoRoot: string; onCha
   const nothing = cfg.left.mode === "off" && cfg.right.mode === "off";
   return (
     <section className="pictures-panel">
-      <div className="editor-head">
-        <h2>Screen pictures <span className="muted">· nice!view</span></h2>
-      </div>
       <p className="muted">Put your own picture or animated GIF on the screens. Pictures are turned into black and white dots; the preview shows exactly what the screen will show.</p>
       {state.moduleProblem && <p className="warning">{state.moduleProblem}</p>}
       <div className="picture-halves">
