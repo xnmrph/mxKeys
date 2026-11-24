@@ -70,7 +70,11 @@ jobs:
         with:
           path: dist
           merge-multiple: true
-      - run: ls -la dist
+      # Artifacts keep their bundle/<kind>/ folders; the release wants a flat list.
+      - run: |
+          mkdir out
+          find dist -type f -exec mv {} out/ \;
+          ls -la out
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.v.outputs.version }}
@@ -78,4 +82,4 @@ jobs:
           target_commitish: ${{ github.sha }}
           body_path: docs/releases/${{ steps.v.outputs.version }}.md
           fail_on_unmatched_files: true
-          files: dist/*
+          files: out/*
