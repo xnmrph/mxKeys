@@ -107,7 +107,7 @@ export interface HardwareProfile {
   studio: boolean;
 }
 
-export interface Note { level: "info" | "warning"; text: string }
+export interface Note { level: "info" | "warning"; text: string; fix?: string }
 
 export interface Detection {
   keyboard: FieldResult<Known<KeyboardId>>;

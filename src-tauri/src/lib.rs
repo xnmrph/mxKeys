@@ -30,6 +30,32 @@ fn open_config_repo(app: AppHandle, path: String) -> Result<summary::RepoSummary
 }
 
 /// Config folders opened before (newest first; missing folders are left out).
+/// Boards in build.yaml that lack ZMK's `zmk` variant (current ZMK — and GitHub's
+/// build of the repository — can't build them). Empty when all is well.
+#[tauri::command]
+fn build_yaml_variant_check(repo_path: String) -> Vec<String> {
+    let path = PathBuf::from(repo_path).join("build.yaml");
+    std::fs::read_to_string(path)
+        .ok()
+        .and_then(|t| zmk_config::build_yaml::add_zmk_variant(&t))
+        .map(|(_, changed)| changed)
+        .unwrap_or_default()
+}
+
+/// Add the `zmk` variant to those boards in build.yaml (only those values change).
+#[tauri::command]
+fn build_yaml_add_zmk_variant(repo_path: String) -> Result<Vec<String>, String> {
+    let path = PathBuf::from(repo_path).join("build.yaml");
+    let text = std::fs::read_to_string(&path).map_err(|e| e.to_string())?;
+    match zmk_config::build_yaml::add_zmk_variant(&text) {
+        Some((new, changed)) => {
+            editor::write(&path, &new)?;
+            Ok(changed)
+        }
+        None => Ok(Vec::new()),
+    }
+}
+
 #[tauri::command]
 fn recent_folders(app: AppHandle) -> Result<Vec<String>, String> {
     Ok(history::recent(&data_dir(&app)?))
@@ -539,6 +565,8 @@ pub fn run() {
             pictures_state,
             pictures_preview,
             pictures_source,
+            build_yaml_variant_check,
+            build_yaml_add_zmk_variant,
             pictures_save,
             pictures_remove,
             live_devices,

@@ -239,6 +239,84 @@ impl BuildMatrix {
     }
 }
 
+/// Whether a board id (HWMv2 naming) lacks ZMK's `zmk` board variant.
+fn needs_zmk_variant(raw: &str) -> bool {
+    let b = BoardId::parse(raw);
+    let hwmv2 = b.revision.is_some() || b.qualifiers.is_some() || !raw.contains("_v");
+    hwmv2 && b.qualifiers.is_none()
+}
+
+/// Add the `//zmk` variant to every board in build.yaml that needs it, editing only
+/// those values (comments, order and formatting stay). Returns the new text and the
+/// boards changed, or `None` if nothing needed changing.
+pub fn add_zmk_variant(yaml: &str) -> Option<(String, Vec<String>)> {
+    let mut changed = Vec::new();
+    let mut out = String::with_capacity(yaml.len() + 32);
+    for line in yaml.split_inclusive('\n') {
+        let Some(key) = line.find("board:") else {
+            out.push_str(line);
+            continue;
+        };
+        let before = &line[..key];
+        // Only a key (`board:` / `- board:`), not text inside a comment or value.
+        if before.contains('#') || !before.trim_start_matches([' ', '\t', '-']).is_empty() {
+            out.push_str(line);
+            continue;
+        }
+        let rest_eol = &line[key + "board:".len()..];
+        let rest = rest_eol.trim_end_matches(['\r', '\n']);
+        let eol = &rest_eol[rest.len()..];
+        let (value, comment) = match rest.find(" #") {
+            Some(i) => (&rest[..i], &rest[i..]),
+            None => (rest, ""),
+        };
+        let trimmed = value.trim();
+        let edit = |v: &str, changed: &mut Vec<String>| -> String {
+            let (q, inner) = match v.chars().next() {
+                Some(c @ ('"' | '\'')) if v.len() >= 2 && v.ends_with(c) => {
+                    (c.to_string(), &v[1..v.len() - 1])
+                }
+                _ => (String::new(), v),
+            };
+            if !inner.is_empty() && needs_zmk_variant(inner) {
+                changed.push(inner.to_string());
+                format!("{q}{inner}//zmk{q}")
+            } else {
+                v.to_string()
+            }
+        };
+        let new_value = if trimmed.starts_with('[') && trimmed.ends_with(']') {
+            let items: Vec<String> = trimmed[1..trimmed.len() - 1]
+                .split(',')
+                .map(|it| {
+                    let t = it.trim();
+                    let lead = &it[..it.len() - it.trim_start().len()];
+                    let trail = &it[it.trim_end().len()..];
+                    format!("{lead}{}{trail}", edit(t, &mut changed))
+                })
+                .collect();
+            let lead = &value[..value.len() - value.trim_start().len()];
+            format!("{lead}[{}]", items.join(","))
+        } else if trimmed.is_empty() {
+            value.to_string()
+        } else {
+            let lead = &value[..value.len() - value.trim_start().len()];
+            let trail = &value[value.trim_end().len()..];
+            format!("{lead}{}{trail}", edit(trimmed, &mut changed))
+        };
+        out.push_str(before);
+        out.push_str("board:");
+        out.push_str(&new_value);
+        out.push_str(comment);
+        out.push_str(eol);
+    }
+    if changed.is_empty() {
+        None
+    } else {
+        Some((out, changed))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -300,5 +378,21 @@ mod tests {
             "corne_left-nice_view_adapter-nice_view-nice_nano_2.0.0-zmk"
         );
         assert_eq!(m.targets[1].default_artifact_name(), "reset");
+    }
+
+    #[test]
+    fn adds_zmk_variant() {
+        let yaml = "# my build\ninclude:\n  - board: nice_nano@2.0.0\n    shield: corne_left nice_view_adapter nice_view # with screen\n    snippet: studio-rpc-usb-uart\n  - board: \"nice_nano@2.0.0\"  # right\n    shield: corne_right\n  - board: nice_nano@2.0.0//zmk\n    shield: settings_reset\n  - board: nice_nano_v2\n    shield: x\n";
+        let (out, changed) = add_zmk_variant(yaml).unwrap();
+        assert_eq!(changed, vec!["nice_nano@2.0.0", "nice_nano@2.0.0"]);
+        assert_eq!(
+            out,
+            "# my build\ninclude:\n  - board: nice_nano@2.0.0//zmk\n    shield: corne_left nice_view_adapter nice_view # with screen\n    snippet: studio-rpc-usb-uart\n  - board: \"nice_nano@2.0.0//zmk\"  # right\n    shield: corne_right\n  - board: nice_nano@2.0.0//zmk\n    shield: settings_reset\n  - board: nice_nano_v2\n    shield: x\n"
+        );
+        // Flow lists, and nothing to do the second time.
+        let (flow, _) = add_zmk_variant("board: [ nice_nano@2.0.0, xiao_ble//zmk ]\n").unwrap();
+        assert_eq!(flow, "board: [ nice_nano@2.0.0//zmk, xiao_ble//zmk ]\n");
+        assert!(add_zmk_variant(&out).is_none());
+        assert!(BuildMatrix::parse(&out).is_ok());
     }
 }

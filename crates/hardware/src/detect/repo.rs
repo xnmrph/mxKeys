@@ -133,9 +133,12 @@ pub fn from_build_yaml(m: &BuildMatrix) -> Findings {
                     .is_some_and(|q| q.split('/').any(|p| p.ends_with("zmk")));
                 if hwmv2 && !has_zmk_variant {
                     let fixed = catalog::controller(id).board;
-                    f.notes.push(Note::warning(format!(
-                        "build.yaml builds for “{raw}”. Current ZMK needs the “zmk” variant (“{fixed}”); without it the screen and other ZMK features fail to build. The app uses “{fixed}” when it builds.",
-                    )));
+                    f.notes.push(
+                        Note::warning(format!(
+                            "build.yaml builds for “{raw}”. Current ZMK needs the “zmk” variant (“{fixed}”); without it the screen and other ZMK features fail to build — including GitHub's build of your repository. The app uses “{fixed}” when it builds.",
+                        ))
+                        .with_fix("build_yaml_zmk_variant"),
+                    );
                 }
                 if raw == "nice_nano_v2" {
                     f.notes.push(Note::info(

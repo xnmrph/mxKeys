@@ -230,6 +230,7 @@ function RepoView({ repo, error, busy, onOpenAnother, onKeymapChanged, onReload 
         {error && <p className="error" role="alert">{error}</p>}
 
         <div hidden={tab !== "keyboard"} className="tab-body">
+          <BuildYamlFix repoRoot={repo.root} revision={changes} onFixed={() => { void onReload(); bump(); }} />
           <HardwareSetup repoRoot={repo.root} onProfile={onProfile} />
           {keymap && (
             <section className="card">
@@ -268,6 +269,39 @@ function RepoView({ repo, error, busy, onOpenAnother, onKeymapChanged, onReload 
         </div>
       </main>
     </div>
+  );
+}
+
+/** build.yaml boards without ZMK's `zmk` variant: current ZMK (and GitHub's build of the
+ * repository) fails on them. Offers the one-line-per-board repair. */
+function BuildYamlFix({ repoRoot, revision, onFixed }: { repoRoot: string; revision: unknown; onFixed: () => void }) {
+  const [boards, setBoards] = useState<string[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    invoke<string[]>("build_yaml_variant_check", { repoPath: repoRoot }).then(setBoards).catch(() => setBoards([]));
+  }, [repoRoot, revision]);
+  if (boards.length === 0) return null;
+  const unique = [...new Set(boards)];
+  return (
+    <section className="card fix-card">
+      <h2><Icon name="warn" size={18} /> GitHub can't build your firmware</h2>
+      <p>
+        <code>build.yaml</code> builds for {unique.map((b, i) => <span key={b}>{i > 0 && ", "}<code>{b}</code></span>)}. Current ZMK needs the
+        {" "}<code>zmk</code> variant (<code>{unique[0]}//zmk</code>), so every build on GitHub fails. mxKeys already uses it for its own builds.
+      </p>
+      <div className="row">
+        <button className="primary" disabled={busy} onClick={async () => {
+          setBusy(true);
+          setError(null);
+          try { await invoke("build_yaml_add_zmk_variant", { repoPath: repoRoot }); setBoards([]); onFixed(); }
+          catch (e) { setError(String(e)); }
+          finally { setBusy(false); }
+        }}>Fix build.yaml</button>
+        <span className="muted small">Changes {boards.length} line{boards.length === 1 ? "" : "s"}; then save and upload a version on Install &amp; save.</span>
+      </div>
+      {error && <p className="error">{error}</p>}
+    </section>
   );
 }
 

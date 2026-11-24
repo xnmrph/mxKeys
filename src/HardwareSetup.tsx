@@ -132,7 +132,16 @@ export function HardwareSetup({ repoRoot, onProfile }: { repoRoot: string; onPro
           {[d.keyboard, d.controller, d.display, d.central, d.studio].flatMap((f) => f.conflicts).map((c) => (
             <p key={c} className="warning">{withCode(c)}</p>
           ))}
-          {d.notes.map((n) => <p key={n.text} className={n.level === "warning" ? "warning" : "note"}>{n.text}</p>)}
+          {d.notes.map((n) => (
+            <div key={n.text} className={n.level === "warning" ? "warning" : "note"}>
+              {n.text}
+              {n.fix === "build_yaml_zmk_variant" && (
+                <div className="row"><button onClick={async () => {
+                  try { await invoke("build_yaml_add_zmk_variant", { repoPath: repoRoot }); await run(); } catch (e) { setError(String(e)); }
+                }}>Fix build.yaml</button></div>
+              )}
+            </div>
+          ))}
           {report.unsupported.length > 0 && (
             <p className="warning">mxKeys can't build firmware for {report.unsupported.join(" or ")} yet. You can still look at your keymap.</p>
           )}

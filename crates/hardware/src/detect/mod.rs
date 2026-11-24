@@ -146,6 +146,9 @@ pub enum NoteLevel {
 pub struct Note {
     pub level: NoteLevel,
     pub text: String,
+    /// A repair the app can make for this note (e.g. `"build_yaml_zmk_variant"`).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fix: Option<&'static str>,
 }
 
 impl Note {
@@ -153,13 +156,19 @@ impl Note {
         Note {
             level: NoteLevel::Info,
             text: text.into(),
+            fix: None,
         }
     }
     pub fn warning(text: impl Into<String>) -> Self {
         Note {
             level: NoteLevel::Warning,
             text: text.into(),
+            fix: None,
         }
+    }
+    pub fn with_fix(mut self, fix: &'static str) -> Self {
+        self.fix = Some(fix);
+        self
     }
 }
 
