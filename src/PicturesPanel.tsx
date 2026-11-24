@@ -95,6 +95,14 @@ export function PicturesPanel({ repoRoot, onChanged }: { repoRoot: string; onCha
   const nothing = cfg.left.mode === "off" && cfg.right.mode === "off";
   return (
     <section className="pictures-panel">
+      {dirty && (
+        <div className="unsaved-bar" role="status">
+          <span><strong>Not saved yet.</strong> The keyboard still shows the last saved pictures — save, then build and install.</span>
+          <span className="spacer" />
+          <button onClick={() => load()} disabled={busy}>Discard</button>
+          <button className="primary" disabled={busy || !!state.moduleProblem || (nothing && !state.saved)} onClick={save}>{busy ? "Saving…" : "Save to config"}</button>
+        </div>
+      )}
       {state.moduleProblem && <p className="warning">{withCode(state.moduleProblem)}</p>}
       <div className="picture-halves">
         <HalfEditor title="Left half" half="left" art={cfg.left} pic={pics.left} budget={cfg.budget_kib} repoRoot={repoRoot}
