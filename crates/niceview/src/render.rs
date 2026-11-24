@@ -71,6 +71,31 @@ pub struct Options {
     pub white_background: bool,
     /// Shortest time a frame is shown (ms); faster GIFs are slowed down.
     pub min_frame_ms: u32,
+    /// Extra zoom on top of the fit (1 = as fitted).
+    #[serde(default = "one")]
+    pub zoom: f32,
+    /// Where the picture's centre sits, in screen pixels from the screen's centre
+    /// (upright, x right, y down).
+    #[serde(default)]
+    pub offset_x: f32,
+    #[serde(default)]
+    pub offset_y: f32,
+    /// Rotation in degrees, clockwise.
+    #[serde(default)]
+    pub rotate: f32,
+}
+
+fn one() -> f32 {
+    1.0
+}
+
+impl Options {
+    fn has_transform(&self) -> bool {
+        self.zoom != 1.0
+            || self.offset_x != 0.0
+            || self.offset_y != 0.0
+            || self.rotate.rem_euclid(360.0) != 0.0
+    }
 }
 
 impl Default for Options {
@@ -84,6 +109,10 @@ impl Default for Options {
             invert: false,
             white_background: true,
             min_frame_ms: 100,
+            zoom: 1.0,
+            offset_x: 0.0,
+            offset_y: 0.0,
+            rotate: 0.0,
         }
     }
 }
@@ -177,7 +206,96 @@ pub fn load(bytes: &[u8]) -> Result<Source, RenderError> {
 
 /// Brightness of each pixel after fitting into `w`×`h`, with transparency and bars
 /// filled with the background.
+/// Fit scale factors (x, y) of the picture into `w`×`h`.
+fn base_scale(sw: u32, sh: u32, w: u32, h: u32, fit: Fit) -> (f32, f32) {
+    let sx = w as f32 / sw as f32;
+    let sy = h as f32 / sh as f32;
+    match fit {
+        Fit::Stretch => (sx, sy),
+        Fit::Cover => (sx.max(sy), sx.max(sy)),
+        Fit::Contain => (sx.min(sy), sx.min(sy)),
+    }
+}
+
+/// Largest edge of the scaled picture we sample from (zoomed-in pictures only need
+/// the part around the screen, but keeping it simple is cheap at this size).
+const MAX_SCALED_EDGE: f32 = 4096.0;
+
+/// Fit with the user's zoom, move and rotation: maps every screen pixel back into
+/// the scaled picture and samples it bilinearly.
+fn fit_gray_transformed(img: &RgbaImage, w: u32, h: u32, o: &Options) -> GrayImage {
+    let bg = if o.white_background { 255.0 } else { 0.0 };
+    let (sw, sh) = img.dimensions();
+    let (bx, by) = base_scale(sw, sh, w, h, o.fit);
+    let zoom = o.zoom.clamp(0.1, 16.0);
+    let mut tx = bx * zoom;
+    let mut ty = by * zoom;
+    let edge = (sw as f32 * tx).max(sh as f32 * ty);
+    if edge > MAX_SCALED_EDGE {
+        tx *= MAX_SCALED_EDGE / edge;
+        ty *= MAX_SCALED_EDGE / edge;
+    }
+    let rw = ((sw as f32 * tx).round() as u32).max(1);
+    let rh = ((sh as f32 * ty).round() as u32).max(1);
+    // Real scale after capping, relative to what was asked (sampling stays correct).
+    let (kx, ky) = (
+        rw as f32 / (sw as f32 * bx * zoom),
+        rh as f32 / (sh as f32 * by * zoom),
+    );
+    let filter = if rw < sw || rh < sh {
+        FilterType::Lanczos3
+    } else {
+        FilterType::Triangle
+    };
+    let scaled = image::imageops::resize(img, rw, rh, filter);
+
+    // Premultiplied luma and alpha, so edges blend into the background smoothly.
+    let lum = |x: i64, y: i64| -> (f32, f32) {
+        if x < 0 || y < 0 || x >= rw as i64 || y >= rh as i64 {
+            return (0.0, 0.0);
+        }
+        let p = scaled.get_pixel(x as u32, y as u32);
+        let a = p[3] as f32 / 255.0;
+        let l = 0.2126 * p[0] as f32 + 0.7152 * p[1] as f32 + 0.0722 * p[2] as f32;
+        (l * a, a)
+    };
+    let (sin, cos) = o.rotate.to_radians().sin_cos();
+    let cx = w as f32 / 2.0 + o.offset_x;
+    let cy = h as f32 / 2.0 + o.offset_y;
+    let mut out = GrayImage::new(w, h);
+    for y in 0..h {
+        for x in 0..w {
+            let dx = x as f32 + 0.5 - cx;
+            let dy = y as f32 + 0.5 - cy;
+            // Undo the clockwise rotation (y points down).
+            let u = (dx * cos + dy * sin) * kx + rw as f32 / 2.0 - 0.5;
+            let v = (-dx * sin + dy * cos) * ky + rh as f32 / 2.0 - 0.5;
+            let (x0, y0) = (u.floor(), v.floor());
+            let (fx, fy) = (u - x0, v - y0);
+            let (x0, y0) = (x0 as i64, y0 as i64);
+            let mut l = 0.0;
+            let mut a = 0.0;
+            for (xx, yy, wgt) in [
+                (x0, y0, (1.0 - fx) * (1.0 - fy)),
+                (x0 + 1, y0, fx * (1.0 - fy)),
+                (x0, y0 + 1, (1.0 - fx) * fy),
+                (x0 + 1, y0 + 1, fx * fy),
+            ] {
+                let (pl, pa) = lum(xx, yy);
+                l += pl * wgt;
+                a += pa * wgt;
+            }
+            let v = l + bg * (1.0 - a);
+            out.put_pixel(x, y, Luma([v.round().clamp(0.0, 255.0) as u8]));
+        }
+    }
+    out
+}
+
 fn fit_gray(img: &RgbaImage, w: u32, h: u32, o: &Options) -> GrayImage {
+    if o.has_transform() {
+        return fit_gray_transformed(img, w, h, o);
+    }
     let bg = if o.white_background { 255.0 } else { 0.0 };
     let (sw, sh) = img.dimensions();
     let (rw, rh, ox, oy) = match o.fit {
@@ -420,6 +538,50 @@ mod tests {
 
     fn lit(f: &Frame) -> usize {
         f.pixels.iter().filter(|p| **p).count()
+    }
+
+    #[test]
+    fn move_rotate_and_zoom() {
+        // Square: top half black, bottom half white.
+        let src = load(&png(
+            100,
+            100,
+            |_, y| if y < 50 { [0, 0, 0, 255] } else { [255; 4] },
+        ))
+        .unwrap();
+        let img = &src.frames[0].0;
+        let o = Options {
+            dither: Dither::Threshold,
+            fit: Fit::Contain,
+            white_background: false,
+            ..Options::default()
+        };
+        // Contain on 68×160: a 68×68 square in the middle (y 46..114), split at y = 80.
+        let base = render_frame(img, 0, Area::Full, &o);
+        assert!(!base.get(34, 60) && base.get(34, 100));
+        // Identity transform values take the old path: identical output.
+        let same = render_frame(img, 0, Area::Full, &Options { rotate: 360.0, ..o });
+        assert_eq!(same.pixels, base.pixels);
+        // Moved 40 px down: the split moves to y = 120.
+        let moved = render_frame(img, 0, Area::Full, &Options { offset_y: 40.0, ..o });
+        assert!(!moved.get(34, 110) && moved.get(34, 140));
+        assert!(!moved.get(34, 20), "background above the moved picture");
+        // Rotated 180°: white on top.
+        let turned = render_frame(img, 0, Area::Full, &Options { rotate: 180.0, ..o });
+        assert!(turned.get(34, 60) && !turned.get(34, 100));
+        // Rotated 90° clockwise: the black top becomes the right side.
+        let quarter = render_frame(img, 0, Area::Full, &Options { rotate: 90.0, ..o });
+        assert!(!quarter.get(60, 80) && quarter.get(8, 80));
+        // Zoom 3: the 204 px square overflows the screen; the split stays at y = 80.
+        let zoomed = render_frame(img, 0, Area::Full, &Options { zoom: 3.0, ..o });
+        assert!(!zoomed.get(34, 2) && zoomed.get(34, 158));
+        // Old settings files without the new fields still load.
+        let old: Options = serde_json::from_str(
+            r#"{"fit":"cover","dither":"atkinson","threshold":128,"brightness":0,"contrast":0,"invert":false,"white_background":true,"min_frame_ms":100}"#,
+        )
+        .unwrap();
+        assert_eq!(old.zoom, 1.0);
+        assert!(!old.has_transform());
     }
 
     #[test]

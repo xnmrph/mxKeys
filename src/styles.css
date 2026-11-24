@@ -211,6 +211,9 @@ button.link { border: none; background: none; padding: 0; cursor: pointer; }
 .screen-mock { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 6px; border-radius: 10px; background: #1f2937; }
 .screen-mock .screen { background: #000; position: relative; display: flex; flex-direction: column; overflow: hidden; }
 .screen-mock img { image-rendering: pixelated; display: block; }
+.screen-mock .screen.movable { cursor: grab; touch-action: none; user-select: none; }
+.screen-mock .screen.dragging { cursor: grabbing; }
+.position-controls { display: flex; flex-direction: column; gap: 6px; padding-bottom: 8px; border-bottom: 1px solid var(--border, #e5e7eb); }
 .screen-mock img.actual { width: 68px; height: auto; outline: 1px solid #4b5563; }
 .status-strip { background: #000; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; color: #fff; box-sizing: border-box; }
 .status-strip .batt { display: inline-block; width: 36px; height: 16px; border: 3px solid #fff; border-radius: 2px; background: linear-gradient(90deg, #fff 60%, transparent 60%); }

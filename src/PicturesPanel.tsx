@@ -9,6 +9,8 @@ type DitherKind = "threshold" | "floyd_steinberg" | "atkinson" | "bayer4" | "bay
 interface Options {
   fit: Fit; dither: DitherKind; threshold: number; brightness: number; contrast: number;
   invert: boolean; white_background: boolean; min_frame_ms: number;
+  /** Extra zoom (1 = as fitted), picture centre offset in screen pixels, clockwise degrees. */
+  zoom: number; offset_x: number; offset_y: number; rotate: number;
 }
 interface HalfArt { mode: Mode; source: string | null; options: Options }
 interface ArtConfig { version: number; left: HalfArt; right: HalfArt; budget_kib: number }
@@ -129,8 +131,44 @@ function HalfEditor({ title, half, art, pic, budget, repoRoot, allowArt, onChang
   const [err, setErr] = useState<string | null>(null);
   const [frame, setFrame] = useState(0);
   const seq = useRef(0);
-  const o = art.options;
+  const o = { ...art.options, zoom: art.options.zoom ?? 1, offset_x: art.options.offset_x ?? 0, offset_y: art.options.offset_y ?? 0, rotate: art.options.rotate ?? 0 };
   const setO = (p: Partial<Options>) => onChange({ options: { ...o, ...p } });
+  const latest = useRef(o);
+  latest.current = o;
+  const setLatest = useRef(setO);
+  setLatest.current = setO;
+
+  // Drag the picture to move it, scroll to zoom (like cropping an avatar or banner).
+  const screenRef = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null);
+  const [dragging, setDragging] = useState(false);
+  useEffect(() => {
+    const el = screenRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      // Ctrl + scroll (also what a trackpad pinch sends) zooms; plain scrolling
+      // keeps scrolling the page.
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      const z = latest.current.zoom * (e.deltaY < 0 ? 1.1 : 1 / 1.1);
+      setLatest.current({ zoom: Math.round(Math.min(8, Math.max(0.2, z)) * 100) / 100 });
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  });
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (!pic) return;
+    (e.target as Element).setPointerCapture(e.pointerId);
+    drag.current = { x: e.clientX, y: e.clientY, ox: o.offset_x, oy: o.offset_y };
+    setDragging(true);
+  };
+  const onPointerMove = (e: React.PointerEvent) => {
+    const d = drag.current;
+    if (!d) return;
+    setO({ offset_x: Math.round(d.ox + (e.clientX - d.x) / SCALE), offset_y: Math.round(d.oy + (e.clientY - d.y) / SCALE) });
+  };
+  const onPointerUp = () => { drag.current = null; setDragging(false); };
+  const rotateBy = (deg: number) => setO({ rotate: ((((o.rotate + deg + 180) % 360) + 360) % 360) - 180 });
 
   // Re-render the preview (debounced) when anything changes.
   useEffect(() => {
@@ -140,9 +178,10 @@ function HalfEditor({ title, half, art, pic, budget, repoRoot, allowArt, onChang
       invoke<Preview>("pictures_preview", { repoPath: repoRoot, picture: pic, mode: art.mode, options: o, budgetKib: budget })
         .then((p) => { if (my === seq.current) { setPreview(p); setErr(null); setFrame(0); } })
         .catch((e) => { if (my === seq.current) setErr(String(e)); });
-    }, 120);
+    }, dragging ? 40 : 120);
     return () => clearTimeout(t);
-  }, [art.mode, pic, o, budget, repoRoot]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [art.mode, pic, JSON.stringify(o), budget, repoRoot]);
 
   // Play animations at their real speed.
   useEffect(() => {
@@ -173,10 +212,12 @@ function HalfEditor({ title, half, art, pic, budget, repoRoot, allowArt, onChang
       {art.mode !== "off" && (
         <div className="picture-body">
           <div className="screen-mock" style={{ width: 68 * SCALE + 12 }}>
-            <div className="screen" style={{ width: 68 * SCALE, height: 160 * SCALE }}>
+            <div className={`screen${pic ? " movable" : ""}${dragging ? " dragging" : ""}`} ref={screenRef} style={{ width: 68 * SCALE, height: 160 * SCALE }}
+              onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}
+              title={pic ? "Drag to move · Ctrl + scroll to zoom" : undefined}>
               {art.mode === "art" && <div className="status-strip" style={{ height: 20 * SCALE }}><span className="batt" /><span className="small">⌁</span></div>}
               {preview?.frames[frame] && (
-                <img src={preview.frames[frame]} alt="preview" style={{ width: 68 * SCALE, height: (art.mode === "art" ? 140 : 160) * SCALE }} />
+                <img src={preview.frames[frame]} alt="preview" draggable={false} style={{ width: 68 * SCALE, height: (art.mode === "art" ? 140 : 160) * SCALE }} />
               )}
               {!pic && <div className="empty muted">No picture yet</div>}
             </div>
@@ -194,6 +235,19 @@ function HalfEditor({ title, half, art, pic, budget, repoRoot, allowArt, onChang
                 <span className="muted"> · original {preview.sourceSize[0]}×{preview.sourceSize[1]}{preview.sourceFrames > 1 ? `, ${preview.sourceFrames} frames` : ""}</span>
                 {reduced && <span className="warning-text"> — fewer frames than the original (too fast or too many for the space); it plays at the original speed, less smoothly.</span>}
               </p>
+            )}
+            {pic && (
+              <div className="position-controls">
+                <p className="muted small">Drag the picture to move it; Ctrl + scroll (or pinch) over it to zoom.</p>
+                <Slider label="Zoom" value={o.zoom} min={0.2} max={8} step={0.05} onChange={(v) => setO({ zoom: v })} />
+                <Slider label="Rotate (°)" value={o.rotate} min={-180} max={180} onChange={(v) => setO({ rotate: v })} />
+                <div className="row">
+                  <button onClick={() => rotateBy(-90)} title="Rotate left">↺ 90°</button>
+                  <button onClick={() => rotateBy(90)} title="Rotate right">↻ 90°</button>
+                  <button disabled={o.zoom === 1 && o.offset_x === 0 && o.offset_y === 0 && o.rotate === 0}
+                    onClick={() => setO({ zoom: 1, offset_x: 0, offset_y: 0, rotate: 0 })}>Reset position</button>
+                </div>
+              </div>
             )}
             <label className="field small">Fit
               <select value={o.fit} onChange={(e) => setO({ fit: e.target.value as Fit })}>{FITS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
