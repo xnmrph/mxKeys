@@ -246,7 +246,7 @@ function RepoView({ repo, error, busy, onOpenAnother, onKeymapChanged, onReload 
 
         <div hidden={tab !== "keymap"} className="tab-body">
           {keymap ? (
-            <KeymapEditor keymap={keymap} repoRoot={repo.root} liveInfo={live} flash={flash} onBlocked={onBlocked} onConnect={() => setTab("keyboard")}
+            <KeymapEditor keymap={keymap} repoRoot={repo.root} liveInfo={live} flash={flash} onBlocked={onBlocked} onConnect={() => setTab("keyboard")} onInstall={() => setTab("install")}
               registerFileChanged={registerFileChanged} onChanged={(k) => { onKeymapChanged(k); bump(); }} onReload={onReload} />
           ) : <p className="warning">No keymap file found in this config.</p>}
         </div>

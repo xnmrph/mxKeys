@@ -216,7 +216,7 @@ export interface LayerRef { index: number; title: string; define: string | null 
 
 export interface EditorCatalog { keycodes: KeycodeInfo[]; keycodesSource: string; behaviors: BehaviorInfo[]; macroControls: BehaviorInfo[]; layers: LayerRef[]; schemas: DefSchema[] }
 
-export interface EditResult { keymap: KeymapSummary; version: string; canUndo: boolean; canRedo: boolean }
+export interface EditResult { keymap: KeymapSummary; version: string; canUndo: boolean; canRedo: boolean; notLive?: string }
 
 export type EditOp =
   | { op: "set_binding"; layer: number; position: number; binding: string }

@@ -70,6 +70,10 @@ pub struct EditResult {
     pub version: String,
     pub can_undo: bool,
     pub can_redo: bool,
+    /// Set by live editing when the key went into the files only, because the
+    /// keyboard doesn't have this behavior yet (it's new and needs an install).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub not_live: Option<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -191,6 +195,7 @@ fn result(path: &Path, text: String, h: &History) -> Result<EditResult, String> 
         version: version_of(&text),
         can_undo: !h.undo.is_empty(),
         can_redo: !h.redo.is_empty(),
+        not_live: None,
     })
 }
 

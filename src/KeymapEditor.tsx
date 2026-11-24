@@ -11,7 +11,7 @@ import { Icon } from "./icons";
 
 const MAX_UNIT = 54; // px per key unit (smaller when a wide keyboard needs to fit)
 
-export function KeymapEditor({ keymap, repoRoot, liveInfo, flash, onBlocked, onConnect, registerFileChanged, onChanged, onReload }: {
+export function KeymapEditor({ keymap, repoRoot, liveInfo, flash, onBlocked, onConnect, onInstall, registerFileChanged, onChanged, onReload }: {
   keymap: KeymapSummary;
   repoRoot: string;
   liveInfo: LiveInfo;
@@ -20,6 +20,8 @@ export function KeymapEditor({ keymap, repoRoot, liveInfo, flash, onBlocked, onC
   onBlocked: () => void;
   /** Go to where the keyboard is connected. */
   onConnect: () => void;
+  /** Go to Build & install. */
+  onInstall: () => void;
   /** Live editing changed the file itself (discard, keep keyboard's): adopt it. */
   registerFileChanged: (f: () => Promise<void>) => void;
   onChanged: (k: KeymapSummary) => void;
@@ -30,6 +32,13 @@ export function KeymapEditor({ keymap, repoRoot, liveInfo, flash, onBlocked, onC
   const [selected, setSelected] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  // Live editing put something into the files only: these behaviors are new and
+  // reach the keyboard with the next install (Studio can't add behaviors).
+  const [needsInstall, setNeedsInstall] = useState<string[]>([]);
+  useEffect(() => { if (!liveInfo.ready) setNeedsInstall([]); }, [liveInfo.ready]);
+  const pending = useCallback((names: string[]) => {
+    setNeedsInstall((cur) => [...new Set([...cur, ...names])]);
+  }, []);
   const [geometry, setGeometry] = useState<KeyGeom[]>([]);
   const [catalog, setCatalog] = useState<Catalog | null>(null);
   const [canUndo, setCanUndo] = useState(false);
@@ -143,7 +152,9 @@ export function KeymapEditor({ keymap, repoRoot, liveInfo, flash, onBlocked, onC
     if (blocked()) return false;
     try {
       if (live && op.op === "set_binding") {
-        apply(await invoke<EditResult>("live_set_key", { layer: op.layer, position: op.position, binding: op.binding }));
+        const r = await invoke<EditResult>("live_set_key", { layer: op.layer, position: op.position, binding: op.binding });
+        apply(r);
+        if (r.notLive) { pending([r.notLive]); setNotice(null); return true; }
       } else if (live && op.op === "rename_layer") {
         apply(await invoke<EditResult>("live_rename_layer", { layer: op.layer, name: op.name }));
       } else {
@@ -160,21 +171,29 @@ export function KeymapEditor({ keymap, repoRoot, liveInfo, flash, onBlocked, onC
       setError(String(e));
       return false;
     }
-  }, [apply, keymap.path, live, blocked]);
+  }, [apply, keymap.path, live, blocked, pending]);
 
   // Several edits as one change (community favourites).
   const editBatch = useCallback(async (ops: EditOp[]) => {
     if (blocked()) return false;
     try {
       apply(await invoke<EditResult>("edit_keymap_batch", { keymapPath: keymap.path, ops }));
-      setNotice(live ? "Added to your files. It reaches the keyboard when you build and install the firmware." : null);
+      setNotice(null);
+      if (live) {
+        // Keys go to the keyboard right away where it already has what they use.
+        const keys = ops.flatMap((o) => o.op === "set_binding" ? [{ layer: o.layer, position: o.position, binding: o.binding }] : []);
+        const missing = keys.length ? await invoke<string[]>("live_push_keys", { keys }) : [];
+        // Combos and layer rules aren't keys: Studio can't send them at all.
+        const fileOnly = ops.flatMap((o) => o.op === "add_def" && (o.def_type === "combo" || o.def_type === "conditional_layer") ? [o.name] : []);
+        pending([...missing, ...fileOnly]);
+      }
       setSelected(null);
       return true;
     } catch (e) {
       setError(String(e));
       return false;
     }
-  }, [apply, keymap.path, live, blocked]);
+  }, [apply, keymap.path, live, blocked, pending]);
 
   const step = useCallback(async (which: "undo_keymap" | "redo_keymap") => {
     if (blocked()) return;
@@ -226,6 +245,13 @@ export function KeymapEditor({ keymap, repoRoot, liveInfo, flash, onBlocked, onC
         )}
       </div>
       {notice && <p className="note">{notice}</p>}
+      {live && needsInstall.length > 0 && (
+        <div className="note install-note">
+          <span><strong>New on this keyboard: {needsInstall.map((n) => `“${n}”`).join(", ")}.</strong>{" "}
+            Saved in your files. The keyboard learns new behaviors and combos from an install (live editing can only move what it already has). Install once, then place and move them live like any other key.</span>
+          <button className="primary" onClick={onInstall}>Build &amp; install</button>
+        </div>
+      )}
       <nav className="tabs">
         {keymap.layers.map((l) => (
           <button key={l.index} className={l.index === layer.index ? "active" : ""} onClick={() => { setLayerIndex(l.index); setSelected(null); setRenaming(null); }}>

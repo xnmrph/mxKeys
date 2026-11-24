@@ -542,6 +542,14 @@ fn live_set_key(
 }
 
 #[tauri::command]
+fn live_push_keys(
+    state: tauri::State<'_, live::LiveState>,
+    keys: Vec<live::KeySet>,
+) -> Result<Vec<String>, String> {
+    live::push_keys(&state, &keys)
+}
+
+#[tauri::command]
 fn live_rename_layer(
     state: tauri::State<'_, live::LiveState>,
     editor: tauri::State<'_, editor::Editor>,
@@ -637,6 +645,7 @@ pub fn run() {
             live_compare,
             live_set_key,
             live_rename_layer,
+            live_push_keys,
             live_save,
             live_discard,
             live_clear_saved,

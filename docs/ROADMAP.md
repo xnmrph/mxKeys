@@ -154,6 +154,7 @@ Phases are done in order, one at a time. Tick boxes as work lands (keep this fil
 - [x] Compare keyboard ↔ files on connect and on every file reload; per-key “Keep keyboard's” / “Send files'”, layer-name differences, unchecked keys explained
 - [x] Save on keyboard / Discard (keyboard and file together, undoable); offer to clear saved live changes after a firmware install
 - [x] App: connect panel (USB, Bluetooth scan, simulated keyboard in developer mode), unlock hint with the layer/key of `&studio_unlock`, live mode in the key editor
+- [x] Behaviors that are only in the files (new favourites, a new macro): the key goes to the files and the editor offers Build & install once; Studio can't add behaviors or combos to a running keyboard. Favourites send their keys live where the keyboard already has what they use
 - [ ] Real-hardware checks (checklist in PROGRESS.md)
 - [ ] RPC-based hardware detection (device info + physical layouts → Phase 2 evidence); the client already reads both
 - [ ] Live layer add/remove/move (decision D: not in v1)

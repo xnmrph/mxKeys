@@ -97,7 +97,7 @@ function FavouriteDialog({ f, ctx, labels, liveNote, onClose, onApply }: {
             <ul>{result.changes.map((c, i) => <li key={i}>{c}</li>)}</ul>
           )}
         </div>
-        {liveNote && <p className="muted small">This goes into your files; it reaches the keyboard with the next build and install.</p>}
+        {liveNote && <p className="muted small">Keys the keyboard can already do change live right away. Anything new to it (behaviors, combos) needs one build &amp; install; after that you can place and move it live.</p>}
         <div className="modal-foot">
           <span className="spacer" />
           <button onClick={onClose}>Cancel</button>

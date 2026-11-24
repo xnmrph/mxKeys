@@ -535,3 +535,7 @@ select option { background: var(--surface-1); color: var(--ink); }
 .fav-param select { align-self: flex-start; }
 .fav-preview { background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 10px 14px; }
 .fav-preview ul { margin: 6px 0 0; padding-left: 1.2em; font-size: 13px; }
+
+/* Live editing put new behaviors in the files only: offer the install. */
+.install-note { display: flex; align-items: center; gap: var(--space-3); background: var(--info-soft); color: var(--ink); padding: 10px 14px; border-radius: var(--radius-md); margin: var(--space-3) 0; }
+.install-note button { flex: none; }

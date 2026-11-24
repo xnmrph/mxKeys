@@ -8,8 +8,8 @@ use std::sync::Mutex;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use mxkeys_studio::ble::{self, BleCandidate};
-use mxkeys_studio::live::{Live, LiveStatus};
-use mxkeys_studio::mapping::{self, DeviceBehaviors, Mapper};
+use mxkeys_studio::live::{Live, LiveError, LiveStatus};
+use mxkeys_studio::mapping::{self, DeviceBehaviors, Mapper, Unmappable};
 use mxkeys_studio::serial::{self, SerialCandidate};
 use mxkeys_studio::sync::{self, Comparison};
 use mxkeys_studio::Transport;
@@ -346,23 +346,59 @@ pub fn set_key(
         .find(|l| l.id as usize == layer)
         .and_then(|l| l.bindings.get(position).copied())
         .ok_or("That key doesn't exist on the keyboard.")?;
-    c.live
-        .set_key(layer, position, binding)
-        .map_err(|e| e.to_string())?;
-    match editor.edit(
-        &c.keymap_path,
-        &EditOp::SetBinding {
-            layer,
-            position,
-            binding: binding.to_string(),
-        },
-    ) {
+    let op = EditOp::SetBinding {
+        layer,
+        position,
+        binding: binding.to_string(),
+    };
+    match c.live.set_key(layer, position, binding) {
+        Ok(_) => {}
+        // A behavior that's only in the files so far (e.g. just added from the
+        // favourites): Studio can't create behaviors, so the key goes into the files
+        // and reaches the keyboard with the next install.
+        Err(LiveError::Unmappable(Unmappable::NotOnKeyboard(name))) => {
+            let mut r = editor.edit(&c.keymap_path, &op)?;
+            r.not_live = Some(name);
+            return Ok(r);
+        }
+        Err(e) => return Err(e.to_string()),
+    }
+    match editor.edit(&c.keymap_path, &op) {
         Ok(r) => Ok(r),
         Err(e) => {
             let _ = c.live.restore_key(layer, position, old);
             Err(e)
         }
     }
+}
+
+/// A key to send to the keyboard (its file already has it).
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct KeySet {
+    pub layer: usize,
+    pub position: usize,
+    pub binding: String,
+}
+
+/// Send keys the files already have to the keyboard, as far as it can take them.
+/// Returns the behaviors it doesn't have yet (they need an install first).
+pub fn push_keys(state: &LiveState, keys: &[KeySet]) -> Result<Vec<String>, String> {
+    let mut guard = state.session.lock().unwrap();
+    let c = guard.as_mut().ok_or("Not connected.")?;
+    let mut missing: Vec<String> = Vec::new();
+    for k in keys {
+        match c.live.set_key(k.layer, k.position, &k.binding) {
+            Ok(_) => {}
+            Err(LiveError::Unmappable(Unmappable::NotOnKeyboard(n))) => {
+                if !missing.contains(&n) {
+                    missing.push(n);
+                }
+            }
+            Err(e) => return Err(e.to_string()),
+        }
+    }
+    Ok(missing)
 }
 
 pub fn rename_layer(
@@ -559,9 +595,37 @@ mod tests {
                 .unsaved
         );
 
-        // A key the keyboard can't take doesn't touch the file.
-        assert!(set_key(&state, &editor, 0, 0, "&nope").is_err());
-        assert!(!std::fs::read_to_string(&km).unwrap().contains("&nope"));
+        // A key that can't be worked out doesn't touch the file.
+        assert!(set_key(&state, &editor, 0, 0, "&kp NOT_A_KEY").is_err());
+        assert!(!std::fs::read_to_string(&km).unwrap().contains("NOT_A_KEY"));
+
+        // A behavior the keyboard doesn't have yet (just added to the files) goes
+        // into the files only and says so; the keyboard keeps its key.
+        let r = set_key(&state, &editor, 0, 0, "&bspc_del").unwrap();
+        assert_eq!(r.not_live.as_deref(), Some("bspc_del"));
+        assert!(std::fs::read_to_string(&km).unwrap().contains("&bspc_del"));
+        let undo = editor.undo(&km).unwrap();
+        assert!(!undo.keymap.layers[0].bindings[0].contains("bspc_del"));
+
+        // Pushing keys the files have: the keyboard takes what it can.
+        let missing = push_keys(
+            &state,
+            &[
+                KeySet {
+                    layer: 0,
+                    position: 0,
+                    binding: "&kp B".into(),
+                },
+                KeySet {
+                    layer: 0,
+                    position: 1,
+                    binding: "&hml B A".into(),
+                },
+            ],
+        )
+        .unwrap();
+        assert_eq!(missing, vec!["hml".to_string()]);
+        set_key(&state, &editor, 0, 0, "&kp A").unwrap();
 
         // Discard: keyboard and file go back to the last saved state.
         discard(&state, &editor).unwrap();
