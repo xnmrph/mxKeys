@@ -20,9 +20,9 @@ jobs:
           - name: linux-x86_64
             os: ubuntu-22.04
             args: --bundles appimage,deb
-          - name: macos-universal
+          - name: macos-apple-silicon
             os: macos-latest
-            args: --target universal-apple-darwin --bundles app,dmg
+            args: --bundles app,dmg
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -37,8 +37,6 @@ jobs:
           cache: npm
       - run: npm ci
       - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ runner.os == 'macOS' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
       - uses: Swatinem/rust-cache@v2
         with:
           key: installers
@@ -50,4 +48,4 @@ jobs:
           path: |
             target/release/bundle/appimage/*.AppImage
             target/release/bundle/deb/*.deb
-            target/universal-apple-darwin/release/bundle/dmg/*.dmg
+            target/release/bundle/dmg/*.dmg
