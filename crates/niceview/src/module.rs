@@ -292,11 +292,11 @@ pub fn frames_c(left: &[Frame], right: &[Frame]) -> String {
 #define LV_ATTRIBUTE_MEM_ALIGN
 #endif
 
-#if IS_ENABLED(CONFIG_NICE_VIEW_WIDGET_INVERTED)
+/* Bit set = a light pixel. The nice!view shows LVGL "black" as light (its status
+ * screen draws on a black background that looks light), so index 1 is black.
+ * Pictures look exactly like the mxKeys preview, whatever the screen colour
+ * setting; each picture has its own Invert option. */
 #define MXK_PALETTE 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0xff,
-#else
-#define MXK_PALETTE 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff,
-#endif
 
 #if IS_ENABLED(CONFIG_ZMK_SPLIT) && !IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
 /* Right half: {} frame(s) */
@@ -469,8 +469,10 @@ mod tests {
         ));
         assert!(c.contains(".header.w = 160,\n    .header.h = 68,\n    .data_size = 1368,"));
         assert!(c.contains("static const uint16_t mxk_left_delays[] = { 150, 150 };"));
-        // All-white frames plus the 10 0xff bytes in the two palette macros.
-        assert_eq!(c.matches("0xff,").count(), 2 * 20 * 68 + 10);
+        // All-light frames plus the 5 0xff bytes in the palette macro (white, then
+        // black's alpha): bit set = light on the nice!view = LVGL black.
+        assert_eq!(c.matches("0xff,").count(), 2 * 20 * 68 + 5);
+        assert!(c.contains("#define MXK_PALETTE 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0xff,"));
     }
 
     #[test]

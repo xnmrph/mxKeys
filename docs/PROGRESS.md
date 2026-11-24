@@ -118,7 +118,7 @@ that needs testing on real hardware.
       and connection icons still update.
 - [ ] Left half whole screen: picture upright, covers the status.
 - [ ] Animation stops after the idle timeout and resumes on a key press.
-- [ ] `CONFIG_NICE_VIEW_WIDGET_INVERTED=y` inverts the pictures too.
+- [x] Pictures show as in the preview (first hardware test showed them inverted: palette fixed).
 - [ ] Remove pictures → rebuild → stock screens again.
 
 ## Session 3 (cont.) — 2026-11-23 — Phase 8

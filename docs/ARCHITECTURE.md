@@ -491,8 +491,11 @@ module waits until `zmk_display_is_initialized()` and then queues its work on
 `zmk_display_work_q()` — behind ZMK's own `initialize_display` — to add an
 `lv_image` on top of the active screen (top-left; 140×68 over the stock art or 160×68
 over everything). Animations: an `lv_timer` steps frames with their delays and is
-paused/resumed from `zmk_activity_state_changed` (via the same work queue). Palette
-follows `CONFIG_NICE_VIEW_WIDGET_INVERTED`.
+paused/resumed from `zmk_activity_state_changed` (via the same work queue). Palette:
+a set bit is a light pixel, which on the nice!view is LVGL *black* (found on real
+hardware: the first version used ZMK's art palette and every picture came out
+inverted). Pictures ignore `CONFIG_NICE_VIEW_WIDGET_INVERTED` so they always match
+the preview; each picture has its own Invert option.
 
 Budget: program area 0xC6000 (792 KiB); measured Corne halves with screen ≈430 KiB /
 ≈315 KiB. Default 64 KiB per half (frame 1,368 B full / 1,232 B art + ~32 B overhead).

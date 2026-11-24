@@ -136,7 +136,7 @@ Phases are done in order, one at a time. Tick boxes as work lands (keep this fil
 - [x] Import PNG/GIF/JPEG/BMP/WebP (animated GIF frames + delays); fit (fill/fit/stretch) to the right half's picture area (68×140 under the battery strip) or the whole screen (68×160) on either half
 - [x] Dithering: soft (Atkinson), fine (Floyd–Steinberg), patterns (Bayer 4/8), sharp threshold; brightness/contrast/mid point, invert, background; live animated preview at 3× and 1:1
 - [x] LVGL 9 `I1` encoding in the display's orientation — verified byte-for-byte against ZMK's own `balloon` art
-- [x] Generated ZMK module in the config repo (`nice_view_art/`, two lines in `zephyr/module.yml`): image placed over ZMK's stock screen on the display work queue, animation paused while idle, respects `NICE_VIEW_WIDGET_INVERTED`; originals + settings kept for re-editing; removable
+- [x] Generated ZMK module in the config repo (`nice_view_art/`, two lines in `zephyr/module.yml`): image placed over ZMK's stock screen on the display work queue, animation paused while idle, colours exactly as previewed (palette fixed after the first hardware test); originals + settings kept for re-editing; removable
 - [x] Flash budget per half (default 64 KB, up to 192 KB) + minimum frame time; frames merged/sampled with the speed kept
 - [x] Rebuild hint covers the pictures; one commit-message line for picture changes
 - [x] Acceptance: owner's config (copy) — left full-screen still + right 6-frame GIF chosen in the app → built in the app → frames read back from the compiled `zmk.elf` decode to exactly the previews
