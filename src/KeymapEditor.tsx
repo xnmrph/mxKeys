@@ -46,6 +46,15 @@ export function KeymapEditor({ keymap, liveInfo, flash, onBlocked, onConnect, re
     return true;
   }, [locked, onBlocked]);
   const [flashing, setFlashing] = useState(false);
+  // Bring the key picker into view when a key is chosen; Escape closes it.
+  const pickerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (selected === null) return;
+    pickerRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setSelected(null); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selected]);
   const stripRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!flash) return;
@@ -243,7 +252,7 @@ export function KeymapEditor({ keymap, liveInfo, flash, onBlocked, onConnect, re
                   transformOrigin: g.r ? `${((g.rx - g.x) / 100) * UNIT}px ${((g.ry - g.y) / 100) * UNIT}px` : undefined,
                 }}
               >
-                <span className="tap">{label.tap}</span>
+                <span className={`tap${label.tap.length > 6 ? " tiny" : label.tap.length > 4 ? " long" : ""}`}>{label.tap}</span>
                 {label.hold && <span className="hold">{label.hold}</span>}
               </button>
             );
@@ -253,6 +262,7 @@ export function KeymapEditor({ keymap, liveInfo, flash, onBlocked, onConnect, re
         <ol className="binding-list">{layer.bindings.map((b, i) => <li key={i}><button className="link" onClick={() => { if (!blocked()) setSelected(i); }}><code>{b}</code></button></li>)}</ol>
       )}
       {selected !== null && catalog && (
+        <div ref={pickerRef}>
         <KeyPicker
           key={`${layer.index}-${selected}-${layer.bindings[selected]}`}
           raw={layer.bindings[selected]}
@@ -261,6 +271,7 @@ export function KeymapEditor({ keymap, liveInfo, flash, onBlocked, onConnect, re
           onCancel={() => setSelected(null)}
           onSave={async (binding) => { if (await edit({ op: "set_binding", layer: layer.index, position: selected, binding })) setSelected(null); }}
         />
+        </div>
       )}
       {catalog && (
         <BehaviorsPanel definitions={keymap.definitions} cat={catalog} geometry={geometry.length === keymap.layers[0]?.bindings.length ? geometry : []} baseLabels={baseLabels} edit={edit} />

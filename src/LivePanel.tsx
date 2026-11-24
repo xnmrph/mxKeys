@@ -158,7 +158,7 @@ export function LivePanel({ repoRoot, keymapPath, revision, onStatus, flash, onF
         <strong>{st?.name}</strong>
         <span className="muted small">via {view.via}</span>
         {ready ? <span className="small">Live — key changes go to the keyboard instantly.</span>
-          : <span className="locked-text"><Icon name="lock" size={18} /> Locked — press the keyboard's <strong>Studio unlock</strong> key{view.unlockKey && <> (layer “{view.unlockKey[0]}”, key {view.unlockKey[1]})</>} to edit.</span>}
+          : <span className="locked-text"><Icon name="lock" size={18} /><span>Locked — press the keyboard's <strong>Studio unlock</strong> key{view.unlockKey && <> (layer “{view.unlockKey[0]}”, key {view.unlockKey[1]})</>} to edit.</span></span>}
         <span className="spacer" />
         {ready && <>
           <button className="primary" disabled={!st?.unsaved || !!busy} onClick={() => run("Saving…", "live_save")} title="Keep the changes on the keyboard after it restarts">Save on keyboard</button>

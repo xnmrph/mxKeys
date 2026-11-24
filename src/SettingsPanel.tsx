@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactElement } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import type { NewValue, SettingsOp, SettingsPage, SettingView, Unit } from "./types";
+import { withCode } from "./text";
 
 /** Factor from the shown unit to the stored value. */
 const SCALE: Record<Unit, number> = { seconds: 1000, minutes: 60000, milliseconds: 1, percent: 1 };
@@ -136,7 +137,7 @@ function SettingRow({ s, advanced, parent, onSet }: { s: SettingView; advanced: 
         {s.def.help}
         {!s.applies && parent && <> Only used when “{parent.def.label}” is on.</>}
       </div>
-      {s.problem && <div className="warning">{s.problem}</div>}
+      {s.problem && <div className="warning">{withCode(s.problem)}</div>}
       {advanced && (
         <div className="setting-raw muted">
           {options.map((o) => <code key={o}>{o}</code>)}

@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { confirmAction } from "./dialogs";
 import { PositionEditor } from "./PositionEditor";
+import { withCode } from "./text";
 
 type Mode = "off" | "art" | "full";
 type Fit = "cover" | "contain" | "stretch";
@@ -94,8 +95,7 @@ export function PicturesPanel({ repoRoot, onChanged }: { repoRoot: string; onCha
   const nothing = cfg.left.mode === "off" && cfg.right.mode === "off";
   return (
     <section className="pictures-panel">
-      <p className="muted">Put your own picture or animated GIF on the screens. Pictures are turned into black and white dots; the preview shows exactly what the screen will show.</p>
-      {state.moduleProblem && <p className="warning">{state.moduleProblem}</p>}
+      {state.moduleProblem && <p className="warning">{withCode(state.moduleProblem)}</p>}
       <div className="picture-halves">
         <HalfEditor title="Left half" half="left" art={cfg.left} pic={pics.left} budget={cfg.budget_kib} repoRoot={repoRoot}
           allowArt={false} onChange={(p) => update("left", p)} onPick={(r) => { setPics({ ...pics, left: r }); setDirty(true); }} />

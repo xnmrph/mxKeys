@@ -61,9 +61,9 @@ export function FlashWizard({ repoRoot }: { repoRoot: string }) {
         <h3>Install on the keyboard</h3>
         <label className="check">
           <input type="checkbox" checked={reset} onChange={(e) => setReset(e.target.checked)} />
-          Reset settings first <span className="muted">— only needed if the halves stop talking to each other or pairing is broken. You'll pair Bluetooth again afterwards.</span>
+          <span>Reset settings first <span className="muted">— only needed if the halves stop talking to each other or pairing is broken. You'll pair Bluetooth again afterwards.</span></span>
         </label>
-        <button className="primary" onClick={start}>Start</button>
+        <button className="primary" onClick={start}>Install on keyboard</button>
         {ended && <span className="muted"> Stopped.</span>}
         {error && <p className="error">{error}</p>}
       </div>

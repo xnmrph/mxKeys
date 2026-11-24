@@ -12,6 +12,7 @@ import { HistoryPanel } from "./HistoryPanel";
 import { PicturesPanel } from "./PicturesPanel";
 import { LivePanel, type LiveInfo } from "./LivePanel";
 import { Icon } from "./icons";
+import { withCode } from "./text";
 
 type Tab = "keyboard" | "keymap" | "screen" | "settings" | "install";
 const NO_LIVE: LiveInfo = { connected: false, ready: false, locked: false, name: null, unlockHint: null, unsaved: false };
@@ -148,7 +149,7 @@ function Welcome({ onCloned, onOpen, onBrowse, busy, error }: {
 const TAB_INFO: Record<Tab, { title: string; icon: string; blurb: string }> = {
   keyboard: { title: "Keyboard", icon: "keyboard", blurb: "What you have, and the connection for live editing." },
   keymap: { title: "Keymap", icon: "keymap", blurb: "What every key does, on every layer — plus combos, macros and special keys." },
-  screen: { title: "Screen", icon: "screen", blurb: "Your own pictures and animations on the nice!view screens." },
+  screen: { title: "Screen", icon: "screen", blurb: "Your own pictures and GIFs on the nice!view screens. The preview shows exactly the dots the screen will show." },
   settings: { title: "Settings", icon: "settings", blurb: "Battery, Bluetooth, screen, lights and typing." },
   install: { title: "Install & save", icon: "install", blurb: "Build the firmware, put it on the keyboard, and keep a version of your changes." },
 };
@@ -162,9 +163,21 @@ function RepoView({ repo, error, busy, onOpenAnother, onKeymapChanged, onReload 
   onReload: () => Promise<void>;
 }) {
   const keymap = repo.keymaps[0];
-  const [tab, setTab] = useState<Tab>("keyboard");
+  const [tab, setTabState] = useState<Tab>("keyboard");
+  // Each tab keeps its own scroll position.
+  const paneRef = useRef<HTMLElement>(null);
+  const scrolls = useRef<Partial<Record<Tab, number>>>({});
+  const setTab = useCallback((t: Tab) => {
+    setTabState((old) => {
+      if (paneRef.current) scrolls.current[old] = paneRef.current.scrollTop;
+      return t;
+    });
+  }, []);
+  useEffect(() => { if (paneRef.current) paneRef.current.scrollTop = scrolls.current[tab] ?? 0; }, [tab]);
   const [profile, setProfile] = useState<HardwareProfile | null>(null);
-  const onProfile = useCallback((p: HardwareProfile | null) => setProfile(p), []);
+  // While the hardware is being re-checked, keep using the last confirmed answer
+  // (so tabs and the build panel don't flicker away).
+  const onProfile = useCallback((p: HardwareProfile | null) => { if (p) setProfile(p); }, []);
   // Bumped on every edit so the Firmware panel can say a rebuild is needed.
   const [changes, setChanges] = useState(0);
   const bump = useCallback(() => setChanges((n) => n + 1), []);
@@ -209,7 +222,7 @@ function RepoView({ repo, error, busy, onOpenAnother, onKeymapChanged, onReload 
           <ThemeSwitch />
         </div>
       </aside>
-      <main className="pane">
+      <main className="pane" ref={paneRef}>
         <header className="pane-head">
           <h1>{info.title}</h1>
           <p className="muted">{info.blurb}</p>
@@ -226,7 +239,7 @@ function RepoView({ repo, error, busy, onOpenAnother, onKeymapChanged, onReload 
             </section>
           )}
           {repo.firmware && <Firmware firmware={repo.firmware} />}
-          {repo.warnings.map((w) => <p key={w} className="warning">{w}</p>)}
+          {repo.warnings.map((w) => <p key={w} className="warning">{withCode(w)}</p>)}
           <p className="muted mono small">{repo.root}</p>
         </div>
 

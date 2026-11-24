@@ -5,6 +5,7 @@ import type {
   Confidence, DetectionReport, FieldResult, HardwareProfile, Known, QuizAnswers, QuizQuestion, Source,
 } from "./types";
 import { Illustration } from "./illustrations";
+import { withCode } from "./text";
 
 const SOURCE_LABEL: Record<Source, string> = {
   settings: "your settings",
@@ -129,7 +130,7 @@ export function HardwareSetup({ repoRoot, onProfile }: { repoRoot: string; onPro
             <Field label="Live editing" field={d.studio} show={(v) => (v ? "on" : "off")} />
           </div>
           {[d.keyboard, d.controller, d.display, d.central, d.studio].flatMap((f) => f.conflicts).map((c) => (
-            <p key={c} className="warning">{c}</p>
+            <p key={c} className="warning">{withCode(c)}</p>
           ))}
           {d.notes.map((n) => <p key={n.text} className={n.level === "warning" ? "warning" : "note"}>{n.text}</p>)}
           {report.unsupported.length > 0 && (

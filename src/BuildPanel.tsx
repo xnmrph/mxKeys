@@ -156,7 +156,7 @@ export function BuildPanel({ repoRoot, autoSetup, changes = 0 }: { repoRoot: str
       {pct !== null && <div className="progress"><div className="bar"><div style={{ width: `${pct}%` }} /></div></div>}
       {tcError && <p className="error">{tcError}</p>}
       <div className="row">
-        <button className="primary" onClick={build} disabled={building}>{building ? "Building…" : "Build firmware"}</button>
+        <button className={fwState === "up_to_date" ? "" : "primary"} onClick={build} disabled={building}>{building ? "Building…" : fwState === "up_to_date" ? "Build again" : "Build firmware"}</button>
         {tc && !tc.status.ready && !tc.running && !tcProgress && (
           <button onClick={() => invoke("start_toolchain_setup").then(refresh)}>Download build tools now</button>
         )}

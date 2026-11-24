@@ -182,7 +182,7 @@ export function KeyPicker({ raw, cat, title, onSave, onCancel }: {
         <span className="muted">currently <code>{raw}</code></span>
       </div>
       <label className="field">
-        What should this key do?
+        <span>What should this key do?</span>
         <select value={ref} onChange={(e) => chooseBehavior(e.target.value)}>
           {!behavior && <option value="">Custom text (Advanced)</option>}
           {groups.map(([c, bs]) => (
