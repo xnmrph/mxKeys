@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { EditOp, KeyGeom } from "./types";
 import type { KeyLabel } from "./bindings";
 import { MiniBoard } from "./BehaviorsPanel";
-import { FAVOURITES, type FavCtx, type Favourite, type Values } from "./favourites";
+import { FAVOURITES, type FavCtx, type Favourite, type Values } from "./favouriteRecipes";
 
 /** "Community favourites": proven tricks you can add to your keymap in one step. */
 export function Favourites({ ctx, labels, onApply, liveNote }: {
