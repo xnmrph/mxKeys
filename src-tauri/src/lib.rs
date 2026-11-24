@@ -355,6 +355,21 @@ async fn pictures_preview(
     .map_err(|e| e.to_string())?
 }
 
+/// The original picture, for positioning it on the screen.
+#[tauri::command]
+async fn pictures_source(
+    app: AppHandle,
+    repo_path: String,
+    picture: pictures::PictureRef,
+) -> Result<pictures::SourceImage, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        app.state::<pictures::Pictures>()
+            .source_image(&PathBuf::from(repo_path), &picture)
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
 /// Write the pictures (and the small ZMK module showing them) into the config repo.
 #[tauri::command]
 async fn pictures_save(
@@ -523,6 +538,7 @@ pub fn run() {
             git_run,
             pictures_state,
             pictures_preview,
+            pictures_source,
             pictures_save,
             pictures_remove,
             live_devices,

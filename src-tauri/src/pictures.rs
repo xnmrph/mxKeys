@@ -75,6 +75,13 @@ pub fn state(repo_root: &Path) -> PicturesState {
     }
 }
 
+#[derive(Debug, Serialize)]
+pub struct SourceImage {
+    pub url: String,
+    pub width: u32,
+    pub height: u32,
+}
+
 impl Pictures {
     fn load(&self, path: &Path) -> Result<Arc<Source>, String> {
         if let Some(s) = self.cache.lock().unwrap().get(path) {
@@ -92,6 +99,20 @@ impl Pictures {
         }
         cache.insert(path.to_path_buf(), src.clone());
         Ok(src)
+    }
+
+    /// The original picture (first frame) for the position editor, as a PNG data URL,
+    /// at the same resolution the renderer works from.
+    pub fn source_image(&self, repo_root: &Path, picture: &PictureRef) -> Result<SourceImage, String> {
+        let src = self.load(&picture.path(repo_root))?;
+        let (img, _) = src.frames.first().ok_or("the picture is empty")?;
+        let png = render::rgba_png(img);
+        let b64 = base64::engine::general_purpose::STANDARD;
+        Ok(SourceImage {
+            url: format!("data:image/png;base64,{}", b64.encode(png)),
+            width: img.width(),
+            height: img.height(),
+        })
     }
 
     pub fn preview(

@@ -492,6 +492,15 @@ pub fn render(src: &Source, area: Area, o: &Options, max_frames: usize) -> Vec<F
 }
 
 /// A PNG of the frame at `scale`× (for previews).
+/// A colour picture as PNG (for showing the original in the position editor).
+pub fn rgba_png(img: &RgbaImage) -> Vec<u8> {
+    let mut out = Vec::new();
+    DynamicImage::ImageRgba8(img.clone())
+        .write_to(&mut Cursor::new(&mut out), ImageFormat::Png)
+        .expect("PNG encoding into memory can't fail");
+    out
+}
+
 pub fn preview_png(f: &Frame, scale: u32) -> Vec<u8> {
     let scale = scale.max(1);
     let img = GrayImage::from_fn(f.width * scale, f.height * scale, |x, y| {
