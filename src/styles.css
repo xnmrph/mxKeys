@@ -286,8 +286,8 @@ form.inline { display: inline-flex; gap: 6px; align-items: center; }
 .raw-options { margin-top: 14px; }
 .raw-options form { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .settings-panel .warning { font-size: 13px; }
-.behaviors { margin-top: var(--space-8); }
-.def-layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 16px; align-items: start; }
+.behaviors { margin-top: var(--space-5); }
+.def-layout-unused { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 16px; align-items: start; }
 @media (max-width: 760px) { .def-layout { grid-template-columns: 1fr; } }
 .def-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; max-height: 560px; overflow-y: auto; }
 .def-list li > button { width: 100%; text-align: left; display: flex; flex-direction: column; gap: 2px; padding: 6px 10px; }
@@ -495,3 +495,24 @@ select option { background: var(--surface-1); color: var(--ink); }
 .hi-reset.active { fill: var(--signal); stroke: var(--signal-deep); }
 .hi-label { font-family: var(--mono); font-size: 30px; fill: var(--ink-muted); letter-spacing: 0.06em; }
 .hi-label.strong { fill: var(--ink); font-weight: 500; }
+
+/* Combos, macros and special keys: card grid + popup editor */
+.def-grid { list-style: none; padding: 0; margin: 0 0 var(--space-3); display: grid; grid-template-columns: repeat(auto-fill, minmax(176px, 1fr)); gap: var(--space-2); }
+.def-tile { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 8px; text-align: left;
+  background: var(--surface-1); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 10px 12px; min-height: 0; }
+.def-tile:hover:not(:disabled) { border-color: var(--signal); background: var(--surface-2); }
+.def-tile.conflict { border-color: var(--warn); }
+.def-tile .def-title { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: var(--ink); }
+.def-tile .def-summary { font-size: 12px; white-space: normal; }
+.def-tile.add { border-style: dashed; color: var(--ink-muted); align-items: center; justify-content: center; font-weight: 500; }
+.def-tile.new-form { gap: 8px; }
+.def-tile.new-form input { width: 100%; }
+.card-keys { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.mini-cap { font-family: var(--sans); font-size: 11px; font-weight: 600; min-width: 22px; height: 22px; padding: 0 6px; display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--line-strong); border-radius: 6px; background: var(--key); color: var(--ink); box-shadow: inset 0 -1.5px 0 var(--line); }
+.mini-cap.result { border-color: var(--signal); }
+.card-arrow { color: var(--ink-faint); font-size: 12px; }
+.behaviors .tune { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.def-modal { width: min(820px, 100%); }
+.def-modal .def-card { border: none; padding: 0; margin: 0; background: none; }
+.key.hl { border-color: var(--signal); box-shadow: 0 0 0 2px var(--signal); background: var(--surface-2); }

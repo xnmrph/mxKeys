@@ -46,6 +46,8 @@ export function KeymapEditor({ keymap, liveInfo, flash, onBlocked, onConnect, re
     return true;
   }, [locked, onBlocked]);
   const [flashing, setFlashing] = useState(false);
+  // Keys of the combo under the mouse in the list below.
+  const [highlight, setHighlight] = useState<number[] | null>(null);
   // Bring the key picker into view when a key is chosen; Escape closes it.
   const pickerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -239,7 +241,7 @@ export function KeymapEditor({ keymap, liveInfo, flash, onBlocked, onConnect, re
             return (
               <button
                 key={i}
-                className={`key${label.muted ? " muted" : ""}${selected === i ? " selected" : ""}`}
+                className={`key${label.muted ? " muted" : ""}${selected === i ? " selected" : ""}${highlight?.includes(i) ? " hl" : ""}`}
                 title={layer.bindings[i]}
                 disabled={!!layer.readOnlyReason}
                 onClick={() => { if (!blocked()) setSelected(i); }}
@@ -274,7 +276,7 @@ export function KeymapEditor({ keymap, liveInfo, flash, onBlocked, onConnect, re
         </div>
       )}
       {catalog && (
-        <BehaviorsPanel definitions={keymap.definitions} cat={catalog} geometry={geometry.length === keymap.layers[0]?.bindings.length ? geometry : []} baseLabels={baseLabels} edit={edit} />
+        <BehaviorsPanel definitions={keymap.definitions} cat={catalog} geometry={geometry.length === keymap.layers[0]?.bindings.length ? geometry : []} baseLabels={baseLabels} edit={edit} onHighlight={setHighlight} />
       )}
       {keymap.parseProblems.length > 0 && (
         <details>

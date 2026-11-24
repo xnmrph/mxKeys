@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactElement } from "react";
+import { useEffect, useMemo, useState, type ReactElement } from "react";
 import { Icon } from "./icons";
 import { confirmAction, tell } from "./dialogs";
 import type { DefSchema, DefType, Definition, EditOp, KeyGeom, NewProp, PropSchema, PropValue } from "./types";
@@ -86,12 +86,31 @@ function summaryOf(d: Definition, cat: Catalog, baseLabels: KeyLabel[]): string 
   }
 }
 
-export function BehaviorsPanel({ definitions, cat, geometry, baseLabels, edit }: {
+/** A compact card face: combos show their keys as little keycaps → the result. */
+function CardFace({ d, cat, baseLabels }: { d: Definition; cat: Catalog; baseLabels: KeyLabel[] }) {
+  if (d.def_type === "combo") {
+    const pos = propOf(d, "key-positions");
+    const b = propOf(d, "bindings");
+    const first = b?.type === "bindings" ? b.value[0] : undefined;
+    return (
+      <span className="card-keys">
+        {pos?.type === "numbers" ? pos.value.map((p, i) => <span key={i} className="mini-cap">{baseLabels[p]?.tap || `#${p}`}</span>) : <span className="mini-cap">?</span>}
+        <span className="card-arrow">→</span>
+        <span className="mini-cap result">{first ? describe(first, cat).tap || first : "?"}</span>
+      </span>
+    );
+  }
+  return <span className="def-summary">{summaryOf(d, cat, baseLabels)}</span>;
+}
+
+export function BehaviorsPanel({ definitions, cat, geometry, baseLabels, edit, onHighlight }: {
   definitions: Definition[];
   cat: Catalog;
   geometry: KeyGeom[];
   baseLabels: KeyLabel[];
   edit: (op: EditOp) => Promise<boolean>;
+  /** Show these key positions on the keyboard above (hovering a combo), or none. */
+  onHighlight?: (positions: number[] | null) => void;
 }) {
   const counts = useMemo(() => {
     const m = new Map<DefType, number>();
@@ -160,45 +179,77 @@ export function BehaviorsPanel({ definitions, cat, geometry, baseLabels, edit }:
         ))}
       </nav>
       <p className="muted">{schema.help}</p>
-      <div className="def-layout">
-        <ul className="def-list" key={tab}>
-          {shown.map((d) => (
+      <ul className="def-grid" key={tab}>
+        {shown.map((d) => {
+          const pos = d.def_type === "combo" ? propOf(d, "key-positions") : null;
+          const positions = pos?.type === "numbers" ? pos.value : null;
+          return (
             <li key={d.id}>
-              <button className={d.id === selected ? "active" : ""} onClick={() => setSelected(d.id)}>
-                <span className="def-title">{sameKeys.has(d.id) && <span className="warn-mark" title="Another combo uses the same keys"><Icon name="warn" size={14} /> </span>}{d.title}</span>
-                <span className="muted def-summary">{summaryOf(d, cat, baseLabels)}</span>
+              <button className={`def-tile${sameKeys.has(d.id) ? " conflict" : ""}`} onClick={() => setSelected(d.id)}
+                onMouseEnter={() => onHighlight?.(positions)} onMouseLeave={() => onHighlight?.(null)}
+                onFocus={() => onHighlight?.(positions)} onBlur={() => onHighlight?.(null)}>
+                <span className="def-title">
+                  {sameKeys.has(d.id) && <span className="warn-mark" title="Another combo uses the same keys"><Icon name="warn" size={14} /></span>}
+                  {d.title}
+                  {d.read_only && <span className="badge">read-only</span>}
+                </span>
+                <CardFace d={d} cat={cat} baseLabels={baseLabels} />
               </button>
             </li>
-          ))}
-          {shown.length === 0 && <li className="muted">None yet.</li>}
-          {tabInfo.newName && (creating === null ? (
-            <li><button className="add" onClick={() => setCreating(suggest())}>＋ New {tabInfo.newName}</button></li>
-          ) : (
-            <li>
-              <form className="inline" onSubmit={(e) => { e.preventDefault(); void create(creating.trim()); }}>
+          );
+        })}
+        {tabInfo.newName && (
+          <li>
+            {creating === null ? (
+              <button className="def-tile add" onClick={() => setCreating(suggest())}>＋ New {tabInfo.newName}</button>
+            ) : (
+              <form className="def-tile new-form" onSubmit={(e) => { e.preventDefault(); void create(creating.trim()); }}>
                 <input autoFocus value={creating} onChange={(e) => setCreating(e.target.value)} placeholder="name, e.g. copy_paste" />
-                <button type="submit">Create</button>
-                <button type="button" onClick={() => setCreating(null)}>Cancel</button>
+                <div className="row">
+                  <button type="submit" className="primary">Create</button>
+                  <button type="button" onClick={() => setCreating(null)}>Cancel</button>
+                </div>
+                {tab !== "combo" && tab !== "conditional_layer" && <span className="muted small">Keys use it as <code>&amp;{creating || "name"}</code>.</span>}
               </form>
-              {tab !== "combo" && tab !== "conditional_layer" && <p className="muted small">Keys use it as <code>&amp;{creating || "name"}</code>.</p>}
-            </li>
+            )}
+          </li>
+        )}
+      </ul>
+      {shown.length === 0 && !tabInfo.newName && <p className="muted">None in your keymap.</p>}
+      {(tab === "hold_tap" || tab === "sticky_key" || tab === "caps_word") && (
+        <div className="tune row">
+          <span className="muted small">Adjust a built-in:</span>
+          {TUNABLE.filter((t) => schemas.get(tab) && (tab === "hold_tap" ? ["mt", "lt"] : tab === "sticky_key" ? ["sk", "sl"] : ["caps_word"]).includes(t.target)).map((t) => (
+            <button key={t.target} onClick={async () => { if (await edit({ op: "tune_builtin", target: t.target })) setSelected(`&${t.target}`); }}>{t.name}</button>
           ))}
-          {(tab === "hold_tap" || tab === "sticky_key" || tab === "caps_word") && (
-            <li className="tune">
-              <span className="muted small">Adjust a built-in:</span>
-              {TUNABLE.filter((t) => schemas.get(tab) && (tab === "hold_tap" ? ["mt", "lt"] : tab === "sticky_key" ? ["sk", "sl"] : ["caps_word"]).includes(t.target)).map((t) => (
-                <button key={t.target} className="link" onClick={async () => { if (await edit({ op: "tune_builtin", target: t.target })) setSelected(`&${t.target}`); }}>{t.name}</button>
-              ))}
-            </li>
-          )}
-        </ul>
-        <div className="def-editor">
-          {current ? (
-            <DefinitionEditor key={current.id} d={current} conflict={sameKeys.get(current.id)} schema={schema} cat={cat} geometry={geometry} baseLabels={baseLabels} edit={edit} onRemoved={() => setSelected(null)} />
-          ) : <p className="muted">Pick one on the left{tabInfo.newName ? ", or create a new one" : ""}.</p>}
         </div>
-      </div>
+      )}
+      {current && (
+        <DefModal title={current.title} kind={tabInfo.newName || tabInfo.name} onClose={() => setSelected(null)}>
+          <DefinitionEditor key={current.id} d={current} conflict={sameKeys.get(current.id)} schema={schema} cat={cat} geometry={geometry} baseLabels={baseLabels} edit={edit} onRemoved={() => setSelected(null)} />
+        </DefModal>
+      )}
     </section>
+  );
+}
+
+/** Popup holding one definition's editor (Esc or the backdrop closes it). */
+function DefModal({ title, kind, onClose, children }: { title: string; kind: string; onClose: () => void; children: ReactElement }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  return (
+    <div className="modal-backdrop" onPointerDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="modal def-modal" role="dialog" aria-label={title}>
+        <div className="modal-head">
+          <span className="overline">{kind}</span>
+          <button className="icon-button" onClick={onClose} aria-label="Close">✕</button>
+        </div>
+        {children}
+      </div>
+    </div>
   );
 }
 
