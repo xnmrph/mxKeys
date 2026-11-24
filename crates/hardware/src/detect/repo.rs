@@ -16,10 +16,6 @@ fn side_of(shield: &str) -> Option<Side> {
     }
 }
 
-fn base_name(shield: &str) -> &str {
-    shield.trim_end_matches("_left").trim_end_matches("_right")
-}
-
 fn keyboard_targets(m: &BuildMatrix) -> impl Iterator<Item = &BuildTarget> {
     m.targets
         .iter()
