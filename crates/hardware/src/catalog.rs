@@ -7,10 +7,57 @@
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum KeyboardId {
-    Corne,
+/// A keyboard, named by its ZMK shield without the `_left`/`_right` suffix (`corne`,
+/// `lily58`, `sofle`, `planck`). Any ZMK shield works; a few have nicer names below.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct KeyboardId(pub String);
+
+impl KeyboardId {
+    pub fn new(base: &str) -> Self {
+        KeyboardId(base.to_string())
+    }
+    pub fn corne() -> Self {
+        KeyboardId::new("corne")
+    }
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+    /// The shields to build for each half (or the one shield of a one-piece board).
+    pub fn halves(&self, split: bool) -> Vec<HalfShield> {
+        if split {
+            vec![
+                HalfShield {
+                    side: Some(Side::Left),
+                    shield: format!("{}_left", self.0),
+                },
+                HalfShield {
+                    side: Some(Side::Right),
+                    shield: format!("{}_right", self.0),
+                },
+            ]
+        } else {
+            vec![HalfShield {
+                side: None,
+                shield: self.0.clone(),
+            }]
+        }
+    }
+}
+
+/// One firmware's keyboard shield: a half of a split keyboard, or the whole keyboard.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct HalfShield {
+    pub side: Option<Side>,
+    pub shield: String,
+}
+
+/// Plain name and facts for a keyboard id.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct KeyboardInfo {
+    pub name: String,
+    /// In the list below (nice name, layout known in advance).
+    pub known: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -50,21 +97,14 @@ pub struct KeyGeom {
     pub ry: i32,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
-pub struct HalfDef {
-    pub side: Side,
-    pub shield: &'static str,
-}
-
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct KeyboardDef {
-    pub id: KeyboardId,
+    /// Shield name without `_left`/`_right` (the [`KeyboardId`]).
+    pub base: &'static str,
     pub name: &'static str,
-    pub halves: &'static [HalfDef],
     /// Shield names that identify this keyboard in build.yaml.
     pub shields: &'static [&'static str],
     pub key_count: usize,
-    pub supported: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -111,21 +151,10 @@ pub const NRF52840_FAMILY: u32 = 0xADA5_2840;
 pub const NRF52840_MULTILIB: &str = "thumb/v7e-m+fp/hard";
 
 pub const CORNE: KeyboardDef = KeyboardDef {
-    id: KeyboardId::Corne,
+    base: "corne",
     name: "Corne",
-    halves: &[
-        HalfDef {
-            side: Side::Left,
-            shield: "corne_left",
-        },
-        HalfDef {
-            side: Side::Right,
-            shield: "corne_right",
-        },
-    ],
     shields: &["corne_left", "corne_right", "corne"],
     key_count: 42,
-    supported: true,
 };
 
 pub const KEYBOARDS: &[KeyboardDef] = &[CORNE];
@@ -248,11 +277,42 @@ pub fn toolchain_multilibs() -> Vec<&'static str> {
     v
 }
 
-pub fn keyboard(id: KeyboardId) -> &'static KeyboardDef {
-    KEYBOARDS
-        .iter()
-        .find(|k| k.id == id)
-        .expect("every KeyboardId has a definition")
+pub fn keyboard(id: &KeyboardId) -> KeyboardInfo {
+    match KEYBOARDS.iter().find(|k| k.base == id.as_str()) {
+        Some(k) => KeyboardInfo {
+            name: k.name.to_string(),
+            known: true,
+        },
+        None => KeyboardInfo {
+            name: pretty_name(id.as_str()),
+            known: false,
+        },
+    }
+}
+
+/// `lily58` → "Lily58", `kyria_rev3` → "Kyria rev3", `cradio` → "Cradio".
+pub fn pretty_name(base: &str) -> String {
+    let spaced = base.replace(['_', '-'], " ");
+    let mut c = spaced.chars();
+    match c.next() {
+        Some(f) => f.to_uppercase().collect::<String>() + c.as_str(),
+        None => String::new(),
+    }
+}
+
+/// The keyboard a shield name belongs to (`lily58_left` → `lily58`), and whether it
+/// names a half.
+pub fn keyboard_of_shield(shield: &str) -> (KeyboardId, bool) {
+    if let Some(k) = KEYBOARDS.iter().find(|k| k.shields.contains(&shield)) {
+        let half = shield.ends_with("_left") || shield.ends_with("_right");
+        return (KeyboardId::new(k.base), half);
+    }
+    for suffix in ["_left", "_right"] {
+        if let Some(b) = shield.strip_suffix(suffix) {
+            return (KeyboardId::new(b), true);
+        }
+    }
+    (KeyboardId::new(shield), false)
 }
 
 pub fn controller(id: ControllerId) -> &'static ControllerDef {
@@ -322,7 +382,16 @@ mod tests {
         for d in [DisplayKind::None, DisplayKind::NiceView, DisplayKind::Oled128x32] {
             assert_eq!(display(d).kind, d);
         }
-        assert_eq!(keyboard(KeyboardId::Corne).name, "Corne");
+        assert_eq!(keyboard(&KeyboardId::corne()).name, "Corne");
+        assert_eq!(keyboard(&KeyboardId::new("lily58")).name, "Lily58");
+        assert!(!keyboard(&KeyboardId::new("kyria_rev3")).known);
+        assert_eq!(pretty_name("kyria_rev3"), "Kyria rev3");
+        assert_eq!(
+            keyboard_of_shield("lily58_right"),
+            (KeyboardId::new("lily58"), true)
+        );
+        assert_eq!(keyboard_of_shield("planck"), (KeyboardId::new("planck"), false));
+        assert_eq!(keyboard_of_shield("corne_left"), (KeyboardId::corne(), true));
     }
 
     #[test]

@@ -12,7 +12,7 @@
 
 use std::path::{Path, PathBuf};
 
-use mxkeys_hardware::catalog::{ControllerId, Side};
+use mxkeys_hardware::catalog::ControllerId;
 use mxkeys_probe::Uf2Drive;
 use serde::Serialize;
 
@@ -20,13 +20,22 @@ use crate::copy::CopyOutcome;
 use crate::uf2;
 use crate::verify::{self, Mismatch};
 
+/// What gets flashed: a half of a split keyboard, or a one-piece keyboard.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Part {
+    Left,
+    Right,
+    Whole,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(tag = "kind", content = "side", rename_all = "snake_case")]
 pub enum Job {
     /// Flash `settings_reset.uf2` (clears pairings and saved settings).
-    Reset(Side),
+    Reset(Part),
     /// Flash the real firmware.
-    Firmware(Side),
+    Firmware(Part),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -38,44 +47,47 @@ pub struct Step {
 /// Firmware files from a build.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Firmware {
-    pub left: PathBuf,
-    pub right: PathBuf,
+    /// Left then right for a split keyboard, or the one firmware of a one-piece board.
+    pub parts: Vec<(Part, PathBuf)>,
     pub settings_reset: PathBuf,
 }
 
 impl Firmware {
-    /// The files `mxkeys-toolchain` writes: `<dir>/{left,right,settings_reset}.uf2`.
-    pub fn in_dir(dir: &Path) -> Firmware {
+    /// The files `mxkeys-toolchain` writes: `<dir>/{left,right,main,settings_reset}.uf2`.
+    pub fn in_dir(dir: &Path, split: bool) -> Firmware {
+        let parts = if split {
+            vec![
+                (Part::Left, dir.join("left.uf2")),
+                (Part::Right, dir.join("right.uf2")),
+            ]
+        } else {
+            vec![(Part::Whole, dir.join("main.uf2"))]
+        };
         Firmware {
-            left: dir.join("left.uf2"),
-            right: dir.join("right.uf2"),
+            parts,
             settings_reset: dir.join("settings_reset.uf2"),
         }
     }
 }
 
-/// The steps for a run. With `reset`, both halves get the settings-reset firmware first
+/// The steps for a run. With `reset`, every part gets the settings-reset firmware first
 /// (ZMK's documented procedure), then the real firmware.
 pub fn plan(fw: &Firmware, reset: bool) -> Vec<Step> {
     let mut steps = Vec::new();
     if reset {
+        for (p, _) in &fw.parts {
+            steps.push(Step {
+                job: Job::Reset(*p),
+                file: fw.settings_reset.clone(),
+            });
+        }
+    }
+    for (p, f) in &fw.parts {
         steps.push(Step {
-            job: Job::Reset(Side::Left),
-            file: fw.settings_reset.clone(),
-        });
-        steps.push(Step {
-            job: Job::Reset(Side::Right),
-            file: fw.settings_reset.clone(),
+            job: Job::Firmware(*p),
+            file: f.clone(),
         });
     }
-    steps.push(Step {
-        job: Job::Firmware(Side::Left),
-        file: fw.left.clone(),
-    });
-    steps.push(Step {
-        job: Job::Firmware(Side::Right),
-        file: fw.right.clone(),
-    });
     steps
 }
 
@@ -150,11 +162,20 @@ pub struct Session {
 /// Polls (≈0.5 s each) after which a drive that hasn't restarted earns a hint.
 const STUCK_AFTER: u32 = 20;
 
-fn side_name(s: Side) -> &'static str {
-    match s {
-        Side::Left => "left",
-        Side::Right => "right",
+/// "the left half", "the keyboard".
+fn part_name(p: Part) -> &'static str {
+    match p {
+        Part::Left => "the left half",
+        Part::Right => "the right half",
+        Part::Whole => "the keyboard",
     }
+}
+
+fn capitalize(s: &str) -> String {
+    let mut c = s.chars();
+    c.next().map_or(String::new(), |f| {
+        f.to_uppercase().collect::<String>() + c.as_str()
+    })
 }
 
 impl Session {
@@ -283,8 +304,8 @@ impl Session {
 
     fn title(job: Job) -> String {
         match job {
-            Job::Reset(s) => format!("Reset the {} half", side_name(s)),
-            Job::Firmware(s) => format!("Install firmware on the {} half", side_name(s)),
+            Job::Reset(p) => format!("Reset {}", part_name(p)),
+            Job::Firmware(p) => format!("Install firmware on {}", part_name(p)),
         }
     }
 
@@ -299,38 +320,51 @@ impl Session {
             })
             .collect();
         let job = self.steps.get(self.index).map(|s| s.job);
-        let side = match job {
-            Some(Job::Reset(s) | Job::Firmware(s)) => side_name(s),
-            None => "",
+        let part = match job {
+            Some(Job::Reset(p) | Job::Firmware(p)) => Some(p),
+            None => None,
         };
-        let other = if side == "left" { "right" } else { "left" };
+        let side = part.map_or("", part_name);
+        let unplug_other = match part {
+            Some(Part::Left) => " (unplug the right half)",
+            Some(Part::Right) => " (unplug the left half)",
+            _ => "",
+        };
+        let split = self
+            .steps
+            .iter()
+            .any(|s| matches!(s.job, Job::Firmware(Part::Left | Part::Right)));
         let (instruction, detail) = match (&self.phase, job) {
             (Phase::Finished, _) => (
                 "All done!".to_string(),
-                Some("Unplug and replug the halves (or switch them off and on). They should find each other within a few seconds.".to_string()),
+                Some(if split {
+                    "Unplug and replug the halves (or switch them off and on). They should find each other within a few seconds.".to_string()
+                } else {
+                    "Unplug and replug the keyboard (or switch it off and on).".to_string()
+                }),
             ),
             (Phase::WaitingForDrive, Some(j)) => (
                 format!(
-                    "Plug the {side} half into this computer with USB (unplug the {other} half), then quickly press its reset button twice."
+                    "Plug {side} into this computer with USB{unplug_other}, then quickly press its reset button twice."
                 ),
                 Some(match j {
-                    Job::Reset(_) => "This clears saved settings and Bluetooth pairings so both halves start fresh. You'll pair your computers again afterwards.".to_string(),
+                    Job::Reset(_) => format!("This clears saved settings and Bluetooth pairings so {} start fresh. You'll pair your computers again afterwards.", if split { "both halves" } else { "the keyboard can" }),
                     Job::Firmware(_) => "A drive called something like NICENANO appears for a moment — we'll notice it and copy the firmware automatically.".to_string(),
                 }),
             ),
             (Phase::TooManyDrives, _) => (
-                "More than one keyboard half is in update mode.".to_string(),
-                Some(format!("Unplug everything except the {side} half.")),
+                "More than one keyboard is in update mode.".to_string(),
+                Some(format!("Unplug everything except {side}.")),
             ),
             (Phase::Refused { reason, .. }, _) => (
                 "This isn't the right device.".to_string(),
-                Some(format!("{reason} Unplug it, then plug in the {side} half and press its reset button twice.")),
+                Some(format!("{reason} Unplug it, then plug in {side} and press its reset button twice.")),
             ),
-            (Phase::Copying { .. }, _) => (format!("Copying firmware to the {side} half…"), Some("Don't unplug it.".to_string())),
+            (Phase::Copying { .. }, _) => (format!("Copying firmware to {side}…"), Some("Don't unplug it.".to_string())),
             (Phase::Restarting { polls, .. }, _) => (
-                format!("The {side} half is restarting…"),
+                format!("{} is restarting…", capitalize(side)),
                 (*polls >= STUCK_AFTER).then(|| {
-                    "The drive is still there. If this doesn't change, unplug the half, plug it in again and double-tap reset to retry.".to_string()
+                    "The drive is still there. If this doesn't change, unplug it, plug it in again and double-tap reset to retry.".to_string()
                 }),
             ),
             (Phase::Failed { reason }, _) => ("Copying didn't finish.".to_string(), Some(reason.clone())),

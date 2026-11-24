@@ -171,7 +171,7 @@ fn no_special<T>(_: &T, _: &[Source], _: &T, _: &[Source]) -> Option<String> {
 
 fn describe_keyboard(k: &Known<KeyboardId>) -> String {
     match k {
-        Known::Known(id) => format!("it's a {}", catalog::keyboard(*id).name),
+        Known::Known(id) => format!("it's a {}", catalog::keyboard(id).name),
         Known::Other(name) => format!("it's a keyboard called “{name}”"),
     }
 }
@@ -290,6 +290,11 @@ pub fn combine(evidence: &[Evidence], mut notes: Vec<Note>) -> Detection {
         },
     );
 
+    let split_fact = evidence.iter().rev().find_map(|e| match e.fact {
+        Fact::Split(s) => Some(s),
+        _ => None,
+    });
+
     // Screen software vs. screen hardware.
     let screen_sw = evidence.iter().rev().find_map(|e| match e.fact {
         Fact::ScreenSoftware(on) => Some(on),
@@ -308,7 +313,9 @@ pub fn combine(evidence: &[Evidence], mut notes: Vec<Note>) -> Detection {
 
     let profile = match (&keyboard.value, &controller.value, display.value) {
         (Some(Known::Known(k)), Some(Known::Known(c)), Some(d)) => Some(HardwareProfile {
-            keyboard: *k,
+            keyboard: k.clone(),
+            // Known keyboards (Corne) are split; others say so through build.yaml.
+            split: split_fact.unwrap_or(true),
             controller: *c,
             display: d,
             central: central.value.unwrap_or(Side::Left),
@@ -330,7 +337,7 @@ pub fn combine(evidence: &[Evidence], mut notes: Vec<Note>) -> Detection {
 
     let summary = {
         let kb = match &keyboard.value {
-            Some(Known::Known(k)) => catalog::keyboard(*k).name.to_string(),
+            Some(Known::Known(k)) => catalog::keyboard(k).name,
             Some(Known::Other(n)) => n.clone(),
             None => "Keyboard unknown".into(),
         };

@@ -47,7 +47,7 @@ fn owner_repo_detection(drives: &[Uf2Info], usb: &[UsbDevice], quiz: Option<&Qui
 #[test]
 fn owners_repo_alone() {
     let d = owner_repo_detection(&[], &[], None);
-    assert_eq!(d.keyboard.value, Some(Known::Known(KeyboardId::Corne)));
+    assert_eq!(d.keyboard.value, Some(Known::Known(KeyboardId::corne())));
     assert_eq!(d.controller.value, Some(Known::Known(ControllerId::NiceNanoV2)));
     assert_eq!(d.controller.confidence, Some(Confidence::Medium));
     assert_eq!(d.display.value, Some(DisplayKind::NiceView));
@@ -59,7 +59,7 @@ fn owners_repo_alone() {
         d.summary,
         "Corne · nice!nano v2 · nice!view — detected from build.yaml"
     );
-    assert_eq!(d.profile, Some(HardwareProfile::CORNE_NICE_NANO_V2_NICE_VIEW));
+    assert_eq!(d.profile, Some(HardwareProfile::corne_nice_nano_v2_nice_view()));
     assert!(d.ask.is_empty(), "{:?}", d.ask);
     assert!(d.keyboard.conflicts.is_empty() && d.display.conflicts.is_empty());
     // The screen is switched off in the owner's settings — must be pointed out.
@@ -153,7 +153,7 @@ fn legacy_v0_3_repo() {
         confs: &c,
         ..Default::default()
     });
-    assert_eq!(d.profile, Some(HardwareProfile::CORNE_NICE_NANO_V2_NICE_VIEW));
+    assert_eq!(d.profile, Some(HardwareProfile::corne_nice_nano_v2_nice_view()));
     assert!(d.notes.iter().any(|n| n.text.contains("nice_nano_v2")));
     assert!(
         !d.notes.iter().any(|n| n.level == NoteLevel::Warning),
@@ -187,9 +187,31 @@ fn other_controllers_and_keyboards() {
         build: Some(&b),
         ..Default::default()
     });
-    assert_eq!(d.keyboard.value, Some(Known::Other("lily58".into())));
+    // Any ZMK shield is a keyboard: named after the shield, split from `_left`.
+    assert_eq!(d.keyboard.value, Some(Known::Known(KeyboardId::new("lily58"))));
     assert_eq!(d.controller.value, Some(Known::Known(ControllerId::XiaoBle)));
-    assert_eq!(d.profile, None);
+    let p = d.profile.expect("lily58 + XIAO is buildable");
+    assert!(p.split);
+    assert_eq!(p.build_targets()[1].shields, ["lily58_right"]);
+
+    // A one-piece keyboard builds one firmware (plus settings reset).
+    let b = BuildMatrix::parse("include:\n  - board: nice_nano@2.0.0//zmk\n    shield: planck\n").unwrap();
+    let p = detect(&Inputs {
+        build: Some(&b),
+        ..Default::default()
+    })
+    .profile
+    .unwrap();
+    assert!(!p.split);
+    let t = p.build_targets();
+    assert_eq!(t.len(), 2);
+    assert_eq!(
+        (t[0].id, t[0].shields.clone()),
+        (
+            mxkeys_hardware::profile::TargetId::Main,
+            vec!["planck".to_string()]
+        )
+    );
 
     let b = BuildMatrix::parse("include:\n  - board: xiao_ble\n    shield: corne_left\n").unwrap();
     let p = detect(&Inputs {
@@ -221,7 +243,7 @@ fn usb_devices() {
         usb: &usb("corne_zmk_studio.json"),
         ..Default::default()
     });
-    assert_eq!(d.keyboard.value, Some(Known::Known(KeyboardId::Corne)));
+    assert_eq!(d.keyboard.value, Some(Known::Known(KeyboardId::corne())));
     assert_eq!(d.keyboard.confidence, Some(Confidence::Weak));
     assert_eq!(d.studio.value, Some(true));
     assert!(d.notes.iter().any(|n| n.text.contains("“Corne xnmrph”")));

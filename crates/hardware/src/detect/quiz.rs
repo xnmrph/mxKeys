@@ -15,10 +15,10 @@ pub struct QuizAnswers {
 
 pub fn from_quiz(a: &QuizAnswers) -> Findings {
     let mut f = Findings::default();
-    if let Some(k) = a.keyboard {
+    if let Some(k) = &a.keyboard {
         f.evidence.push(Evidence::new(
             Source::Quiz,
-            Fact::Keyboard(Known::Known(k)),
+            Fact::Keyboard(Known::Known(k.clone())),
             Confidence::Medium,
             format!("you said it's a {}", catalog::keyboard(k).name),
         ));

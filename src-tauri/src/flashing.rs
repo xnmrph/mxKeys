@@ -30,8 +30,11 @@ pub struct FlashEvent {
     pub ended: bool,
 }
 
+/// The firmware files for a config: left/right halves, or one file for a one-piece
+/// keyboard (from the confirmed hardware; split if not confirmed yet).
 pub fn firmware_for(data: &Path, repo: &Path) -> Firmware {
-    Firmware::in_dir(&mxkeys_toolchain::pipeline::firmware_dir(data, repo))
+    let split = crate::profiles::load(data, repo).is_none_or(|p| p.split);
+    Firmware::in_dir(&mxkeys_toolchain::pipeline::firmware_dir(data, repo), split)
 }
 
 /// Whether built firmware exists and is newer than every file in the config repo's
@@ -46,10 +49,10 @@ pub enum FirmwareState {
 
 pub fn firmware_state(fw: &Firmware, repo: &Path) -> FirmwareState {
     let mtime = |p: &Path| std::fs::metadata(p).and_then(|m| m.modified()).ok();
-    let (Some(l), Some(r)) = (mtime(&fw.left), mtime(&fw.right)) else {
+    let times: Option<Vec<_>> = fw.parts.iter().map(|(_, f)| mtime(f)).collect();
+    let Some(built) = times.and_then(|t| t.into_iter().min()) else {
         return FirmwareState::NotBuilt;
     };
-    let built = l.min(r);
     let mut sources: Vec<std::path::PathBuf> = vec![repo.join("build.yaml"), repo.join("zephyr/module.yml")];
     if let Ok(dir) = std::fs::read_dir(repo.join("config")) {
         sources.extend(dir.flatten().map(|e| e.path()).filter(|p| p.is_file()));
@@ -77,7 +80,7 @@ pub fn firmware_state(fw: &Firmware, repo: &Path) -> FirmwareState {
 
 /// Prepare a session; error in plain language if the firmware isn't built or is wrong.
 pub fn new_session(fw: &Firmware, profile: &HardwareProfile, reset: bool) -> Result<Session, String> {
-    for f in [&fw.left, &fw.right] {
+    for (_, f) in &fw.parts {
         if !f.is_file() {
             return Err("Build the firmware first — there's nothing to install yet.".into());
         }
@@ -197,7 +200,7 @@ mod tests {
         let (repo, fwdir) = (base.join("repo"), base.join("fw"));
         std::fs::create_dir_all(repo.join("config")).unwrap();
         std::fs::create_dir_all(&fwdir).unwrap();
-        let fw = Firmware::in_dir(&fwdir);
+        let fw = Firmware::in_dir(&fwdir, true);
         assert_eq!(firmware_state(&fw, &repo), FirmwareState::NotBuilt);
         let set_time = |p: &Path, t: SystemTime| {
             std::fs::File::options()
@@ -211,8 +214,8 @@ mod tests {
         };
         let now = SystemTime::now();
         set_time(&repo.join("config/corne.conf"), now - Duration::from_secs(60));
-        set_time(&fw.left, now - Duration::from_secs(30));
-        set_time(&fw.right, now - Duration::from_secs(30));
+        set_time(&fw.parts[0].1, now - Duration::from_secs(30));
+        set_time(&fw.parts[1].1, now - Duration::from_secs(30));
         assert_eq!(firmware_state(&fw, &repo), FirmwareState::UpToDate);
         set_time(&repo.join("config/corne.conf"), now);
         assert_eq!(firmware_state(&fw, &repo), FirmwareState::Outdated);
@@ -231,10 +234,10 @@ mod tests {
                 .collect();
             std::fs::write(fwdir.join(format!("{n}.uf2")), data).unwrap();
         }
-        let fw = Firmware::in_dir(&fwdir);
-        let profile = HardwareProfile::CORNE_NICE_NANO_V2_NICE_VIEW;
+        let fw = Firmware::in_dir(&fwdir, true);
+        let profile = HardwareProfile::corne_nice_nano_v2_nice_view();
         assert!(
-            new_session(&Firmware::in_dir(&base.join("none")), &profile, false)
+            new_session(&Firmware::in_dir(&base.join("none"), true), &profile, false)
                 .unwrap_err()
                 .contains("Build the firmware first")
         );

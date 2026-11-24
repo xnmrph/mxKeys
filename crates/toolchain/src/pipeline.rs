@@ -111,6 +111,7 @@ pub fn target_name(t: TargetId) -> &'static str {
     match t {
         TargetId::Left => "left",
         TargetId::Right => "right",
+        TargetId::Main => "main",
         TargetId::SettingsReset => "settings_reset",
     }
 }
@@ -146,11 +147,15 @@ pub fn run(
         PipelineError::Repo("config/west.yml is missing, so we don't know which ZMK to build".into())
     })?;
     let west_text = repo::read(west_yml).map_err(|e| PipelineError::Repo(e.to_string()))?;
-    let profile = opts.profile.or_else(|| detect_profile(&files)).ok_or_else(|| {
-        PipelineError::Repo(
-            "couldn't tell which keyboard this config is for — confirm your hardware first".into(),
-        )
-    })?;
+    let profile = opts
+        .profile
+        .clone()
+        .or_else(|| detect_profile(&files))
+        .ok_or_else(|| {
+            PipelineError::Repo(
+                "couldn't tell which keyboard this config is for — confirm your hardware first".into(),
+            )
+        })?;
 
     emit(Event::Stage {
         text: "Getting the build tools ready".into(),
@@ -168,7 +173,7 @@ pub fn run(
             emit(Event::Install(p))
         })?;
 
-        let outcome = build_targets(opts, &files, &ws, &tools, profile, runner, emit)?;
+        let outcome = build_targets(opts, &files, &ws, &tools, profile.clone(), runner, emit)?;
         let unexplained = outcome
             .results
             .iter()
@@ -308,6 +313,7 @@ pub fn plain_target(t: TargetId) -> &'static str {
     match t {
         TargetId::Left => "left half",
         TargetId::Right => "right half",
+        TargetId::Main => "keyboard",
         TargetId::SettingsReset => "settings reset",
     }
 }

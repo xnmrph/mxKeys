@@ -29,9 +29,10 @@ fn write_uf2(path: &Path, family: u32, blocks: u32) {
 }
 
 fn firmware(dir: &Path) -> Firmware {
-    let fw = Firmware::in_dir(dir);
-    write_uf2(&fw.left, NRF52840, 40);
-    write_uf2(&fw.right, NRF52840, 30);
+    let fw = Firmware::in_dir(dir, true);
+    let (left, right) = (fw.parts[0].1.clone(), fw.parts[1].1.clone());
+    write_uf2(&left, NRF52840, 40);
+    write_uf2(&right, NRF52840, 30);
     write_uf2(&fw.settings_reset, NRF52840, 10);
     fw
 }
@@ -55,11 +56,12 @@ fn full_flow_with_settings_reset() {
     let dir = tmp("full");
     let mounts = tmp("full-mounts");
     let fw = firmware(&dir);
+    let (left, right) = (fw.parts[0].1.clone(), fw.parts[1].1.clone());
     let mut s = Session::new(plan(&fw, true), ControllerId::NiceNanoV2).unwrap();
     assert_eq!(s.view().steps.len(), 4);
     assert_eq!(s.view().steps[0].title, "Reset the left half");
 
-    let expected_files = [&fw.settings_reset, &fw.settings_reset, &fw.left, &fw.right];
+    let expected_files = [&fw.settings_reset, &fw.settings_reset, &left, &right];
     for (i, file) in expected_files.iter().enumerate() {
         // Nothing plugged in yet.
         assert_eq!(s.on_drives(&scan(&mounts)), None);
@@ -121,11 +123,12 @@ fn refuses_wrong_device_and_recovers() {
 fn refuses_firmware_for_another_chip_before_starting() {
     let dir = tmp("chip");
     let fw = firmware(&dir);
-    write_uf2(&fw.right, 0xE48B_FF56, 5); // RP2040 family
+    let (left, right) = (fw.parts[0].1.clone(), fw.parts[1].1.clone());
+    write_uf2(&right, 0xE48B_FF56, 5); // RP2040 family
     let err = Session::new(plan(&fw, false), ControllerId::NiceNanoV2).unwrap_err();
-    assert_eq!(err.0, fw.right);
+    assert_eq!(err.0, right);
     assert!(err.1.to_string().contains("isn't for the nice!nano v2"));
-    std::fs::write(&fw.left, b"not a uf2").unwrap();
+    std::fs::write(&left, b"not a uf2").unwrap();
     assert!(Session::new(plan(&fw, false), ControllerId::NiceNanoV2).is_err());
 }
 
@@ -157,4 +160,19 @@ fn too_many_drives_failure_retry_skip_and_stuck_hint() {
     s.skip();
     assert!(s.is_finished());
     assert_eq!(s.view().steps[1].state, StepState::Skipped);
+}
+
+#[test]
+fn one_piece_keyboard_flashes_once() {
+    let dir = tmp("whole");
+    let fw = Firmware::in_dir(&dir, false);
+    write_uf2(&fw.parts[0].1, NRF52840, 20);
+    write_uf2(&fw.settings_reset, NRF52840, 10);
+    let s = Session::new(plan(&fw, true), ControllerId::NiceNanoV2).unwrap();
+    let v = s.view();
+    let titles: Vec<&str> = v.steps.iter().map(|x| x.title.as_str()).collect();
+    assert_eq!(titles, ["Reset the keyboard", "Install firmware on the keyboard"]);
+    assert!(v
+        .instruction
+        .starts_with("Plug the keyboard into this computer with USB, then"));
 }

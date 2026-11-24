@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 use super::{Confidence, Evidence, Fact, Findings, Known, Note, Source};
-use crate::catalog;
+use crate::catalog::{self, KeyboardId};
 
 /// ZMK firmware's default USB ids (ZMK `app/Kconfig`: `USB_DEVICE_VID`/`PID`).
 pub const ZMK_VID: u16 = 0x1D50;
@@ -70,11 +70,11 @@ pub fn from_usb(devices: &[UsbDevice]) -> Findings {
             let already = f
                 .evidence
                 .iter()
-                .any(|e| e.fact == Fact::Keyboard(Known::Known(k.id)));
+                .any(|e| e.fact == Fact::Keyboard(Known::Known(KeyboardId::new(k.base))));
             if !already && lower.contains(&k.name.to_ascii_lowercase()) {
                 f.evidence.push(Evidence::new(
                     Source::Usb,
-                    Fact::Keyboard(Known::Known(k.id)),
+                    Fact::Keyboard(Known::Known(KeyboardId::new(k.base))),
                     Confidence::Weak,
                     format!("a ZMK keyboard named “{name}” is connected"),
                 ));

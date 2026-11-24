@@ -4,9 +4,12 @@ use serde::{Deserialize, Serialize};
 
 use crate::catalog::{self, ControllerId, DisplayKind, KeyboardId, Side};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct HardwareProfile {
     pub keyboard: KeyboardId,
+    /// Two halves (`<keyboard>_left` / `_right`); false for a one-piece keyboard.
+    #[serde(default = "yes")]
+    pub split: bool,
     pub controller: ControllerId,
     pub display: DisplayKind,
     /// The half that talks to the computer (and runs ZMK Studio).
@@ -15,22 +18,26 @@ pub struct HardwareProfile {
     pub studio: bool,
 }
 
+fn yes() -> bool {
+    true
+}
+
 impl HardwareProfile {
-    /// The v1 target hardware.
-    pub const CORNE_NICE_NANO_V2_NICE_VIEW: HardwareProfile = HardwareProfile {
-        keyboard: KeyboardId::Corne,
-        controller: ControllerId::NiceNanoV2,
-        display: DisplayKind::NiceView,
-        central: Side::Left,
-        studio: true,
-    };
+    /// The owner's hardware (and the first one tested end to end).
+    pub fn corne_nice_nano_v2_nice_view() -> HardwareProfile {
+        HardwareProfile {
+            keyboard: KeyboardId::corne(),
+            split: true,
+            controller: ControllerId::NiceNanoV2,
+            display: DisplayKind::NiceView,
+            central: Side::Left,
+            studio: true,
+        }
+    }
 
     /// Plain-language reasons the app can't fully support this profile yet.
     pub fn unsupported_parts(&self) -> Vec<String> {
         let mut out = Vec::new();
-        if !catalog::keyboard(self.keyboard).supported {
-            out.push(format!("{} keyboards", catalog::keyboard(self.keyboard).name));
-        }
         let c = catalog::controller(self.controller);
         if !c.supported {
             out.push(format!("the {} controller", c.name));
@@ -39,7 +46,7 @@ impl HardwareProfile {
         if !d.supported {
             out.push(format!("the {} screen", d.name));
         }
-        if self.central != Side::Left {
+        if self.split && self.central != Side::Left {
             out.push("a right-hand central half".to_string());
         }
         out
@@ -49,7 +56,7 @@ impl HardwareProfile {
     pub fn title(&self) -> String {
         format!(
             "{} · {} · {}",
-            catalog::keyboard(self.keyboard).name,
+            catalog::keyboard(&self.keyboard).name,
             catalog::controller(self.controller).name,
             catalog::display(self.display).name
         )
@@ -58,20 +65,21 @@ impl HardwareProfile {
     /// The firmware variants the app builds for this profile — only what's needed
     /// (each half with its display, plus settings reset).
     pub fn build_targets(&self) -> Vec<BuildTarget> {
-        let kb = catalog::keyboard(self.keyboard);
         let ctrl = catalog::controller(self.controller);
         let disp = catalog::display(self.display);
-        let mut out: Vec<BuildTarget> = kb
-            .halves
-            .iter()
+        let mut out: Vec<BuildTarget> = self
+            .keyboard
+            .halves(self.split)
+            .into_iter()
             .map(|h| {
-                let mut shields = vec![h.shield.to_string()];
+                let mut shields = vec![h.shield.clone()];
                 shields.extend(disp.shields.iter().map(|s| s.to_string()));
-                let central = h.side == self.central;
+                let central = h.side.is_none_or(|s| s == self.central);
                 BuildTarget {
                     id: match h.side {
-                        Side::Left => TargetId::Left,
-                        Side::Right => TargetId::Right,
+                        Some(Side::Left) => TargetId::Left,
+                        Some(Side::Right) => TargetId::Right,
+                        None => TargetId::Main,
                     },
                     board: ctrl.board.to_string(),
                     shields,
@@ -98,6 +106,8 @@ impl HardwareProfile {
 pub enum TargetId {
     Left,
     Right,
+    /// The firmware of a one-piece keyboard.
+    Main,
     SettingsReset,
 }
 
@@ -129,7 +139,7 @@ mod tests {
 
     #[test]
     fn v1_profile_targets_match_the_brief() {
-        let p = HardwareProfile::CORNE_NICE_NANO_V2_NICE_VIEW;
+        let p = HardwareProfile::corne_nice_nano_v2_nice_view();
         assert_eq!(p.title(), "Corne · nice!nano v2 · nice!view");
         assert!(p.unsupported_parts().is_empty());
         let t = p.build_targets();
@@ -165,7 +175,7 @@ mod tests {
             "include:\n  - board: nice_nano@2.0.0\n    shield: corne_left\n    snippet: studio-rpc-usb-uart\n  - board: nice_nano_v2\n    shield: corne_left nice_view_adapter nice_view\n    snippet: studio-rpc-usb-uart\n  - board: nice_nano@2.0.0\n    shield: settings_reset\n",
         )
         .unwrap();
-        let t = HardwareProfile::CORNE_NICE_NANO_V2_NICE_VIEW.build_targets();
+        let t = HardwareProfile::corne_nice_nano_v2_nice_view().build_targets();
         assert!(!t[0].matches(&m.targets[0]), "no screen variant isn't needed");
         assert!(
             t[0].matches(&m.targets[1]),
@@ -179,7 +189,7 @@ mod tests {
         let p = HardwareProfile {
             controller: ControllerId::XiaoBle,
             display: DisplayKind::Oled128x32,
-            ..HardwareProfile::CORNE_NICE_NANO_V2_NICE_VIEW
+            ..HardwareProfile::corne_nice_nano_v2_nice_view()
         };
         assert_eq!(
             p.unsupported_parts(),
@@ -190,7 +200,7 @@ mod tests {
         );
         let no_screen = HardwareProfile {
             display: DisplayKind::None,
-            ..HardwareProfile::CORNE_NICE_NANO_V2_NICE_VIEW
+            ..HardwareProfile::corne_nice_nano_v2_nice_view()
         };
         assert_eq!(no_screen.build_targets()[1].shields, ["corne_right"]);
     }

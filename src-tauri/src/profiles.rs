@@ -50,13 +50,13 @@ mod tests {
         std::fs::create_dir_all(&a).unwrap();
         std::fs::create_dir_all(&b).unwrap();
         assert_eq!(load(&data, &a), None);
-        let p = HardwareProfile::CORNE_NICE_NANO_V2_NICE_VIEW;
-        save(&data, &a, p).unwrap();
+        let p = HardwareProfile::corne_nice_nano_v2_nice_view();
+        save(&data, &a, p.clone()).unwrap();
         let q = HardwareProfile {
             display: DisplayKind::None,
-            ..p
+            ..p.clone()
         };
-        save(&data, &b, q).unwrap();
+        save(&data, &b, q.clone()).unwrap();
         assert_eq!(load(&data, &a), Some(p));
         assert_eq!(load(&data, &b), Some(q));
         std::fs::write(data.join(FILE), "garbage").unwrap();

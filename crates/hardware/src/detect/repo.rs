@@ -4,7 +4,7 @@ use zmk_config::build_yaml::{BuildMatrix, BuildTarget};
 use zmk_config::kconfig::{KconfigFile, KconfigValue};
 
 use super::{Confidence, Evidence, Fact, Findings, Known, Note, Source};
-use crate::catalog::{self, ControllerId, DisplayKind, Side};
+use crate::catalog::{self, ControllerId, DisplayKind, KeyboardId, Side};
 
 fn side_of(shield: &str) -> Option<Side> {
     if shield.ends_with("_left") {
@@ -68,33 +68,37 @@ pub fn from_build_yaml(m: &BuildMatrix) -> Findings {
             }
         }
     }
-    let mut named: Vec<&str> = Vec::new();
+    let mut named: Vec<KeyboardId> = Vec::new();
+    let mut halves = false;
     for s in &kb_shields {
-        match catalog::KEYBOARDS.iter().find(|k| k.shields.contains(s)) {
-            Some(k) => {
-                if !named.contains(&k.name) {
-                    named.push(k.name);
-                    f.evidence.push(Evidence::new(
-                        src,
-                        Fact::Keyboard(Known::Known(k.id)),
-                        Confidence::Medium,
-                        format!("build.yaml builds {}", kb_shields.join(" and ")),
-                    ));
-                }
-            }
-            None => {
-                let base = base_name(s);
-                if !named.contains(&base) {
-                    named.push(base);
-                    f.evidence.push(Evidence::new(
-                        src,
-                        Fact::Keyboard(Known::Other(base.to_string())),
-                        Confidence::Medium,
-                        format!("build.yaml builds the “{s}” shield"),
-                    ));
-                }
-            }
+        let (id, half) = catalog::keyboard_of_shield(s);
+        halves |= half;
+        if !named.contains(&id) {
+            let because = if catalog::keyboard(&id).known {
+                format!("build.yaml builds {}", kb_shields.join(" and "))
+            } else {
+                format!("build.yaml builds the “{s}” shield")
+            };
+            f.evidence.push(Evidence::new(
+                src,
+                Fact::Keyboard(Known::Known(id.clone())),
+                Confidence::Medium,
+                because,
+            ));
+            named.push(id);
         }
+    }
+    if !kb_shields.is_empty() {
+        f.evidence.push(Evidence::new(
+            src,
+            Fact::Split(halves),
+            Confidence::Medium,
+            if halves {
+                "build.yaml builds a left and a right half".to_string()
+            } else {
+                "build.yaml builds one firmware for the whole keyboard".to_string()
+            },
+        ));
     }
 
     // Controller (all targets, including settings_reset, use the controller's board).

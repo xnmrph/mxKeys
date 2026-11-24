@@ -256,7 +256,7 @@ fn start_flash(
 #[tauri::command]
 fn firmware_ready(app: AppHandle, repo_path: String) -> Result<bool, String> {
     let fw = flashing::firmware_for(&data_dir(&app)?, &PathBuf::from(repo_path));
-    Ok(fw.left.is_file() && fw.right.is_file())
+    Ok(fw.parts.iter().all(|(_, f)| f.is_file()))
 }
 
 /// `retry`, `skip` or `cancel` the current flashing step.

@@ -106,6 +106,8 @@ pub enum Known<T> {
 #[serde(tag = "field", content = "value", rename_all = "snake_case")]
 pub enum Fact {
     Keyboard(Known<KeyboardId>),
+    /// Two halves (true) or a one-piece keyboard (false).
+    Split(bool),
     Controller(Known<ControllerId>),
     Display(DisplayKind),
     Central(Side),

@@ -33,6 +33,7 @@ impl BuildPlan {
         let name = match target.id {
             TargetId::Left => "left",
             TargetId::Right => "right",
+            TargetId::Main => "main",
             TargetId::SettingsReset => "settings_reset",
         };
         BuildPlan {
@@ -124,7 +125,7 @@ mod tests {
 
     #[test]
     fn args_for_the_v1_profile() {
-        let t = HardwareProfile::CORNE_NICE_NANO_V2_NICE_VIEW.build_targets();
+        let t = HardwareProfile::corne_nice_nano_v2_nice_view().build_targets();
         let ws = Workspace {
             dir: PathBuf::from("/ws"),
             manifest_text: String::new(),
@@ -179,7 +180,7 @@ mod tests {
         let repo = std::env::temp_dir().join(format!("mxkeys-plan-{}", std::process::id()));
         std::fs::create_dir_all(repo.join("zephyr")).unwrap();
         std::fs::write(repo.join("zephyr/module.yml"), "build: {}\n").unwrap();
-        let t = HardwareProfile::CORNE_NICE_NANO_V2_NICE_VIEW.build_targets();
+        let t = HardwareProfile::corne_nice_nano_v2_nice_view().build_targets();
         let plan = BuildPlan::new(t[1].clone(), &repo, Path::new("/b"));
         assert_eq!(plan.extra_modules, std::slice::from_ref(&repo));
         let ws = Workspace {
