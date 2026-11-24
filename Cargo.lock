@@ -2626,6 +2626,7 @@ dependencies = [
 name = "mxkeys-probe"
 version = "0.1.0"
 dependencies = [
+ "dbus",
  "mxkeys-hardware",
  "nusb",
  "serde",

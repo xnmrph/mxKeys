@@ -59,6 +59,9 @@ pub fn default_roots() -> Vec<PathBuf> {
         let mounts = std::fs::read_to_string("/proc/self/mounts")
             .or_else(|_| std::fs::read_to_string("/proc/mounts"))
             .unwrap_or_default();
+        // Nothing mounted the bootloader drive (no automounter running)? Mount it.
+        #[cfg(target_os = "linux")]
+        roots.extend(crate::automount::mount_bootloader_drives(&mounts));
         roots.extend(
             parse_proc_mounts(&mounts)
                 .into_iter()

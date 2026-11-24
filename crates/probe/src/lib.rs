@@ -6,6 +6,8 @@
 //!
 //! [`MockUsb`] and [`MockDrives`] return fixed lists for tests and demos.
 
+#[cfg(target_os = "linux")]
+mod automount;
 mod drives;
 
 use std::path::PathBuf;

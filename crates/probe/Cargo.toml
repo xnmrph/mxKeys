@@ -12,3 +12,6 @@ mxkeys-hardware = { path = "../hardware" }
 nusb = "0.2"
 serde.workspace = true
 thiserror.workspace = true
+
+[target.'cfg(target_os = "linux")'.dependencies]
+dbus = "0.9"
