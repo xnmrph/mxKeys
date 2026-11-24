@@ -65,8 +65,21 @@ impl Cmd {
 pub enum RunError {
     #[error("couldn't start {program}: {source}")]
     Spawn { program: String, source: std::io::Error },
-    #[error("{program} failed (exit code {code:?})")]
+    #[error("{}", failed_text(program, *code))]
     Failed { program: String, code: Option<i32> },
+}
+
+fn failed_text(program: &str, code: Option<i32>) -> String {
+    let mut s = match code {
+        Some(c) => format!("{program} failed (exit code {c})"),
+        None => format!("{program} was stopped"),
+    };
+    // 127 = the program (or its loader) couldn't be found — on NixOS that's what
+    // generic Linux binaries do without nix-ld.
+    if code == Some(127) && std::path::Path::new("/etc/NIXOS").exists() {
+        s.push_str(". On NixOS, the downloaded build tools need nix-ld: add `programs.nix-ld.enable = true;` to your configuration, rebuild, and try again.");
+    }
+    s
 }
 
 pub trait CommandRunner: Send + Sync {

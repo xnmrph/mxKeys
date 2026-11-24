@@ -139,7 +139,7 @@ export function BuildPanel({ repoRoot, autoSetup, changes = 0 }: { repoRoot: str
     ? `Build tools are ready (${mb(tc.status.size)}).`
     : tc.running || tcProgress
       ? describeInstall(tcProgress) || "Getting the build tools ready…"
-      : `Build tools aren't downloaded yet (about 500 MB to download, ${tc.status.missing.length} parts missing).`;
+      : `Build tools aren't downloaded yet (about 500 MB to download, ${tc.status.missing.length} ${tc.status.missing.length === 1 ? "part" : "parts"} missing).`;
   const pct = tcProgress?.kind === "bytes" && tcProgress.total ? (tcProgress.done / tcProgress.total) * 100 : null;
 
   return (
