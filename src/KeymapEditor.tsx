@@ -5,6 +5,7 @@ import type { EditOp, EditResult, EditorCatalog, KeyGeom, KeymapSummary } from "
 import { Catalog, describe } from "./bindings";
 import { KeyPicker } from "./KeyPicker";
 import { BehaviorsPanel } from "./BehaviorsPanel";
+import { Favourites } from "./Favourites";
 import type { LiveInfo } from "./LivePanel";
 import { Icon } from "./icons";
 
@@ -154,6 +155,20 @@ export function KeymapEditor({ keymap, repoRoot, liveInfo, flash, onBlocked, onC
       }
       setNotice(null);
       if (op.op !== "set_binding" && op.op !== "rename_layer") setSelected(null);
+      return true;
+    } catch (e) {
+      setError(String(e));
+      return false;
+    }
+  }, [apply, keymap.path, live, blocked]);
+
+  // Several edits as one change (community favourites).
+  const editBatch = useCallback(async (ops: EditOp[]) => {
+    if (blocked()) return false;
+    try {
+      apply(await invoke<EditResult>("edit_keymap_batch", { keymapPath: keymap.path, ops }));
+      setNotice(live ? "Added to your files. It reaches the keyboard when you build and install the firmware." : null);
+      setSelected(null);
       return true;
     } catch (e) {
       setError(String(e));
@@ -311,6 +326,9 @@ export function KeymapEditor({ keymap, repoRoot, liveInfo, flash, onBlocked, onC
       {catalog && (
         <BehaviorsPanel definitions={keymap.definitions} cat={catalog} geometry={geometry.length === keymap.layers[0]?.bindings.length ? geometry : []} baseLabels={baseLabels} edit={edit} onHighlight={setHighlight} />
       )}
+      <Favourites
+        ctx={{ layers: keymap.layers, definitions: keymap.definitions, geometry: geometry.length === keymap.layers[0]?.bindings.length ? geometry : [], layer: layer.index }}
+        labels={baseLabels} onApply={editBatch} liveNote={live} />
       {keymap.parseProblems.length > 0 && (
         <details>
           <summary>Parts of this file the app didn't understand (kept unchanged)</summary>

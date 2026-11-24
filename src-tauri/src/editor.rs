@@ -215,6 +215,29 @@ impl Editor {
         result(path, text, &all[path])
     }
 
+    /// Apply several edits as one change (one undo step); nothing is written unless all
+    /// of them apply.
+    pub fn edit_many(&self, path: &Path, ops: &[EditOp]) -> Result<EditResult, String> {
+        let before = repo::read(path).map_err(|e| e.to_string())?;
+        let mut text = before.clone();
+        for (i, op) in ops.iter().enumerate() {
+            let doc = Document::parse(text);
+            let km = Keymap::from_document(&doc).map_err(|e| e.to_string())?;
+            let patches = patches_for(&doc, &km, op).map_err(|e| format!("step {}: {e}", i + 1))?;
+            let after = doc.apply(&patches).map_err(|e| e.to_string())?;
+            if !after.diagnostics.is_empty() || Keymap::from_document(&after).is_err() {
+                return Err(
+                    "That change would break the keymap file, so it wasn't saved. Please report this.".into(),
+                );
+            }
+            text = after.source().to_string();
+        }
+        write(path, &text)?;
+        self.record(path, before);
+        let all = self.history.lock().unwrap();
+        result(path, text, &all[path])
+    }
+
     pub fn undo(&self, path: &Path) -> Result<EditResult, String> {
         self.step(path, true)
     }
@@ -371,5 +394,62 @@ mod tests {
         assert!(cat.macro_controls.iter().any(|b| b.reference == "&macro_press"));
         assert_eq!(cat.schemas.len(), 9);
         std::fs::remove_file(&path).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod batch_tests {
+    use super::*;
+
+    #[test]
+    fn many_edits_are_one_undo_step() {
+        let dir = std::env::temp_dir().join(format!("mxkeys-batch-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let p = dir.join("a.keymap");
+        let src = "/ {\n    keymap {\n        compatible = \"zmk,keymap\";\n        base {\n            bindings = <&kp A &kp B>;\n        };\n    };\n};\n";
+        std::fs::write(&p, src).unwrap();
+        let ed = Editor::default();
+        let ops = vec![
+            EditOp::AddDef {
+                def_type: behaviors::DefType::ModMorph,
+                name: "bspc_del".into(),
+                props: vec![
+                    (
+                        "bindings".into(),
+                        behaviors::NewProp::Bindings(vec!["&kp BSPC".into(), "&kp DEL".into()]),
+                    ),
+                    (
+                        "mods".into(),
+                        behaviors::NewProp::Names(vec!["MOD_LSFT".into(), "MOD_RSFT".into()]),
+                    ),
+                ],
+            },
+            EditOp::SetBinding {
+                layer: 0,
+                position: 1,
+                binding: "&bspc_del".into(),
+            },
+        ];
+        let r = ed.edit_many(&p, &ops).unwrap();
+        let text = std::fs::read_to_string(&p).unwrap();
+        assert!(
+            text.contains("bspc_del: bspc_del") && text.contains("&kp A &bspc_del"),
+            "{text}"
+        );
+        assert!(r.can_undo);
+        ed.undo(&p).unwrap();
+        assert_eq!(std::fs::read_to_string(&p).unwrap(), src);
+        // A failing step leaves the file alone.
+        let bad = vec![
+            EditOp::SetBinding {
+                layer: 0,
+                position: 0,
+                binding: "&kp C".into(),
+            },
+            EditOp::RemoveLayer { layer: 7 },
+        ];
+        assert!(ed.edit_many(&p, &bad).is_err());
+        assert_eq!(std::fs::read_to_string(&p).unwrap(), src);
+        std::fs::remove_dir_all(&dir).ok();
     }
 }

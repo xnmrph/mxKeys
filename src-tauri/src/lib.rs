@@ -183,7 +183,11 @@ fn physical_layout(app: AppHandle, repo_path: String) -> Vec<mxkeys_hardware::ca
     let corne = mxkeys_hardware::catalog::KeyboardId::corne();
     let keyboard = profiles::load(&data, &repo).map(|p| p.keyboard).or_else(|| {
         detection::repo_inputs(&repo).build.as_ref().and_then(|b| {
-            b.targets.iter().flat_map(|t| t.keyboard_shields()).next().map(|s| mxkeys_hardware::catalog::keyboard_of_shield(s).0)
+            b.targets
+                .iter()
+                .flat_map(|t| t.keyboard_shields())
+                .next()
+                .map(|s| mxkeys_hardware::catalog::keyboard_of_shield(s).0)
         })
     });
     if keyboard.as_ref() == Some(&corne) {
@@ -326,6 +330,16 @@ fn edit_keymap(
     op: editor::EditOp,
 ) -> Result<editor::EditResult, String> {
     editor.edit(&PathBuf::from(keymap_path), &op)
+}
+
+/// Apply several edits as one change (one undo step), e.g. a community favourite.
+#[tauri::command]
+fn edit_keymap_batch(
+    editor: tauri::State<'_, editor::Editor>,
+    keymap_path: String,
+    ops: Vec<editor::EditOp>,
+) -> Result<editor::EditResult, String> {
+    editor.edit_many(&PathBuf::from(keymap_path), &ops)
 }
 
 #[tauri::command]
@@ -610,6 +624,7 @@ pub fn run() {
             pictures_preview,
             pictures_source,
             build_yaml_variant_check,
+            edit_keymap_batch,
             read_layout,
             build_yaml_add_zmk_variant,
             pictures_save,
