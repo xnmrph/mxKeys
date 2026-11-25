@@ -166,6 +166,7 @@ Phases are done in order, one at a time. Tick boxes as work lands (keep this fil
 - [x] Key layout from ZMK itself (`zmk,physical-layout` in the build's `zephyr.dts`; a configure-only run when nothing is built yet); board scales to fit
 - [x] Community favourites: 8 recipes (home-row mods, Smart Shift, Shift+Backspace=Delete, clipboard and Escape combos, tri-layer, repeat key, select word) added as one undoable change; verified by building a Lily58 with them
 - [x] Six more favourites: Shift+,=; and Shift+.=: (urob), Shift+Space ends the sentence, caps word combo, hold-for-layer/double-tap-to-lock, Hyper/Meh key, lock screen key; Lily58 firmware built with all six
+- [x] Nine more (23): grave escape, bracket pairs, one-shot layer, USB/Bluetooth switch, Bluetooth computer keys, media keys, bootloader combo, screenshot and emoji keys; category filter. Edits add the `#include` a binding needs (outputs.h, bt.h, …) — found when `&out` broke a Lily58 build
 - [ ] More favourites, incl. ones needing modules (west.yml edits: urob's helpers, num word, leader)
 - [ ] Controllers beyond the catalog (use build.yaml's board as-is)
 - [ ] Choosing between several physical layouts (e.g. Corne 5/6 columns)

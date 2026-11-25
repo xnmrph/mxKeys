@@ -539,3 +539,4 @@ select option { background: var(--surface-1); color: var(--ink); }
 /* Live editing put new behaviors in the files only: offer the install. */
 .install-note { display: flex; align-items: center; gap: var(--space-3); background: var(--info-soft); color: var(--ink); padding: 10px 14px; border-radius: var(--radius-md); margin: var(--space-3) 0; }
 .install-note button { flex: none; }
+.fav-filter { margin: var(--space-3) 0; flex-wrap: wrap; }

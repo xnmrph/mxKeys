@@ -199,6 +199,93 @@ fn result(path: &Path, text: String, h: &History) -> Result<EditResult, String> 
     })
 }
 
+/// Headers that define the names some behaviors take (`&out OUT_TOG` needs outputs.h).
+/// Keymaps often include only what they used so far, so a new key could break the build.
+const HEADERS: &[(&str, &[&str])] = &[
+    ("dt-bindings/zmk/outputs.h", &["OUT_TOG", "OUT_USB", "OUT_BLE"]),
+    (
+        "dt-bindings/zmk/bt.h",
+        &["BT_SEL", "BT_CLR", "BT_CLR_ALL", "BT_NXT", "BT_PRV", "BT_DISC"],
+    ),
+    ("dt-bindings/zmk/ext_power.h", &["EP_ON", "EP_OFF", "EP_TOG"]),
+    (
+        "dt-bindings/zmk/rgb.h",
+        &[
+            "RGB_TOG",
+            "RGB_ON",
+            "RGB_OFF",
+            "RGB_EFF",
+            "RGB_EFR",
+            "RGB_BRI",
+            "RGB_BRD",
+            "RGB_HUI",
+            "RGB_HUD",
+            "RGB_SAI",
+            "RGB_SAD",
+            "RGB_SPI",
+            "RGB_SPD",
+            "RGB_COLOR_HSB",
+        ],
+    ),
+    (
+        "dt-bindings/zmk/backlight.h",
+        &[
+            "BL_TOG", "BL_ON", "BL_OFF", "BL_INC", "BL_DEC", "BL_CYCLE", "BL_SET",
+        ],
+    ),
+];
+
+/// Add any `#include` the file's bindings need but don't have (after the last include).
+pub fn with_includes(text: &str) -> String {
+    let uses = |name: &str| {
+        text.match_indices(name).any(|(i, _)| {
+            let before = text[..i].chars().next_back();
+            let after = text[i + name.len()..].chars().next();
+            let word = |c: Option<char>| c.is_some_and(|c| c.is_ascii_alphanumeric() || c == '_');
+            !word(before) && !word(after)
+        })
+    };
+    let missing: Vec<&str> = HEADERS
+        .iter()
+        .filter(|(h, names)| !text.contains(h) && names.iter().any(|n| uses(n)))
+        .map(|(h, _)| *h)
+        .collect();
+    if missing.is_empty() {
+        return text.to_string();
+    }
+    let add: String = missing.iter().map(|h| format!("#include <{h}>\n")).collect();
+    // After the last top-of-file include, or at the very top.
+    let mut at = 0;
+    let mut pos = 0;
+    for line in text.split_inclusive('\n') {
+        if line.trim_start().starts_with("#include") {
+            at = pos + line.len();
+        }
+        pos += line.len();
+    }
+    let mut out = String::with_capacity(text.len() + add.len());
+    out.push_str(&text[..at]);
+    if at > 0 && !text[..at].ends_with('\n') {
+        out.push('\n');
+    }
+    out.push_str(&add);
+    out.push_str(&text[at..]);
+    out
+}
+
+/// The file plus every header from `HEADERS` it doesn't include, so names such as
+/// `OUT_TOG` resolve for live editing before the file has needed them.
+pub fn with_all_headers(text: &str) -> String {
+    let mut out = text.to_string();
+    for (h, _) in HEADERS {
+        if !text.contains(h) {
+            out.push_str(&format!("\n#include <{h}>"));
+        }
+    }
+    out.push('\n');
+    out
+}
+
 impl Editor {
     /// Apply an edit to the file as it is on disk *now* (so outside edits are respected).
     pub fn edit(&self, path: &Path, op: &EditOp) -> Result<EditResult, String> {
@@ -213,7 +300,7 @@ impl Editor {
                 "That change would break the keymap file, so it wasn't saved. Please report this.".into(),
             );
         }
-        let text = after.source().to_string();
+        let text = with_includes(after.source());
         write(path, &text)?;
         self.record(path, before);
         let all = self.history.lock().unwrap();
@@ -237,6 +324,7 @@ impl Editor {
             }
             text = after.source().to_string();
         }
+        let text = with_includes(&text);
         write(path, &text)?;
         self.record(path, before);
         let all = self.history.lock().unwrap();
@@ -305,6 +393,19 @@ impl Editor {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn adds_headers_new_keys_need() {
+        let km = "#include <behaviors.dtsi>\n#include <dt-bindings/zmk/keys.h>\n/ { x = <&out OUT_TOG &bt BT_SEL 0>; };\n";
+        let out = with_includes(km);
+        assert!(out.starts_with("#include <behaviors.dtsi>\n#include <dt-bindings/zmk/keys.h>\n#include <dt-bindings/zmk/outputs.h>\n#include <dt-bindings/zmk/bt.h>\n/ {"));
+        // Already there, or not used: unchanged.
+        assert_eq!(with_includes(&out), out);
+        let plain = "#include <behaviors.dtsi>\n/ { x = <&kp A &kp OUT_TOGGLE_X>; };\n";
+        assert_eq!(with_includes(plain), plain);
+        // No includes at all: goes on top.
+        assert!(with_includes("/ { x = <&bt BT_CLR>; };").starts_with("#include <dt-bindings/zmk/bt.h>\n/ {"));
+    }
 
     fn temp_keymap() -> PathBuf {
         let fixtures = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../crates/zmk-config/tests/fixtures");
