@@ -6,8 +6,11 @@ that needs testing on real hardware.
 ## Release 0.1.0 — 2026-11-24
 
 - Installers for Windows (exe/msi), macOS Apple Silicon (dmg) and Linux (AppImage/deb)
-  built by `.github/workflows/installers.yml`; a commit with `[release]` in its message
-  publishes `v<version>` with `docs/releases/<version>.md`. Unsigned for now.
+  built by `.github/workflows/installers.yml`. Unsigned for now.
+- Branches: `dev` is where work happens (default branch); `main` is releases. A push to
+  `main` whose `package.json` version has no release yet publishes `v<version>` with
+  `docs/releases/<version>.md`. To release: bump the version (package.json,
+  src-tauri/Cargo.toml, src-tauri/tauri.conf.json), add the notes, merge `dev` into `main`.
 - Live editing: behaviors only in the files go there with a one-click Build & install;
   14 community favourites.
 
