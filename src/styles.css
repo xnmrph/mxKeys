@@ -110,7 +110,7 @@ details > summary:hover { color: var(--ink); }
 .brand.big { margin-bottom: var(--space-5); }
 
 /* App shell: rail + pane */
-.shell { display: grid; grid-template-columns: 228px minmax(0, 1fr); height: 100vh; }
+.shell { display: grid; grid-template-columns: 228px minmax(0, 1fr); height: 100vh; overflow: hidden; }
 .rail { background: var(--surface-rail); border-right: 1px solid var(--line); display: flex; flex-direction: column; padding: var(--space-5) var(--space-3) var(--space-4); gap: var(--space-6); overflow-y: auto; }
 .rail .brand { padding: 0 var(--space-2); }
 .rail-nav { display: flex; flex-direction: column; gap: 2px; }
@@ -136,7 +136,7 @@ details > summary:hover { color: var(--ink); }
 .repo-chip { display: flex; align-items: center; gap: 8px; padding: 6px 12px; color: var(--ink-muted); min-width: 0; }
 .repo-chip .mono { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); }
 .small-button { min-height: 30px; padding: 6px 12px; align-self: flex-start; }
-.pane { overflow-y: auto; padding: var(--space-6) var(--space-8) var(--space-8); }
+.pane { position: relative; overflow-y: auto; padding: var(--space-6) var(--space-8) var(--space-8); }
 .pane-head { margin-bottom: var(--space-5); max-width: 1100px; }
 .pane-head p { margin: 4px 0 0; }
 .tab-body { max-width: 1100px; }
@@ -214,7 +214,8 @@ td, th { border-bottom: 1px solid var(--border); padding: 4px 8px; text-align: l
 .options { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
 .option { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; border: 1px solid var(--line); border-radius: var(--radius-md); padding: 12px; cursor: pointer; background: var(--surface-2); }
 .option.chosen { border-color: var(--signal); box-shadow: 0 0 0 1px var(--signal); }
-.option input { position: absolute; opacity: 0; pointer-events: none; }
+.option { position: relative; }
+.option input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; pointer-events: none; }
 .option-label { font-weight: 600; }
 .option-desc { font-size: 13px; }
 .hw-chip { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 12px 18px; background: var(--surface-1); margin: 0 0 var(--space-4); }
@@ -467,7 +468,8 @@ select option { background: var(--surface-1); color: var(--ink); }
 .mode-choice label { padding: 6px 14px; border-radius: var(--radius-pill); cursor: pointer; color: var(--ink-muted); font-size: 13px; font-weight: 500; }
 .mode-choice label:hover { color: var(--ink); }
 .mode-choice label:has(input:checked) { background: var(--signal); color: var(--on-signal); }
-.mode-choice input { position: absolute; opacity: 0; pointer-events: none; }
+.mode-choice label { position: relative; }
+.mode-choice input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; pointer-events: none; }
 .picture-half > p.muted { margin: var(--space-2) 0 0; }
 .pictures-panel > .row { margin-top: var(--space-4); }
 .picture-controls { gap: 10px; }

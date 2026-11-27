@@ -106,9 +106,9 @@ export function PicturesPanel({ repoRoot, onChanged }: { repoRoot: string; onCha
       {state.moduleProblem && <p className="warning">{withCode(state.moduleProblem)}</p>}
       <div className="picture-halves">
         <HalfEditor title="Left half" half="left" art={cfg.left} pic={pics.left} budget={cfg.budget_kib} repoRoot={repoRoot}
-          allowArt={false} onChange={(p) => update("left", p)} onPick={(r) => { setPics({ ...pics, left: r }); setDirty(true); }} />
+          onChange={(p) => update("left", p)} onPick={(r) => { setPics({ ...pics, left: r }); setDirty(true); }} />
         <HalfEditor title="Right half" half="right" art={cfg.right} pic={pics.right} budget={cfg.budget_kib} repoRoot={repoRoot}
-          allowArt onChange={(p) => update("right", p)} onPick={(r) => { setPics({ ...pics, right: r }); setDirty(true); }} />
+          onChange={(p) => update("right", p)} onPick={(r) => { setPics({ ...pics, right: r }); setDirty(true); }} />
       </div>
       <div className="row">
         <button className="primary" disabled={busy || !dirty || !!state.moduleProblem || (nothing && !state.saved)} onClick={save}>
@@ -129,8 +129,8 @@ export function PicturesPanel({ repoRoot, onChanged }: { repoRoot: string; onCha
   );
 }
 
-function HalfEditor({ title, half, art, pic, budget, repoRoot, allowArt, onChange, onPick }: {
-  title: string; half: "left" | "right"; art: HalfArt; pic: PictureRef | null; budget: number; repoRoot: string; allowArt: boolean;
+function HalfEditor({ title, half, art, pic, budget, repoRoot, onChange, onPick }: {
+  title: string; half: "left" | "right"; art: HalfArt; pic: PictureRef | null; budget: number; repoRoot: string;
   onChange: (p: Partial<HalfArt>) => void; onPick: (r: PictureRef) => void;
 }) {
   const [preview, setPreview] = useState<Preview | null>(null);
@@ -167,7 +167,7 @@ function HalfEditor({ title, half, art, pic, budget, repoRoot, allowArt, onChang
     const f = await open({ title: "Choose a picture", filters: [{ name: "Pictures", extensions: ["png", "gif", "jpg", "jpeg", "bmp", "webp"] }] });
     if (typeof f === "string") {
       onPick({ kind: "file", path: f });
-      onChange({ mode: art.mode === "off" ? (allowArt ? "art" : "full") : art.mode, options: { ...o, zoom: 1, offset_x: 0, offset_y: 0, rotate: 0 } });
+      onChange({ mode: art.mode === "off" ? (half === "right" ? "art" : "full") : art.mode, options: { ...o, zoom: 1, offset_x: 0, offset_y: 0, rotate: 0 } });
       setPositioning(true);
     }
   }
@@ -179,10 +179,11 @@ function HalfEditor({ title, half, art, pic, budget, repoRoot, allowArt, onChang
       <h3>{title}</h3>
       <div className="mode-choice">
         <label className="check"><input type="radio" checked={art.mode === "off"} onChange={() => onChange({ mode: "off" })} /> ZMK's screen</label>
-        {allowArt && <label className="check"><input type="radio" checked={art.mode === "art"} onChange={() => onChange({ mode: "art" })} /> Picture under the battery</label>}
+        <label className="check"><input type="radio" checked={art.mode === "art"} onChange={() => onChange({ mode: "art" })} /> Picture under the battery</label>
         <label className="check"><input type="radio" checked={art.mode === "full"} onChange={() => onChange({ mode: "full" })} /> Whole screen</label>
       </div>
       {art.mode === "full" && <p className="muted small">{half === "left" ? "Hides the layer, battery and Bluetooth information this half normally shows." : "Hides the battery and connection icons."}</p>}
+      {art.mode === "art" && half === "left" && <p className="muted small">Keeps the battery and the USB/Bluetooth icon. Covers the typing-speed graph, the Bluetooth computer number and the layer name.</p>}
       {art.mode !== "off" && (
         <div className="picture-body">
           <div className="screen-mock" style={{ width: 68 * SCALE + 12 }}>
