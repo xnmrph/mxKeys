@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/assets/mxkeys-banner.png" alt="mxKeys" width="560"></p>
+
 # mxKeys
 
 An all-in-one desktop app that makes [ZMK](https://zmk.dev) keyboards approachable:
