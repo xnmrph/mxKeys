@@ -410,32 +410,37 @@ export const FAVOURITES: Favourite[] = [
     details: "Hold the key: the layer is on while you hold it, as now. Double-tap: the layer stays on until you double-tap again. Great for typing a run of numbers or browsing with arrow keys.",
     credit: "Tap-dance pattern shared by Glove80 and Corne users",
     category: "Layers",
-    params: [
-      { kind: "keys", id: "key", label: "The layer key", count: 1, suggest: (c) => {
-        const i = c.layers.find((l) => l.index === 0)?.bindings.findIndex((b) => /^&mo\s+\S+$/.test(b.trim())) ?? -1;
-        return i >= 0 ? [i] : [];
-      } },
-      { kind: "layer", id: "layer", label: "Layer", initial: (c) => {
-        const b = c.layers.find((l) => l.index === 0)?.bindings.find((x) => /^&mo\s+\S+$/.test(x.trim()));
-        const t = b?.trim().split(/\s+/)[1];
-        const hit = c.layers.find((l) => String(l.index) === t || l.nodeName.toLowerCase().startsWith((t ?? "").toLowerCase()));
-        return hit?.index ?? Math.min(1, c.layers.length - 1);
-      } },
-    ],
+    // No key is pre-selected: which layer key to change is the user's call (a guess once
+    // turned the key a conditional layer depends on into a lock).
+    params: [{ kind: "keys", id: "key", label: "Click the layer key to change (one you hold for a layer)", count: 1, suggest: () => [] }],
     added: (c) => c.definitions.some((d) => d.node_name.startsWith("layer_lock")),
     build: (c, v) => {
       const key = (v.key as number[])[0];
-      const layer = v.layer as number;
-      if (key === undefined) return "Pick the key on the board.";
-      if (layer === 0) return "Pick a layer other than the base layer.";
-      const n = unique(c, `layer_lock_${layer}`);
-      const title = c.layers.find((l) => l.index === layer)?.title ?? `layer ${layer}`;
+      if (key === undefined) return "Click the layer key on the board.";
+      const base = c.layers.find((l) => l.index === 0);
+      const m = /^&mo\s+(\S+)$/.exec(base?.bindings[key]?.trim() ?? "");
+      if (!m) return "That key isn't a plain layer key (hold for a layer). Pick one that is.";
+      const token = m[1];
+      const layer = c.layers.find((l) => String(l.index) === token || l.nodeName.toLowerCase() === token.toLowerCase());
+      const title = layer?.title ?? token;
+      const n = unique(c, `layer_lock_${token.toLowerCase()}`);
+      const changes = [`Adds “${n}” (hold: ${title}, double-tap: lock ${title} on)`, `Base layer, key ${key + 1}: ${title} → ${title} / lock`];
+      // Conditional layers built on this layer still work, but a double-tap leaves the
+      // layer on — say so, since it changes how they behave.
+      if (layer) {
+        for (const d of c.definitions.filter((x) => x.def_type === "conditional_layer")) {
+          const ifl = d.props.find((p) => p.name === "if-layers")?.value;
+          if (ifl && "value" in ifl && Array.isArray(ifl.value) && (ifl.value as unknown[]).includes(layer.index)) {
+            changes.push(`Heads-up: ${title} is part of the conditional layer “${d.title}”. Holding still works as before; a double-tap leaves ${title} on.`);
+          }
+        }
+      }
       return {
         ops: [
-          { op: "add_def", def_type: "tap_dance", name: n, props: [["bindings", { type: "bindings", value: [`&mo ${layer}`, `&tog ${layer}`] }], ["tapping-term-ms", { type: "int", value: 200 }]] },
+          { op: "add_def", def_type: "tap_dance", name: n, props: [["bindings", { type: "bindings", value: [`&mo ${token}`, `&tog ${token}`] }], ["tapping-term-ms", { type: "int", value: 200 }]] },
           { op: "set_binding", layer: 0, position: key, binding: `&${n}` },
         ],
-        changes: [`Adds “${n}” (hold: ${title}, double-tap: lock ${title})`, `Base layer, key ${key + 1} → ${title} / lock`],
+        changes,
       };
     },
   },
