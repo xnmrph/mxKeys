@@ -130,7 +130,10 @@ fn base_mapper(data: &Path, repo_dir: &Path, keymap_path: &Path) -> Result<Mappe
     )?;
     let text = repo::read(keymap_path).map_err(|e| e.to_string())?;
     let config_dir = keymap_path.parent().unwrap_or(repo_dir);
-    let macros = mapping::macros_for(&text, &mapping::search_paths(&ws.dir, config_dir));
+    let macros = mapping::macros_for(
+        &editor::with_all_headers(&text),
+        &mapping::search_paths(&ws.dir, config_dir),
+    );
     let names = mapping::behavior_names(&ws.dir, &Document::parse(text));
     Ok(Mapper {
         macros,

@@ -1,0 +1,37 @@
+<html><style>
+@font-face{font-family:GG;src:url(../../node_modules/@fontsource/grenze-gotisch/files/grenze-gotisch-latin-900-normal.woff2)}
+@font-face{font-family:Plex;font-weight:600;src:url(../../node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-600-normal.woff2)}
+html,body{margin:0;background:transparent}
+svg{display:block}
+</style><body>
+<!-- Shared look with the app icon: dark keycaps, a dished top face, a soft drop shadow,
+     blackletter "mx" in warm ink. -->
+<svg width="0" height="0" style="position:absolute">
+ <defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1B2430"/><stop offset="1" stop-color="#0B1217"/></linearGradient>
+  <linearGradient id="cap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E3A47"/><stop offset="1" stop-color="#18212B"/></linearGradient>
+  <linearGradient id="top" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A3541"/><stop offset="1" stop-color="#1F2934"/></linearGradient>
+  <linearGradient id="dim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1C252F"/><stop offset="1" stop-color="#121A21"/></linearGradient>
+  <filter id="sh" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="14" stdDeviation="14" flood-color="#000" flood-opacity=".5"/></filter>
+  <filter id="shs" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#000" flood-opacity=".45"/></filter>
+ </defs>
+</svg>
+
+<!-- The mxKeys banner ("typed out"): the mx key with a homing bar, then K E Y S. Matches src/Logo.tsx. -->
+<svg id="banner" width="1600" height="480" viewBox="0 0 1600 480">
+ <g transform="translate(108 118)">
+  <g filter="url(#shs)">
+   <rect x="0" y="0" width="356" height="232" rx="40" fill="url(#cap)" stroke="#3A4754" stroke-width="3"/>
+   <rect x="26" y="12" width="304" height="186" rx="30" fill="url(#top)" stroke="#3E4B59" stroke-width="2"/>
+  </g>
+  <text x="178" y="136" text-anchor="middle" font-family="GG" font-size="148" fill="#EEE9E0">mx</text>
+  <rect x="148" y="174" width="60" height="8" rx="4" fill="#FFE714"/>
+  <g font-family="Plex" font-weight="600" font-size="112" fill="#C9D1D8" text-anchor="middle">
+   <g transform="translate(388 0)"><g filter="url(#shs)"><rect width="232" height="232" rx="40" fill="url(#cap)" stroke="#3A4754" stroke-width="3"/><rect x="22" y="12" width="188" height="186" rx="30" fill="url(#top)" stroke="#3E4B59" stroke-width="2"/></g><text x="116" y="146">K</text></g>
+   <g transform="translate(652 0)"><g filter="url(#shs)"><rect width="232" height="232" rx="40" fill="url(#cap)" stroke="#3A4754" stroke-width="3"/><rect x="22" y="12" width="188" height="186" rx="30" fill="url(#top)" stroke="#3E4B59" stroke-width="2"/></g><text x="116" y="146">E</text></g>
+   <g transform="translate(916 0)"><g filter="url(#shs)"><rect width="232" height="232" rx="40" fill="url(#cap)" stroke="#3A4754" stroke-width="3"/><rect x="22" y="12" width="188" height="186" rx="30" fill="url(#top)" stroke="#3E4B59" stroke-width="2"/></g><text x="116" y="146">Y</text></g>
+   <g transform="translate(1180 0)"><g filter="url(#shs)"><rect width="232" height="232" rx="40" fill="url(#cap)" stroke="#3A4754" stroke-width="3"/><rect x="22" y="12" width="188" height="186" rx="30" fill="url(#top)" stroke="#3E4B59" stroke-width="2"/></g><text x="116" y="146">S</text></g>
+  </g>
+ </g>
+</svg>
+</body></html>

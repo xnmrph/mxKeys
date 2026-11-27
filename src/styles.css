@@ -105,10 +105,9 @@ details > summary:hover { color: var(--ink); }
 .dot.crit { background: var(--crit); }
 
 /* Brand */
-.brand { display: flex; align-items: baseline; gap: 1px; color: var(--ink); font-size: 26px; line-height: 1; user-select: none; }
-.brand-mx { font-family: "Grenze Gotisch", serif; font-weight: 900; font-size: 1.2em; letter-spacing: 0.01em; color: var(--ink); }
-.brand-keys { font-family: var(--sans); font-weight: 500; color: var(--ink-muted); letter-spacing: -0.01em; }
-.brand.big { font-size: 44px; margin-bottom: var(--space-4); }
+.brand { display: flex; align-items: center; user-select: none; line-height: 0; }
+.brand svg { display: block; max-width: 100%; height: auto; }
+.brand.big { margin-bottom: var(--space-5); }
 
 /* App shell: rail + pane */
 .shell { display: grid; grid-template-columns: 228px minmax(0, 1fr); height: 100vh; }
@@ -539,3 +538,4 @@ select option { background: var(--surface-1); color: var(--ink); }
 /* Live editing put new behaviors in the files only: offer the install. */
 .install-note { display: flex; align-items: center; gap: var(--space-3); background: var(--info-soft); color: var(--ink); padding: 10px 14px; border-radius: var(--radius-md); margin: var(--space-3) 0; }
 .install-note button { flex: none; }
+.fav-filter { margin: var(--space-3) 0; flex-wrap: wrap; }

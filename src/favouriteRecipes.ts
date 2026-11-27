@@ -17,6 +17,9 @@ export type Param =
   | { kind: "choice"; id: string; label: string; options: [string, string][]; initial: string }
   | { kind: "layer"; id: string; label: string; initial: (c: FavCtx) => number };
 
+export const CATEGORIES = ["Typing", "Shortcuts", "Layers", "System"] as const;
+export type Category = (typeof CATEGORIES)[number];
+
 export type Values = Record<string, number[] | string | number>;
 
 export interface Favourite {
@@ -27,7 +30,7 @@ export interface Favourite {
   /** What it does, how to use it. */
   details: string;
   credit: string;
-  category: "Typing" | "Shortcuts" | "Layers";
+  category: Category;
   params: Param[];
   added: (c: FavCtx) => boolean;
   /** The edits, or a plain-language reason it can't be added here. */
@@ -407,32 +410,37 @@ export const FAVOURITES: Favourite[] = [
     details: "Hold the key: the layer is on while you hold it, as now. Double-tap: the layer stays on until you double-tap again. Great for typing a run of numbers or browsing with arrow keys.",
     credit: "Tap-dance pattern shared by Glove80 and Corne users",
     category: "Layers",
-    params: [
-      { kind: "keys", id: "key", label: "The layer key", count: 1, suggest: (c) => {
-        const i = c.layers.find((l) => l.index === 0)?.bindings.findIndex((b) => /^&mo\s+\S+$/.test(b.trim())) ?? -1;
-        return i >= 0 ? [i] : [];
-      } },
-      { kind: "layer", id: "layer", label: "Layer", initial: (c) => {
-        const b = c.layers.find((l) => l.index === 0)?.bindings.find((x) => /^&mo\s+\S+$/.test(x.trim()));
-        const t = b?.trim().split(/\s+/)[1];
-        const hit = c.layers.find((l) => String(l.index) === t || l.nodeName.toLowerCase().startsWith((t ?? "").toLowerCase()));
-        return hit?.index ?? Math.min(1, c.layers.length - 1);
-      } },
-    ],
+    // No key is pre-selected: which layer key to change is the user's call (a guess once
+    // turned the key a conditional layer depends on into a lock).
+    params: [{ kind: "keys", id: "key", label: "Click the layer key to change (one you hold for a layer)", count: 1, suggest: () => [] }],
     added: (c) => c.definitions.some((d) => d.node_name.startsWith("layer_lock")),
     build: (c, v) => {
       const key = (v.key as number[])[0];
-      const layer = v.layer as number;
-      if (key === undefined) return "Pick the key on the board.";
-      if (layer === 0) return "Pick a layer other than the base layer.";
-      const n = unique(c, `layer_lock_${layer}`);
-      const title = c.layers.find((l) => l.index === layer)?.title ?? `layer ${layer}`;
+      if (key === undefined) return "Click the layer key on the board.";
+      const base = c.layers.find((l) => l.index === 0);
+      const m = /^&mo\s+(\S+)$/.exec(base?.bindings[key]?.trim() ?? "");
+      if (!m) return "That key isn't a plain layer key (hold for a layer). Pick one that is.";
+      const token = m[1];
+      const layer = c.layers.find((l) => String(l.index) === token || l.nodeName.toLowerCase() === token.toLowerCase());
+      const title = layer?.title ?? token;
+      const n = unique(c, `layer_lock_${token.toLowerCase()}`);
+      const changes = [`Adds “${n}” (hold: ${title}, double-tap: lock ${title} on)`, `Base layer, key ${key + 1}: ${title} → ${title} / lock`];
+      // Conditional layers built on this layer still work, but a double-tap leaves the
+      // layer on — say so, since it changes how they behave.
+      if (layer) {
+        for (const d of c.definitions.filter((x) => x.def_type === "conditional_layer")) {
+          const ifl = d.props.find((p) => p.name === "if-layers")?.value;
+          if (ifl && "value" in ifl && Array.isArray(ifl.value) && (ifl.value as unknown[]).includes(layer.index)) {
+            changes.push(`Heads-up: ${title} is part of the conditional layer “${d.title}”. Holding still works as before; a double-tap leaves ${title} on.`);
+          }
+        }
+      }
       return {
         ops: [
-          { op: "add_def", def_type: "tap_dance", name: n, props: [["bindings", { type: "bindings", value: [`&mo ${layer}`, `&tog ${layer}`] }], ["tapping-term-ms", { type: "int", value: 200 }]] },
+          { op: "add_def", def_type: "tap_dance", name: n, props: [["bindings", { type: "bindings", value: [`&mo ${token}`, `&tog ${token}`] }], ["tapping-term-ms", { type: "int", value: 200 }]] },
           { op: "set_binding", layer: 0, position: key, binding: `&${n}` },
         ],
-        changes: [`Adds “${n}” (hold: ${title}, double-tap: lock ${title})`, `Base layer, key ${key + 1} → ${title} / lock`],
+        changes,
       };
     },
   },
@@ -462,7 +470,7 @@ export const FAVOURITES: Favourite[] = [
     summary: "One key locks your computer when you walk away.",
     details: "Sends your system's lock shortcut. Often put on a system or function layer. Placed on the layer shown above.",
     credit: "Common in community keymaps",
-    category: "Shortcuts",
+    category: "System",
     params: [
       { kind: "choice", id: "os", label: "Computer", options: [["win", "Windows / Linux (Super+L)"], ["mac", "macOS (Ctrl+Cmd+Q)"]], initial: "win" },
       { kind: "keys", id: "key", label: "Which key", count: 1, suggest: () => [] },
@@ -473,6 +481,200 @@ export const FAVOURITES: Favourite[] = [
       if (key === undefined) return "Pick the key on the board.";
       const title = c.layers.find((l) => l.index === c.layer)?.title ?? "";
       return { ops: [{ op: "set_binding", layer: c.layer, position: key, binding: v.os === "mac" ? "&kp LC(LG(Q))" : "&kp LG(L)" }], changes: [`${title}, key ${key + 1} → Lock screen`] };
+    },
+  },
+  {
+    id: "grave_escape",
+    title: "Shift + Esc = ~",
+    summary: "Escape gives ` and ~ with Shift or Gui — no separate key for them.",
+    details: "The “grave escape” from 60% keyboards: Escape as usual, ` with Gui held, ~ with Shift held. Every Escape key gets it.",
+    credit: "QMK's Grave Escape, recreated with a ZMK mod-morph in many configs",
+    category: "Typing",
+    params: [],
+    added: (c) => nameTaken(c, "grave_esc"),
+    build: (c) => {
+      const at = c.layers.flatMap((l) => findKeys(c, l.index, ["ESC", "ESCAPE"]).map((p) => [l, p] as const));
+      if (at.length === 0) return "No Escape key found.";
+      const name = unique(c, "grave_esc");
+      // Shift held: the grave key comes out shifted (~). Gui held: plain ` (Gui masked).
+      const ops: EditOp[] = [{ op: "add_def", def_type: "mod_morph", name, props: [
+        ["bindings", { type: "bindings", value: ["&kp ESC", "&kp GRAVE"] }],
+        ["mods", { type: "names", value: ["MOD_LSFT", "MOD_RSFT", "MOD_LGUI", "MOD_RGUI"] }],
+        ["keep-mods", { type: "names", value: ["MOD_LSFT", "MOD_RSFT"] }],
+      ] }];
+      const changes = [`Adds “${name}” (Esc; \` with Gui; ~ with Shift)`];
+      for (const [l, p] of at) {
+        ops.push({ op: "set_binding", layer: l.index, position: p, binding: `&${name}` });
+        changes.push(`${l.title}, key ${p + 1}: Esc → Esc / \` / ~`);
+      }
+      return { ops, changes };
+    },
+  },
+  {
+    id: "pairs",
+    title: "Bracket pairs",
+    summary: "One key types () [] {} or \"\" with the cursor in between.",
+    details: "Types both halves of the pair and steps back inside, so you never forget to close one. Placed on the layer shown above.",
+    credit: "Popular “auto-pair” macro in community keymaps",
+    category: "Typing",
+    params: [
+      { kind: "choice", id: "pair", label: "Pair", options: [["paren", "( )"], ["bracket", "[ ]"], ["brace", "{ }"], ["quote", "\" \""]], initial: "paren" },
+      { kind: "keys", id: "key", label: "Which key", count: 1, suggest: () => [] },
+    ],
+    added: (c) => c.definitions.some((d) => d.node_name.startsWith("pair_")),
+    build: (c, v) => {
+      const key = (v.key as number[])[0];
+      if (key === undefined) return "Pick the key on the board.";
+      const [open, close, shown] = ({ paren: ["LPAR", "RPAR", "( )"], bracket: ["LBKT", "RBKT", "[ ]"], brace: ["LBRC", "RBRC", "{ }"], quote: ["DQT", "DQT", "\" \""] } as Record<string, string[]>)[v.pair as string];
+      const n = unique(c, `pair_${v.pair}`);
+      const title = c.layers.find((l) => l.index === c.layer)?.title ?? "";
+      return {
+        ops: [
+          { op: "add_def", def_type: "macro", name: n, props: [["bindings", { type: "bindings", value: ["&macro_tap", `&kp ${open}`, `&kp ${close}`, "&kp LEFT"] }]] },
+          { op: "set_binding", layer: c.layer, position: key, binding: `&${n}` },
+        ],
+        changes: [`Adds macro “${n}” (${shown}, cursor inside)`, `${title}, key ${key + 1} → ${shown}`],
+      };
+    },
+  },
+  {
+    id: "sticky_layer",
+    title: "One-shot layer",
+    summary: "Tap the key, then the next key comes from the layer — no holding.",
+    details: "Great for numbers and symbols: tap, then type one character from the layer and you're back. Hold it and it works like a normal layer key. Uses ZMK's built-in sticky layer.",
+    credit: "ZMK sticky layer; popular in Miryoku-style and small-board configs",
+    category: "Layers",
+    params: [
+      { kind: "layer", id: "layer", label: "Layer", initial: (c) => Math.min(1, c.layers.length - 1) },
+      { kind: "keys", id: "key", label: "Which key", count: 1, suggest: () => [] },
+    ],
+    added: (c) => usesBehavior(c, "sl"),
+    build: (c, v) => {
+      const key = (v.key as number[])[0];
+      const layer = v.layer as number;
+      if (key === undefined) return "Pick the key on the board.";
+      if (layer === c.layer) return "Pick a different layer from the one the key is on.";
+      const lt = c.layers.find((l) => l.index === layer)?.title ?? `layer ${layer}`;
+      const title = c.layers.find((l) => l.index === c.layer)?.title ?? "";
+      return { ops: [{ op: "set_binding", layer: c.layer, position: key, binding: `&sl ${layer}` }], changes: [`${title}, key ${key + 1} → one-shot ${lt}`] };
+    },
+  },
+  {
+    id: "output_toggle",
+    title: "USB / Bluetooth switch",
+    summary: "One key switches between the cable and Bluetooth.",
+    details: "While a cable is plugged in, ZMK types over USB, so picking another Bluetooth computer seems to do nothing. This key flips between USB and Bluetooth. Often placed next to the Bluetooth keys.",
+    credit: "ZMK output selection; a common fix asked about in the ZMK community",
+    category: "System",
+    params: [{ kind: "keys", id: "key", label: "Which key", count: 1, suggest: () => [] }],
+    added: (c) => c.layers.some((l) => l.bindings.some((b) => b.trim().startsWith("&out "))),
+    build: (c, v) => {
+      const key = (v.key as number[])[0];
+      if (key === undefined) return "Pick the key on the board.";
+      const title = c.layers.find((l) => l.index === c.layer)?.title ?? "";
+      return { ops: [{ op: "set_binding", layer: c.layer, position: key, binding: "&out OUT_TOG" }], changes: [`${title}, key ${key + 1} → USB / Bluetooth`] };
+    },
+  },
+  {
+    id: "bt_keys",
+    title: "Bluetooth computer keys",
+    summary: "Switch between three computers, and a key to forget the current one.",
+    details: "Click four keys in order: computer 1, computer 2, computer 3, then “forget this computer” (clears the current pairing so you can pair again). Placed on the layer shown above.",
+    credit: "ZMK Bluetooth behaviors; on the Bluetooth layer of most wireless keymaps",
+    category: "System",
+    params: [{ kind: "keys", id: "keys", label: "Four keys, in order: 1 · 2 · 3 · forget", count: 4, suggest: () => [] }],
+    added: (c) => c.layers.some((l) => l.bindings.some((b) => b.trim().startsWith("&bt BT_SEL"))),
+    build: (c, v) => {
+      const keys = v.keys as number[];
+      if (keys.length !== 4) return `Click four keys (${keys.length} so far).`;
+      const title = c.layers.find((l) => l.index === c.layer)?.title ?? "";
+      const what = ["&bt BT_SEL 0", "&bt BT_SEL 1", "&bt BT_SEL 2", "&bt BT_CLR"];
+      const names = ["Computer 1", "Computer 2", "Computer 3", "Forget this computer"];
+      return {
+        ops: keys.map((p, i) => ({ op: "set_binding" as const, layer: c.layer, position: p, binding: what[i] })),
+        changes: keys.map((p, i) => `${title}, key ${p + 1} → ${names[i]}`),
+      };
+    },
+  },
+  {
+    id: "media_keys",
+    title: "Media keys",
+    summary: "Volume down, volume up, play/pause and next track.",
+    details: "Click four keys in order: volume down, volume up, play/pause, next track. Works on every computer and phone. Placed on the layer shown above.",
+    credit: "Common on the navigation or function layer of community keymaps",
+    category: "System",
+    params: [{ kind: "keys", id: "keys", label: "Four keys, in order: vol− · vol+ · play · next", count: 4, suggest: () => [] }],
+    added: (c) => c.layers.some((l) => l.bindings.some((b) => b.includes("C_VOL_UP"))),
+    build: (c, v) => {
+      const keys = v.keys as number[];
+      if (keys.length !== 4) return `Click four keys (${keys.length} so far).`;
+      const title = c.layers.find((l) => l.index === c.layer)?.title ?? "";
+      const what = ["&kp C_VOL_DN", "&kp C_VOL_UP", "&kp C_PP", "&kp C_NEXT"];
+      const names = ["Volume down", "Volume up", "Play/pause", "Next track"];
+      return {
+        ops: keys.map((p, i) => ({ op: "set_binding" as const, layer: c.layer, position: p, binding: what[i] })),
+        changes: keys.map((p, i) => `${title}, key ${p + 1} → ${names[i]}`),
+      };
+    },
+  },
+  {
+    id: "boot_combo",
+    title: "Bootloader combo",
+    summary: "Press two keys together to get ready for new firmware — no reset button.",
+    details: "Handy when the reset button is hard to reach (under the screen or the case). Press both keys at once and the keyboard shows up as a drive, ready to install. On a split keyboard pick keys on the half that connects to the computer (usually the left); for the other half use its reset button.",
+    credit: "Common in ZMK configs for cased boards",
+    category: "System",
+    params: [{ kind: "keys", id: "keys", label: "The two keys (far apart, so you can't hit them by accident)", count: 2, suggest: () => [] }],
+    added: (c) => nameTaken(c, "boot_combo"),
+    build: (c, v) => {
+      const keys = v.keys as number[];
+      if (keys.length !== 2) return "Pick two keys on the board.";
+      const h = c.geometry.length ? halves(c.geometry) : null;
+      if (h && !keys.every((k) => h.left.has(k))) return "Pick both keys on the left half — the half that connects to the computer.";
+      const n = unique(c, "boot_combo");
+      return {
+        ops: [{ op: "add_def", def_type: "combo", name: n, props: [["key-positions", { type: "numbers", value: keys }], ["bindings", { type: "bindings", value: ["&bootloader"] }], ["timeout-ms", { type: "int", value: 80 }]] }],
+        changes: [`Combo bootloader: ${keysText(c, keys)}`],
+      };
+    },
+  },
+  {
+    id: "screenshot_key",
+    title: "Screenshot key",
+    summary: "One key to snip part of the screen.",
+    details: "Opens your system's screenshot tool to pick an area. Placed on the layer shown above.",
+    credit: "Common in community keymaps",
+    category: "Shortcuts",
+    params: [
+      { kind: "choice", id: "os", label: "Computer", options: [["win", "Windows (Win+Shift+S)"], ["mac", "macOS (Cmd+Shift+4)"], ["linux", "Linux (Print Screen)"]], initial: "win" },
+      { kind: "keys", id: "key", label: "Which key", count: 1, suggest: () => [] },
+    ],
+    added: (c) => c.layers.some((l) => l.bindings.some((b) => ["&kp LG(LS(S))", "&kp LG(LS(N4))", "&kp PSCRN"].includes(b.trim()))),
+    build: (c, v) => {
+      const key = (v.key as number[])[0];
+      if (key === undefined) return "Pick the key on the board.";
+      const binding = v.os === "mac" ? "&kp LG(LS(N4))" : v.os === "linux" ? "&kp PSCRN" : "&kp LG(LS(S))";
+      const title = c.layers.find((l) => l.index === c.layer)?.title ?? "";
+      return { ops: [{ op: "set_binding", layer: c.layer, position: key, binding }], changes: [`${title}, key ${key + 1} → Screenshot`] };
+    },
+  },
+  {
+    id: "emoji_key",
+    title: "Emoji key",
+    summary: "One key opens the emoji picker.",
+    details: "Opens your system's emoji and symbol picker. Placed on the layer shown above.",
+    credit: "Common in community keymaps",
+    category: "Shortcuts",
+    params: [
+      { kind: "choice", id: "os", label: "Computer", options: [["win", "Windows (Win+.)"], ["mac", "macOS (Ctrl+Cmd+Space)"]], initial: "win" },
+      { kind: "keys", id: "key", label: "Which key", count: 1, suggest: () => [] },
+    ],
+    added: (c) => c.layers.some((l) => l.bindings.some((b) => ["&kp LG(DOT)", "&kp LC(LG(SPACE))"].includes(b.trim()))),
+    build: (c, v) => {
+      const key = (v.key as number[])[0];
+      if (key === undefined) return "Pick the key on the board.";
+      const title = c.layers.find((l) => l.index === c.layer)?.title ?? "";
+      return { ops: [{ op: "set_binding", layer: c.layer, position: key, binding: v.os === "mac" ? "&kp LC(LG(SPACE))" : "&kp LG(DOT)" }], changes: [`${title}, key ${key + 1} → Emoji picker`] };
     },
   },
 ];

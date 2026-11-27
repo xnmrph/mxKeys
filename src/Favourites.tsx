@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { EditOp, KeyGeom } from "./types";
 import type { KeyLabel } from "./bindings";
 import { MiniBoard } from "./BehaviorsPanel";
-import { FAVOURITES, type FavCtx, type Favourite, type Values } from "./favouriteRecipes";
+import { CATEGORIES, FAVOURITES, type Category, type FavCtx, type Favourite, type Values } from "./favouriteRecipes";
 
 /** "Community favourites": proven tricks you can add to your keymap in one step. */
 export function Favourites({ ctx, labels, onApply, liveNote }: {
@@ -15,12 +15,20 @@ export function Favourites({ ctx, labels, onApply, liveNote }: {
   liveNote: boolean;
 }) {
   const [open, setOpen] = useState<Favourite | null>(null);
+  const [cat, setCat] = useState<Category | "All">("All");
+  const shown = FAVOURITES.filter((f) => cat === "All" || f.category === cat);
   return (
     <section className="favourites">
       <h2>Community favourites</h2>
       <p className="muted">Tricks many ZMK users swear by. Add one in a click — it goes into your keymap like anything else, and Undo takes it out again.</p>
+      <div className="mode-choice fav-filter" role="tablist">
+        {(["All", ...CATEGORIES] as const).map((c) => (
+          <label key={c}><input type="radio" checked={cat === c} onChange={() => setCat(c)} /> {c}
+            <span className="muted small"> {c === "All" ? FAVOURITES.length : FAVOURITES.filter((f) => f.category === c).length}</span></label>
+        ))}
+      </div>
       <ul className="def-grid fav-grid">
-        {FAVOURITES.map((f) => {
+        {shown.map((f) => {
           const added = f.added(ctx);
           return (
             <li key={f.id}>

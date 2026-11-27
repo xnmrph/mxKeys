@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Logo } from "./Logo";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import type { FirmwareSummary, KeymapSummary, RepoSummary, TargetSummary } from "./types";
@@ -99,7 +100,7 @@ function ThemeSwitch() {
 }
 
 function Wordmark({ big }: { big?: boolean }) {
-  return <div className={`brand${big ? " big" : ""}`} aria-label="mxKeys"><span className="brand-mx">mx</span><span className="brand-keys">Keys</span></div>;
+  return <div className={`brand${big ? " big" : ""}`}><Logo width={big ? 360 : 184} /></div>;
 }
 
 function replaceKeymap(repo: RepoSummary, k: KeymapSummary): RepoSummary {
