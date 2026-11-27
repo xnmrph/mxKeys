@@ -1,6 +1,4 @@
-<p align="center"><img src="docs/assets/mxkeys-banner.png" alt="mxKeys" width="560"></p>
-
-# mxKeys
+<h1 align="center"><img src="docs/assets/mxkeys-banner.png" alt="mxKeys" width="560"></h1>
 
 An all-in-one desktop app that makes [ZMK](https://zmk.dev) keyboards approachable:
 visual keymap editing, settings, firmware builds **inside the app** (no Docker/Nix/SDK
