@@ -182,8 +182,6 @@ function HalfEditor({ title, half, art, pic, budget, repoRoot, onChange, onPick 
         <label className="check"><input type="radio" checked={art.mode === "art"} onChange={() => onChange({ mode: "art" })} /> Picture under the battery</label>
         <label className="check"><input type="radio" checked={art.mode === "full"} onChange={() => onChange({ mode: "full" })} /> Whole screen</label>
       </div>
-      {art.mode === "full" && <p className="muted small">{half === "left" ? "Hides the layer, battery and Bluetooth information this half normally shows." : "Hides the battery and connection icons."}</p>}
-      {art.mode === "art" && half === "left" && <p className="muted small">Keeps the battery and the USB/Bluetooth icon. Covers the typing-speed graph, the Bluetooth computer number and the layer name.</p>}
       {art.mode !== "off" && (
         <div className="picture-body">
           <div className="screen-mock" style={{ width: 68 * SCALE + 12 }}>
